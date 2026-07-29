@@ -1,0 +1,934 @@
+
+local function GitAud(soundgit, filename)
+	local file = filename..".mp3"
+
+	if not isfile(file) then
+		writefile(file, game:HttpGet(soundgit))
+	end
+
+	return (getcustomasset or getsynasset)(file)
+end
+
+local function GetGitSound(GithubSnd, SoundName)
+	local url = GithubSnd
+	if not isfile(SoundName .. ".ogg") then
+		writefile(SoundName .. ".ogg", game:HttpGet(url))
+	end
+	local sound = Instance.new("Sound")
+	sound.SoundId = (getcustomasset or getsynasset)(SoundName .. ".ogg")
+	return sound
+end
+
+
+function CustomGitSound(soundlink, volume, distance, filename, soundName, parent, looped, mode, emitter)
+	local sound = Instance.new("Sound")
+
+	sound.SoundId = GitAud(soundlink, filename)
+	sound.Parent = parent or workspace
+
+	sound.Volume = volume or 1
+
+	sound.RollOffMaxDistance = distance or 100
+	sound.RollOffMinDistance = 5
+
+	if mode then
+		sound.RollOffMode = mode
+	end
+
+	sound.EmitterSize = emitter or 100000
+
+	sound.PlaybackSpeed = 1
+	sound.Name = soundName or "bgtheme"
+	sound.Looped = looped or false
+
+	return sound
+end
+
+local WindowLights = {}
+local WindowModels = {}
+local CreatedLights = {}
+local NeonOriginalColors = {}
+local HitboxDisabled = false
+local LightStandMap = {}
+local LightOriginalColors = {}
+local WindowParticles = {}
+local ParticleOriginalColors = {}
+local FixtureLights = {}
+local FixtureLightOriginalColors = {}
+local ThemeEndedCount = 0
+local RoomConnection
+local BarDestroyed = false
+
+local TweenService = game:GetService("TweenService")
+local LocalPlayer = game.Players.LocalPlayer
+
+local t2 = {
+	BarColor = Color3.fromRGB(126, 34, 206),
+	BarBackground = Color3.fromRGB(18, 4, 26)
+}
+
+local StormParts = {}
+local NeonParts = {}
+
+local LimboBar = Instance.new("ScreenGui")
+LimboBar.Name = "LimboBar"
+LimboBar.ResetOnSpawn = false
+LimboBar.IgnoreGuiInset = true
+LimboBar.DisplayOrder = 12
+LimboBar.Parent = LocalPlayer:WaitForChild("PlayerGui")
+
+
+local Holder = Instance.new("Frame")
+Holder.Name = "Holder"
+Holder.AnchorPoint = Vector2.new(0, 0.5)
+Holder.Position = UDim2.new(-0.12, 0, 0.5, 0)
+Holder.Size = UDim2.new(0, 22, 0.55, 0)
+Holder.BackgroundColor3 = t2.BarBackground
+Holder.BackgroundTransparency = 0.3
+Holder.BorderSizePixel = 0
+Holder.Parent = LimboBar
+
+
+local UICorner = Instance.new("UICorner")
+UICorner.CornerRadius = UDim.new(0, 6)
+UICorner.Parent = Holder
+
+
+local UIStroke = Instance.new("UIStroke")
+UIStroke.Color = t2.BarColor
+UIStroke.Thickness = 2
+UIStroke.Parent = Holder
+
+
+local UIPadding = Instance.new("UIPadding")
+UIPadding.PaddingBottom = UDim.new(0,3)
+UIPadding.PaddingTop = UDim.new(0,3)
+UIPadding.PaddingLeft = UDim.new(0,3)
+UIPadding.PaddingRight = UDim.new(0,3)
+UIPadding.Parent = Holder
+
+
+local Fill = Instance.new("Frame")
+Fill.Name = "Fill"
+Fill.AnchorPoint = Vector2.new(0.5,1)
+Fill.Position = UDim2.new(0.5,0,1,0)
+Fill.Size = UDim2.new(1,0,0,0)
+Fill.BackgroundColor3 = t2.BarColor
+Fill.BorderSizePixel = 0
+Fill.Parent = Holder
+
+
+local UICorner2 = Instance.new("UICorner")
+UICorner2.CornerRadius = UDim.new(0,5)
+UICorner2.Parent = Fill
+
+
+TweenService:Create(
+	Holder,
+	TweenInfo.new(0.6, Enum.EasingStyle.Quint, Enum.EasingDirection.Out),
+	{
+		Position = UDim2.new(0, 3, 0.5, 0)
+	}
+):Play()
+
+local function TweenBarPercent(percent, speed)
+	percent = math.clamp(percent, 0, 100)
+
+	TweenService:Create(
+		Fill,
+		TweenInfo.new(
+			speed or 0.5,
+			Enum.EasingStyle.Quint,
+			Enum.EasingDirection.Out
+		),
+		{
+			Size = UDim2.new(1, 0, percent / 100, 0)
+		}
+	):Play()
+end
+
+local StormRange = 65
+local MaxBar = 100
+local StormSpeed = 40 / 3.5
+local LightningRadius = 65
+local StormProgress = 0
+
+local RayParams = RaycastParams.new()
+RayParams.FilterType = Enum.RaycastFilterType.Exclude
+
+local function IsInStormRange(hrp)
+	if HitboxDisabled then
+		return false
+	end
+
+	RayParams.FilterDescendantsInstances = {
+		LocalPlayer.Character
+	}
+
+	for _, light in ipairs(WindowLights) do
+		if light.Parent and light.Enabled then
+			local part = light.Parent
+
+			if part:IsA("Attachment") then
+				part = part.Parent
+			end
+
+			if part:IsA("BasePart") then
+				local offset = hrp.Position - part.Position
+				local dist = offset.Magnitude
+
+				if dist <= (light.Range * 0.9) then
+					local direction = offset.Unit
+					local forward = part.CFrame.LookVector
+
+					local angle = math.deg(
+						math.acos(
+							math.clamp(forward:Dot(direction), -1, 1)
+						)
+					)
+
+					if angle <= light.Angle / 2.5 then
+						
+						local ray = workspace:Raycast(
+							part.Position,
+							offset,
+							RayParams
+						)
+
+						if not ray then
+							return true
+						end
+
+						local hit = ray.Instance
+
+						if hit:IsDescendantOf(part.Parent) then
+							return true
+						end
+					end
+				end
+			end
+		end
+	end
+
+	return false
+end
+
+local rooms = workspace:FindFirstChild("CurrentRooms")
+local Storm
+
+Storm = CustomGitSound(
+	"https://github.com/cakmay227-svg/random/raw/refs/heads/main/limbo%20ambience%20riser%202.mp3%20(1).mp3?raw=true",
+	3,
+	120,
+	"STORMTISER",
+	"Storm",
+	workspace,
+	false,
+	Enum.RollOffMode.Inverse,
+	5
+) 
+
+CustomGitSound(
+	"https://github.com/cakmay227-svg/random/raw/refs/heads/main/limbo%20ambience%20storm%205.mp3%20(1).mp3?raw=true",
+	2,
+	10000000,
+	"jxjjxjjdoa",
+	"Theme",
+	workspace,
+	false,
+	Enum.RollOffMode.Linear,
+	10
+)
+
+local theme
+
+repeat
+	theme = workspace:FindFirstChild("Theme")
+	task.wait()
+until theme
+
+theme:Play() 
+
+local function TweenFade() 
+	local tween = TweenService:Create(
+		Holder,
+		TweenInfo.new(
+			0.6,
+			Enum.EasingStyle.Quint,
+			Enum.EasingDirection.Out
+		),
+		{
+			Position = UDim2.new(-0.12,0,0.5,0)
+		}
+	)
+	
+	tween:Play() 
+	
+	tween.Completed:Wait()
+
+	if LimboBar then
+		LimboBar:Destroy()
+	end
+end
+
+local Shutdown = false
+local Flickering = false
+local StopRequested = false
+
+local function ShutdownStorm()
+	if Shutdown then
+		return
+	end
+
+	Shutdown = true
+
+	Flickering = false
+	StopRequested = true
+	
+	TweenFade() 
+
+	for _, sound in ipairs(workspace:GetDescendants()) do
+		if sound:IsA("Sound") then
+			if sound.Name == "Storm" or sound.Name == "Theme" then
+				sound:Stop()
+				sound:Destroy()
+			end
+		end
+	end
+
+	for _, light in ipairs(CreatedLights) do
+		if light and light.Parent then
+			light:Destroy()
+		end
+	end
+
+	for _, part in ipairs(StormParts) do
+		if part and part.Parent then
+			part:Destroy()
+		end
+	end
+	
+	for part, color in pairs(NeonOriginalColors) do
+		if part and part.Parent then
+			part.Color = color
+		end
+	end
+
+	for light, color in pairs(LightOriginalColors) do
+		if light and light.Parent then
+			light.Color = color
+		end
+	end
+
+	for light, color in pairs(FixtureLightOriginalColors) do
+		if light and light.Parent then
+			TweenService:Create(
+				light,
+				TweenInfo.new(1, Enum.EasingStyle.Linear),
+				{
+					Color = color
+				}
+			):Play()
+		end
+	end
+
+	for particle, color in pairs(ParticleOriginalColors) do
+		if particle and particle.Parent then
+			particle.Color = color
+		end
+	end
+
+	table.clear(WindowLights)
+	table.clear(StormParts)
+	table.clear(WindowModels)
+	table.clear(CreatedLights)
+	table.clear(NeonOriginalColors)
+	table.clear(NeonParts)
+	table.clear(WindowParticles)
+	table.clear(ParticleOriginalColors)
+
+	Shake = 0
+end
+
+
+theme.Ended:Connect(function()
+	ThemeEndedCount += 1
+
+	if ThemeEndedCount == 1 then
+		theme:Play()
+		return
+	end
+
+	if Flickering then
+		repeat
+			task.wait()
+		until not Flickering
+	end
+
+	if RoomConnection then
+		RoomConnection:Disconnect()
+		RoomConnection = nil
+	end
+
+	ShutdownStorm()
+end)
+
+if not rooms then
+	return
+end
+
+local RunService = game:GetService("RunService")
+local Players = game:GetService("Players")
+
+local Camera = workspace.CurrentCamera
+
+local Shake = 0
+local MaxDist = 85
+	
+task.spawn(function()
+	while true do
+		task.wait(math.random(5, 10))
+
+		Flickering = true
+		
+		for _, part in ipairs(workspace:GetChildren()) do
+			if part.Name == "StormPart" then
+				local sound = part:FindFirstChild("Storm")
+
+				if sound and not sound.IsPlaying then
+					sound:Play()
+				end
+			end
+		end
+
+		task.wait(3.5)
+
+		StopRequested = true
+
+		repeat
+			task.wait()
+		until not Flickering
+
+		StopRequested = false
+	end
+end)
+
+task.spawn(function()
+	while true do
+		if not Flickering then
+			task.wait()
+			continue
+		end
+
+		for _, light in ipairs(WindowLights) do
+			if light.Parent then
+				light.Enabled = true
+			end
+		end
+
+		while Flickering do
+			if Shutdown then
+				return
+			end
+
+			for _, light in ipairs(WindowLights) do
+				if light.Parent then
+					light.Brightness = 5
+				end
+			end
+
+			local tweens = {}
+
+			for _, light in ipairs(WindowLights) do
+				if light.Parent then
+					light.Brightness = 5
+
+					tweens[#tweens + 1] = TweenService:Create(
+						light,
+						TweenInfo.new(0.1, Enum.EasingStyle.Linear),
+						{
+							Brightness = 0
+						}
+					)
+				end
+			end
+
+			for _, tween in ipairs(tweens) do
+				tween:Play()
+			end
+
+			if #tweens > 0 then
+				tweens[1].Completed:Wait()
+			end
+
+			if StopRequested then
+				break
+			end
+		end
+
+		for _, light in ipairs(WindowLights) do
+			if light.Parent then
+				light.Brightness = 5
+			end
+		end
+
+		local fades = {}
+
+		for _, light in ipairs(WindowLights) do
+			if light.Parent then
+				local tween = TweenService:Create(
+					light,
+					TweenInfo.new(1, Enum.EasingStyle.Linear),
+					{
+						Brightness = 0
+					}
+				)
+
+				fades[#fades + 1] = tween
+				tween:Play()
+			end
+		end
+
+		if #fades > 0 then
+			fades[1].Completed:Wait()
+		end
+
+		for _, light in ipairs(WindowLights) do
+			if light.Parent then
+				light.Enabled = false
+			end
+		end
+
+		Flickering = false
+		
+		for _, part in ipairs(workspace:GetChildren()) do
+			if part.Name == "StormPart" then
+				local sound = part:FindFirstChild("Storm")
+
+				if sound then
+					sound:Stop()
+				end
+			end
+		end
+	end
+end)
+
+-- 2. Phần xử lí room (Gộp logic xử lý từng phòng vào 1 hàm)
+local function ProcessRoom(room)
+	if not room:IsA("Model") then return end
+
+	for _, roomDesc in ipairs(room:GetDescendants()) do
+		if roomDesc:IsA("Model") then
+			local n = roomDesc.Name
+			if n == "Windows" or n == "Window" or n == "Window_Tall" then
+				table.insert(WindowModels, roomDesc)
+				
+				for _, v in ipairs(roomDesc:GetDescendants()) do
+					if v:IsA("ParticleEmitter") then
+						WindowParticles[#WindowParticles + 1] = v
+						ParticleOriginalColors[v] = v.Color
+
+						v.Color = ColorSequence.new(Color3.fromRGB(255,0,0))
+					end
+				end
+				
+				for _, obj in ipairs(roomDesc:GetDescendants()) do
+					if obj:IsA("Light") and obj.Name == "Lightning" then
+						local clone = obj:Clone()
+						clone.Angle = 70
+						clone.Range = 65
+						clone.Brightness = 0
+						clone.Parent = obj.Parent
+						clone.Enabled = false
+
+						table.insert(CreatedLights, clone)
+
+						local clone2 = obj:Clone()
+						clone2.Angle = 80
+						clone2.Range = math.huge
+						clone2.Brightness = 1
+						clone2.Name = "Nono"
+						clone2.Color = Color3.fromRGB(144,0,255)
+						clone2.Enabled = true
+						clone2.Parent = obj.Parent
+
+						table.insert(CreatedLights, clone2)
+
+						local red = Instance.new("PointLight")
+						red.Parent = obj.Parent.Parent.Glass
+						red.Color = Color3.fromRGB(255,0,0)
+
+						table.insert(CreatedLights, red)
+
+						clone2:GetPropertyChangedSignal("Brightness"):Connect(function()
+							if clone2.Brightness ~= 1 then
+								clone2.Brightness = 1
+							end
+						end)
+
+						table.insert(WindowLights, clone)
+					end
+				end
+			end
+		end
+	end
+
+	local HasWindow = false
+
+	for _, obj in ipairs(room:GetDescendants()) do
+		if obj:IsA("Model") then
+			local n = obj.Name
+
+			if n == "Windows" or n == "Window" or n == "Window_Tall" then
+				HasWindow = true
+				break
+			end
+		end
+	end
+
+	if HasWindow then
+		local fixtures = room.Assets:FindFirstChild("Light_Fixtures", true)
+
+		if fixtures then
+			for _, v in ipairs(fixtures:GetDescendants()) do
+				if v:IsA("Light") then
+					FixtureLights[#FixtureLights + 1] = v
+					FixtureLightOriginalColors[v] = v.Color
+
+					TweenService:Create(
+						v,
+						TweenInfo.new(1, Enum.EasingStyle.Linear),
+						{
+							Color = Color3.fromRGB(158,0,0)
+						}
+					):Play()
+				end
+			end
+
+			for _, obj in ipairs(fixtures:GetDescendants()) do
+				if obj:IsA("BasePart") and obj.Material == Enum.Material.Neon then
+					table.insert(NeonParts, obj)
+					NeonOriginalColors[obj] = obj.Color
+
+					local current = obj
+					local stand
+
+					while current do
+						if current:IsA("Model") and (current.Name == "LightStand" or current.Name == "LightStands") then
+							stand = current
+							break
+						end
+
+						current = current.Parent
+					end
+
+					if stand then
+						local lights = {}
+
+						for _, v in ipairs(stand:GetDescendants()) do
+							if v:IsA("Light") then
+								lights[#lights + 1] = v
+
+								if not LightOriginalColors[v] then
+									LightOriginalColors[v] = v.Color
+								end
+							end
+						end
+
+						LightStandMap[obj] = lights
+					end
+				end
+			end
+		end
+
+		local floor = room:FindFirstChild("Parts")
+			and room.Parts:FindFirstChild("Floor")
+
+		if floor then
+			local StormPart = Instance.new("Part")
+			StormPart.Name = "StormPart"
+			StormPart.Anchored = true
+			StormPart.CanCollide = false
+			StormPart.CanQuery = false
+			StormPart.CanTouch = false
+			StormPart.Transparency = 1
+			StormPart.Size = Vector3.new(1,1,1)
+			StormPart.CFrame = floor.CFrame + Vector3.new(0,6,0)
+			StormPart.Parent = workspace
+
+			local sound = Storm:Clone()
+			sound.Parent = StormPart
+
+			table.insert(StormParts, StormPart)
+		end
+	end
+end
+
+-- 1. Phần one time execute (Thực thi xử lý tất cả phòng hiện tại một lần lúc đầu)
+local function InitializeRooms()
+	for _, room in ipairs(rooms:GetChildren()) do
+		ProcessRoom(room)
+	end
+end
+
+InitializeRooms()
+
+task.spawn(function()
+	while not Shutdown do
+		task.wait(math.random(2,5))
+
+		if Shutdown then
+			break
+		end
+
+		local chosen = {}
+		local amount = math.random(1,3)
+
+		for i = 1, amount do
+			if Shutdown then
+				break
+			end
+
+			if #NeonParts > 0 then
+				local part = NeonParts[math.random(1,#NeonParts)]
+
+				if part and part.Parent then
+					table.insert(chosen, part)
+				end
+			end
+		end
+
+		for _, part in ipairs(chosen) do
+			task.spawn(function()
+				if Shutdown then
+					return
+				end
+
+				if part and part.Parent then
+					local oldColor = part.Color
+
+					task.wait(math.random(0,10)/100)
+
+					if Shutdown then
+						if part.Parent then
+							part.Color = oldColor
+							
+							local lights = LightStandMap[part]
+
+							if lights then
+								for _, light in ipairs(lights) do
+									if light.Parent then
+										light.Color = LightOriginalColors[light] or oldColor
+									end
+								end
+							end
+						end
+						return
+					end
+
+					part.Color = Color3.fromRGB(157,3,252)
+					local lights = LightStandMap[part]
+
+					if lights then
+						for _, light in ipairs(lights) do
+							if light.Parent then
+								light.Color = Color3.fromRGB(157,3,252)
+							end
+						end
+					end
+
+					task.wait(0.5)
+
+					if not Shutdown and part.Parent then
+						part.Color = oldColor
+						
+						local lights = LightStandMap[part]
+
+						if lights then
+							for _, light in ipairs(lights) do
+								if light.Parent then
+									light.Color = Color3.fromRGB(155, 0, 0)
+								end
+							end
+						end
+					end
+				end
+			end)
+		end
+	end
+end)
+
+task.spawn(function()
+	while not Shutdown do
+		local char = LocalPlayer.Character
+
+		if char then
+			HitboxDisabled = char:GetAttribute("Hiding") == true
+		else
+			HitboxDisabled = false
+		end
+
+		task.wait(0.5)
+	end
+end)
+
+
+RunService.RenderStepped:Connect(function(dt)
+	local char = LocalPlayer.Character
+	local hrp = char and char:FindFirstChild("HumanoidRootPart")
+
+	if not hrp then
+		return
+	end
+	
+	local InStorm = false
+
+	if Flickering and not char:GetAttribute("Hiding") then
+		InStorm = IsInStormRange(hrp)
+	end
+
+	if InStorm then
+		StormProgress = math.clamp(
+			(StormProgress or 0) + (dt * StormSpeed),
+			0,
+			MaxBar
+		)
+	end
+	
+	if not BarDestroyed and StormProgress >= MaxBar then
+	BarDestroyed = true
+
+	if LimboBar then
+		LimboBar:Destroy()
+	end
+
+	local character = game.Players.LocalPlayer.Character or game.Players.LocalPlayer.CharacterAdded:Wait()
+local humanoid = character:WaitForChild("Humanoid")
+
+humanoid:TakeDamage(1000)
+
+task.spawn(function() 
+CustomGitSound(
+	"https://github.com/cakmay227-svg/random/raw/refs/heads/main/XRecorder_Edited_20260730_01%20(1).mp3?raw=true",
+	3,
+	10000000,
+	"klakx",
+	"Jumpsjc",
+	workspace,
+	false,
+	Enum.RollOffMode.Linear,
+	10
+)
+end) 
+
+local jump
+
+repeat
+	jump = workspace:FindFirstChild("Jumpsjc")
+	task.wait()
+until jump
+
+jump:Play() 
+
+jump.Ended:Connect(function() 
+jump:Destroy() 
+end) 
+
+firesignal(game.ReplicatedStorage.RemotesFolder.DeathHint.OnClientEvent, {
+            'What was that? ',
+            'Seems like a nature disaster has happened',
+            'its name is Limbo, avoid from the light',
+        }, 'Blue')
+
+        game.ReplicatedStorage.GameStats['Player_' .. game.Players.LocalPlayer.Name].Total.DeathCause.Value = 'Limbo'
+
+end
+
+if BarDestroyed then
+	return
+end
+
+	TweenBarPercent(StormProgress, 0.1)
+
+	local target = 0
+
+	for i = #WindowLights, 1, -1 do
+		local light = WindowLights[i]
+
+		if not light.Parent then
+			table.remove(WindowLights, i)
+		elseif light.Brightness > 0 then
+			local part = light.Parent
+
+			if part:IsA("Attachment") then
+				part = part.Parent
+			end
+
+			if part and part:IsA("BasePart") then
+				local dist = (hrp.Position - part.Position).Magnitude
+
+				if dist <= MaxDist then
+					local strength = (1 - dist / MaxDist) * (light.Brightness / 5)
+
+					if strength > target then
+						target = strength
+					end
+				end
+			end
+		end
+	end
+
+	Shake += (target - Shake) * math.clamp(dt * 12, 0, 1)
+
+	if Shake > 0.001 then
+		Camera.CFrame *=
+			CFrame.new(
+				(math.random() - 0.5) * Shake * 2.5,
+				(math.random() - 0.5) * Shake * 2.5,
+				(math.random() - 0.5) * Shake * 1.8
+			) *
+			CFrame.Angles(
+				math.rad((math.random() - 0.5) * Shake * 10),
+				math.rad((math.random() - 0.5) * Shake * 10),
+				math.rad((math.random() - 0.5) * Shake * 6)
+			)
+
+		local pos = Vector3.new(
+			(math.random() - 0.5) * Shake,
+			(math.random() - 0.5) * Shake,
+			(math.random() - 0.5) * Shake
+		)
+
+		local rot = Vector3.new(
+			math.rad((math.random() - 0.5) * Shake * 3),
+			math.rad((math.random() - 0.5) * Shake * 2),
+			math.rad((math.random() - 0.5) * Shake * 5)
+		)
+
+		Camera.CFrame *=
+			CFrame.new(pos) *
+			CFrame.Angles(rot.X, rot.Y, rot.Z)
+	end
+end)
+
+RoomConnection = rooms.ChildAdded:Connect(function(room)
+	task.spawn(function()
+		repeat
+			task.wait()
+		until Shutdown
+			or (
+				(
+					room:FindFirstChild("Windows", true)
+					or room:FindFirstChild("Window", true)
+					or room:FindFirstChild("Window_Tall", true)
+				)
+				and room:FindFirstChild("Lightning", true)
+			)
+
+		if Shutdown then
+			return
+		end
+
+		ProcessRoom(room)
+	end)
+end)
