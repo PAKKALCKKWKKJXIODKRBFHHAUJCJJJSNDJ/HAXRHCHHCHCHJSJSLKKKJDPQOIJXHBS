@@ -26,6 +26,7 @@ local noChase = false
 local currentEntityRoom
 local stopChaseTrigger = false
 local finalRoom = false
+local Fail
 
 
 function CustomGitSound(soundlink, volume, distance, filename, soundName, parent, looped, mode, emitter)
@@ -1180,6 +1181,8 @@ end
 
 FadePlayerGui(3, true)
 
+local Active = true
+
 
 function CustomGitSound(soundlink, volume, distance, filename, soundName, parent, looped, mode, emitter)
 	local sound = Instance.new("Sound")
@@ -1204,8 +1207,6 @@ function CustomGitSound(soundlink, volume, distance, filename, soundName, parent
 
 	return sound
 end
-
-local Fail
 
 local beat = Instance.new("Sound") 
 beat.SoundId = "rbxassetid://135454814111440" 
@@ -1286,10 +1287,98 @@ until theme
 
 theme:Play() 
 
+local Cleanup
+local CanHit
+local NextBeat
+local Hits
+
 local gui = Instance.new("ScreenGui")
 gui.Name = "HeartbeatText"
 gui.ResetOnSpawn = false
 gui.Parent = game:GetService("CoreGui")
+
+local function Failsafe()
+	if not Active then
+		return
+	end
+
+	Active = false
+	CanHit = false
+
+	if connection then
+		connection:Disconnect()
+		connection = nil
+	end
+
+    -- phần code còn lại...
+		
+		task.spawn(function() 
+local jum = GetGitSound("https://github.com/eoyoustme/Hardcore/blob/main/sound.ogg?raw=true","sound")
+jum.Parent = workspace
+jum.Volume = 0.5
+jum.Name = "JUMP" 
+jum.PlaybackSpeed = 1
+jum.RollOffMaxDistance = 12000000
+jum:Play() 
+
+jum.Ended:Connect(function() 
+jum:Destroy() 
+end) 
+end) 
+
+FadePlayerGui(0, false)
+
+local player = game.Players.LocalPlayer
+local humanoid = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+
+if humanoid then
+	humanoid:TakeDamage(1000)
+end
+
+firesignal(game.ReplicatedStorage.RemotesFolder.DeathHint.OnClientEvent, {
+            '... Silence?',
+            'Seems like she was helping you run from the death',
+            'You should give her a respect',
+        }, 'Blue')
+
+        game.ReplicatedStorage.GameStats['Player_' .. game.Players.LocalPlayer.Name].Total.DeathCause.Value = 'Silence'
+		
+		model:Destroy() 
+		theme:Destroy() 
+		
+		cc:Destroy() 
+		gui:Destroy() 
+	end
+
+task.spawn(function()
+	while Active do
+
+
+		local char = game.Players.LocalPlayer.Character
+
+		if not char then
+			Failsafe() 
+			break
+		end
+
+		local collision
+
+		for _, v in ipairs(char:GetDescendants()) do
+			if v.Name == "CollisionPart" and v:IsA("BasePart") then
+				collision = v
+				break
+			end
+		end
+
+		if collision and not collision.Anchored then
+		print("rip") 
+			Failsafe() 
+			break
+		end
+
+		task.wait()
+	end
+end)
 
 local function createText(pos, size, value)
 	local text = Instance.new("TextLabel")
@@ -1540,25 +1629,9 @@ task.spawn(function()
 	local BeatDelay = 0.65
 	local Tolerance = 1
 
-	local Hits = 0
-local NextBeat = tick() + BeatDelay
-
-local Active = true
-local CanHit = false
-
-task.spawn(function()
-	while Active do
-		local char = Players.LocalPlayer.Character
-
-		if not char
-		or char:GetAttribute("Hiding") ~= true then
-			Fail()
-			return
-		end
-
-		task.wait(0.5)
-	end
-end)
+Hits = 0
+NextBeat = tick() + BeatDelay
+CanHit = false
 
 task.delay(BeatDelay - Tolerance, function()
 	if Active then
@@ -1579,7 +1652,7 @@ end)
 
 	local connection
 
-	local function Cleanup()
+	Cleanup = function()
 	Active = false
 
 	if connection then
