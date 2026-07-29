@@ -1,3 +1,34 @@
+local RunService = game:GetService("RunService")
+local Camera = workspace.CurrentCamera
+
+local function Shake(duration, intensity, speed, roll)
+	local start = tick()
+	local conn
+
+	conn = RunService.RenderStepped:Connect(function(dt)
+		local t = tick() - start
+
+		if t >= duration then
+			conn:Disconnect()
+			return
+		end
+
+		local fade = (1 - t / duration)^2
+
+		local x = math.sin(t * speed) * intensity * fade
+		local y = math.cos(t * speed * 0.75) * intensity * 0.65 * fade
+		local r = math.sin(t * speed * 0.55) * math.rad(roll) * fade
+
+		Camera.CFrame *= CFrame.new(x, y, 0) * CFrame.Angles(0, 0, r)
+	end)
+end
+
+Shake(
+	4,      -- thời gian
+	0.3,   -- độ mạnh
+	10,     -- tốc độ (thấp = chậm)
+	2       -- độ nghiêng (độ)
+)
 
 local function GitAud(soundgit, filename)
 	local file = filename..".mp3"
