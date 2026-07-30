@@ -1,0 +1,229 @@
+local Players = game:GetService("Players")
+local Player = Players.LocalPlayer
+
+local MainFrame = Player.PlayerGui:WaitForChild("MainUI"):WaitForChild("MainFrame")
+local MobileButtons = MainFrame:WaitForChild("MobileButtons")
+local HeartBar = MainFrame:WaitForChild("Healthbar")
+HeartBar.Position = UDim2.new(0, 10, 0.975000024, -20)
+
+local function LoadObject(file, parent)
+	local asset = getcustomasset(file)
+	local obj = game:GetObjects(asset)[1]
+
+	if obj then
+		obj.Parent = parent
+	end
+
+	return obj
+end
+
+local ManualFade = false
+
+local SprintBar = LoadObject(
+	"Place_131351567799504_Frame_HC_Sprintbar_1785379229.txt",
+	MainFrame
+)
+
+local SprintButton = LoadObject(
+	"Place_131351567799504_ImageButton_SprintButton_1785380149.txt",
+	MobileButtons
+)
+
+local SprintEffect = LoadObject(
+	"Place_131351567799504_ImageLabel_HC_StaminaVignette_1785381333.txt", -- m tự thay
+	MainFrame
+)
+
+local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
+
+local Character = Player.Character or Player.CharacterAdded:Wait()
+local Humanoid = Character:WaitForChild("Humanoid")
+
+local Bar = MainFrame.HC_Sprintbar.Bar.Bar
+local ExhaustedColor = Color3.fromRGB(172, 36, 38)
+local OriginalColors = {}
+
+for _, v in ipairs(SprintBar:GetDescendants()) do
+	if v:IsA("GuiObject") then
+		OriginalColors[v] = v.BackgroundColor3
+	elseif v:IsA("UIStroke") then
+		OriginalColors[v] = v.Color
+	end
+end
+
+OriginalColors[SprintBar] = SprintBar.BackgroundColor3
+
+local function TweenSprintBar(exhausted)
+	for obj, color in pairs(OriginalColors) do
+		if obj and obj.Parent then
+			local goal
+
+			if obj:IsA("GuiObject") then
+				goal = {
+					BackgroundColor3 = exhausted and ExhaustedColor or color
+				}
+			elseif obj:IsA("UIStroke") then
+				goal = {
+					Color = exhausted and ExhaustedColor or color
+				}
+			end
+
+			if goal then
+				TweenService:Create(
+					obj,
+					TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+					goal
+				):Play()
+			end
+		end
+	end
+end
+
+local Sprinting = false
+local Disabled = false
+local MaxStamina = 115
+local RecoverDelay = false
+local Stamina = MaxStamina
+
+local function SetSprint(state)
+	Sprinting = state
+
+	if state then
+		SprintButton.Image = "rbxassetid://17674431627"
+	else
+		SprintButton.Image = "rbxassetid://17674431834"
+	end
+end
+
+SprintButton.MouseButton1Click:Connect(function()
+
+	if Sprinting then
+		SetSprint(false)
+
+ManualFade = true
+
+TweenService:Create(
+	SprintEffect,
+	TweenInfo.new(2),
+	{
+		ImageTransparency = 1
+	}
+):Play()
+
+task.delay(2, function()
+	ManualFade = false
+end)
+
+		TweenService:Create(
+			SprintEffect,
+			TweenInfo.new(2),
+			{
+				ImageTransparency = 1
+			}
+		):Play()
+
+		Humanoid.WalkSpeed = 15
+	else
+		SetSprint(true)
+ManualFade = false
+	end
+end)
+
+task.spawn(function()
+	while true do
+		if Humanoid.Parent ~= Character then
+			Character = Player.Character or Player.CharacterAdded:Wait()
+			Humanoid = Character:WaitForChild("Humanoid")
+		end
+
+		if Sprinting then
+			if Disabled then
+				Humanoid.WalkSpeed = 13
+			else
+				Humanoid.WalkSpeed = 19
+			end
+		else
+			Humanoid.WalkSpeed = 15
+		end
+
+		task.wait()
+	end
+end)
+
+local DrainSpeed = 20
+local RecoverSpeed = 10
+
+RunService.RenderStepped:Connect(function(dt)
+	local moving = Humanoid.MoveDirection.Magnitude > 0
+
+	if Sprinting and moving and not Disabled then
+	Stamina -= DrainSpeed * dt
+elseif not RecoverDelay and Stamina < MaxStamina then
+	Stamina += RecoverSpeed * dt
+	if Stamina > MaxStamina then
+		Stamina = MaxStamina
+	end
+end
+
+	local percent = Stamina / MaxStamina
+
+	Bar.AnchorPoint = Vector2.new(0, 0.5)
+Bar.Position = UDim2.new(0, 0, 0.5, 0)
+	Bar.Size = Bar.Size:Lerp(
+	UDim2.new(percent, 0, 1, 0),
+	math.clamp(dt * 15, 0, 1)
+)
+
+	if SprintEffect and Sprinting and not ManualFade then
+	local alpha = 1 - ((MaxStamina - Stamina) / MaxStamina)
+	SprintEffect.ImageTransparency = math.clamp(alpha, 0, 1)
+end
+
+	if Stamina <= 0 and Sprinting and not Disabled then
+	Disabled = true
+	RecoverDelay = true
+
+	TweenSprintBar(true)
+
+task.spawn(function() 
+task.wait(2)
+
+
+	TweenService:Create(
+		SprintEffect,
+		TweenInfo.new(5),
+		{
+			ImageTransparency = 1
+		}
+	):Play()
+	end)
+
+	Humanoid.WalkSpeed = 13
+	require(game.Players.LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game).caption("You're exhausted.",true)
+
+	task.delay(0.7, function()
+		RecoverDelay = false
+	end)
+end
+
+if Disabled and Stamina >= 95 then
+	Disabled = false
+	TweenSprintBar(false)
+end
+end)
+
+Player.CharacterAdded:Connect(function(char)
+	Character = char
+	Humanoid = char:WaitForChild("Humanoid")
+
+	if Sprinting then
+	if Disabled then
+		Humanoid.WalkSpeed = 13
+	else
+		Humanoid.WalkSpeed = 19
+	end
+else
+	Humanoid.WalkSpeed = 15
+end
+end)
