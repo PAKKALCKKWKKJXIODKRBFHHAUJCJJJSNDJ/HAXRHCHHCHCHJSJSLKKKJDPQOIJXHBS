@@ -1,3 +1,5 @@
+local testmode = false
+
 local function GetRoom()
 	local currentRooms = workspace:FindFirstChild("CurrentRooms")
 	if not currentRooms then return nil end
@@ -105,7 +107,11 @@ if not room then
 	return
 end
 
-local wardrobes = {}
+local wardrobes
+local selectedWardrobe
+
+if testmode == true then
+wardrobes = {}
 
 for _,obj in ipairs(room:GetDescendants()) do
 	if obj:IsA("Model") and obj.Name == "Wardrobe" then
@@ -117,7 +123,27 @@ if #wardrobes == 0 then
 	return
 end
 
-local selectedWardrobe = wardrobes[math.random(#wardrobes)]
+selectedWardrobe = wardrobes[math.random(#wardrobes)]
+
+if selectedWardrobe and selectedWardrobe:GetAttribute("Singular") == nil then
+	selectedWardrobe:SetAttribute("Singular", true)
+end
+else
+
+for _, obj in ipairs(room:GetDescendants()) do
+	if obj:IsA("Model")
+		and obj.Name == "Wardrobe"
+		and obj:GetAttribute("Singular") then
+
+		selectedWardrobe = obj
+		break
+	end
+end
+
+if not selectedWardrobe then
+	return
+end
+end
 
 local cf = selectedWardrobe:GetBoundingBox()
 local look = selectedWardrobe:GetPivot().LookVector
@@ -659,6 +685,11 @@ for _,v in ipairs(selectedWardrobe:GetDescendants()) do
 		local clone = v:Clone()
 		clone.Enabled = true
 		clone.Parent = v.Parent
+		clone.ActionText = "Ja"        -- Dòng trên
+clone.ObjectText = "hc"    -- Dòng dưới
+clone.KeyboardKeyCode = Enum.KeyCode.E
+clone.HoldDuration = 0.5
+clone.MaxActivationDistance = 10
 		
 		v.Enabled = false
 		
