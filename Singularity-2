@@ -1,4 +1,4 @@
-local testmode = false
+local testmode = true
 
 local function GetRoom()
 	local currentRooms = workspace:FindFirstChild("CurrentRooms")
@@ -107,42 +107,51 @@ if not room then
 	return
 end
 
-local wardrobes
 local selectedWardrobe
 
-if testmode == true then
-wardrobes = {}
-
-for _,obj in ipairs(room:GetDescendants()) do
-	if obj:IsA("Model") and obj.Name == "Wardrobe" then
-		table.insert(wardrobes,obj)
+local function FindWardrobe()
+	for _, obj in ipairs(room:GetDescendants()) do
+		if obj:IsA("Model") and obj.Name == "Wardrobe" then
+			
+			if obj:GetAttribute("Singulared") then
+				continue
+			end
+			
+			if testmode then
+				obj:SetAttribute("Singular", true)
+			end
+			
+			obj:SetAttribute("Singulared", true)
+			return obj
+		end
 	end
 end
 
-if #wardrobes == 0 then
-	return
-end
 
-selectedWardrobe = wardrobes[math.random(#wardrobes)]
-
-if selectedWardrobe and selectedWardrobe:GetAttribute("Singular") == nil then
-	selectedWardrobe:SetAttribute("Singular", true)
-end
-else
-
-for _, obj in ipairs(room:GetDescendants()) do
-	if obj:IsA("Model")
-		and obj.Name == "Wardrobe"
-		and obj:GetAttribute("Singular") then
-
-		selectedWardrobe = obj
-		break
-	end
-end
+selectedWardrobe = FindWardrobe()
 
 if not selectedWardrobe then
-	return
-end
+	local conn
+
+	conn = room.DescendantAdded:Connect(function(obj)
+		if obj:IsA("Model") 
+			and obj.Name == "Wardrobe"
+			and not obj:GetAttribute("Singulared") then
+
+			if testmode then
+				obj:SetAttribute("Singular", true)
+			end
+
+			obj:SetAttribute("Singulared", true)
+
+			selectedWardrobe = obj
+			conn:Disconnect()
+		end
+	end)
+
+	repeat
+		task.wait()
+	until selectedWardrobe
 end
 
 local cf = selectedWardrobe:GetBoundingBox()
@@ -399,10 +408,8 @@ end
 		local target = targets[i]
 
 		local targetPart = nil
-		if target.isPlayer then
-	playerChained = true
+if target.isPlayer then
 	targetPart = target.instance
-	targetPart.Anchored = true
 else
 	targetPart = target.instance
 	table.insert(instancesToDestroy, target.instance)
@@ -474,13 +481,21 @@ task.delay(chainTime, function()
 		beamToUse.Attachment1 = targetAtt
 		playSound("Chained")
 
+		if target.isPlayer then
+			playerChained = true
+			
+			if hrp and hrp.Parent then
+				hrp.Anchored = true
+			end
+		end
+
 		spawnShake:ShakeOnce(
-			3,    -- Magnitude
-			5,    -- Roughness
-			0.02, -- FadeIn
-			0.18, -- FadeOut
-			0,    -- PositionInfluence
-			0.25  -- RotationInfluence
+			3,
+			5,
+			0.02,
+			0.18,
+			0,
+			0.25
 		)
 
 		if fakePart.Parent then
@@ -546,6 +561,7 @@ task.wait(1.4)
 
 if selectedWardrobe and selectedWardrobe.Parent then
 	selectedWardrobe:Destroy()
+	selectedWardrobe:SetAttribute("Singulared", nil)
 end
 
 rangeTween:Cancel()
@@ -687,7 +703,6 @@ for _,v in ipairs(selectedWardrobe:GetDescendants()) do
 		clone.Parent = v.Parent
 		clone.ActionText = "Ja"        -- Dòng trên
 clone.ObjectText = "hc"    -- Dòng dưới
-clone.KeyboardKeyCode = Enum.KeyCode.E
 clone.HoldDuration = 0.5
 clone.MaxActivationDistance = 10
 		
@@ -698,6 +713,7 @@ clone.MaxActivationDistance = 10
 				return
 			end
 			
+			clone.Enabled = false
 			clone:Destroy()
 
 			if animator then
