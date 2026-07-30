@@ -153,6 +153,16 @@ local UICorner2 = Instance.new("UICorner")
 UICorner2.CornerRadius = UDim.new(0,5)
 UICorner2.Parent = Fill
 
+local Overlay = Instance.new("Frame")
+Overlay.BackgroundColor3 = Color3.fromRGB(208,0,255)
+Overlay.BackgroundTransparency = 1
+Overlay.BorderSizePixel = 0
+Overlay.Size = UDim2.fromScale(1,1)
+Overlay.ZIndex = -1
+Overlay.Parent = LimboBar
+
+local OverlayTween
+
 
 TweenService:Create(
 	Holder,
@@ -622,19 +632,11 @@ local function ProcessRoom(room)
 
 		if fixtures then
 			for _, v in ipairs(fixtures:GetDescendants()) do
-				if v:IsA("Light") then
-					FixtureLights[#FixtureLights + 1] = v
-					FixtureLightOriginalColors[v] = v.Color
-
-					TweenService:Create(
-						v,
-						TweenInfo.new(1, Enum.EasingStyle.Linear),
-						{
-							Color = Color3.fromRGB(158,0,0)
-						}
-					):Play()
-				end
-			end
+	if v:IsA("Light") then
+		FixtureLights[#FixtureLights + 1] = v
+		FixtureLightOriginalColors[v] = v.Color
+	end
+end
 
 			for _, obj in ipairs(fixtures:GetDescendants()) do
 				if obj:IsA("BasePart") and obj.Material == Enum.Material.Neon then
@@ -758,30 +760,11 @@ task.spawn(function()
 					end
 
 					part.Color = Color3.fromRGB(157,3,252)
-					local lights = LightStandMap[part]
-
-					if lights then
-						for _, light in ipairs(lights) do
-							if light.Parent then
-								light.Color = Color3.fromRGB(157,3,252)
-							end
-						end
-					end
 
 					task.wait(0.5)
 
 					if not Shutdown and part.Parent then
 						part.Color = oldColor
-						
-						local lights = LightStandMap[part]
-
-						if lights then
-							for _, light in ipairs(lights) do
-								if light.Parent then
-									light.Color = Color3.fromRGB(155, 0, 0)
-								end
-							end
-						end
 					end
 				end
 			end)
@@ -825,6 +808,32 @@ RunService.RenderStepped:Connect(function(dt)
 			MaxBar
 		)
 	end
+	
+	if StormProgress >= 50 and InStorm then
+	if OverlayTween then
+		OverlayTween:Cancel()
+	end
+
+	local alpha = math.clamp((StormProgress - 50) / 50, 0, 1)
+
+Overlay.BackgroundTransparency = 1 - (alpha * 0.7)
+else
+	if Overlay.BackgroundTransparency < 1 then
+		if OverlayTween then
+			OverlayTween:Cancel()
+		end
+
+		OverlayTween = TweenService:Create(
+			Overlay,
+			TweenInfo.new(1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+			{
+				BackgroundTransparency = 1
+			}
+		)
+
+		OverlayTween:Play()
+	end
+end
 	
 	if not BarDestroyed and StormProgress >= MaxBar then
 	BarDestroyed = true
