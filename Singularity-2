@@ -26,6 +26,12 @@ end
 local CameraShaker = require(game.ReplicatedStorage:WaitForChild("CameraShaker"))
 local camera = workspace.CurrentCamera
 
+local spawnShake = CameraShaker.new(Enum.RenderPriority.Camera.Value, function(shakeCf)
+	camera.CFrame = camera.CFrame * shakeCf
+end)
+
+spawnShake:Start()
+
 local s = assets[1]
 s.Name = "Singularity" -- Đổi tên để tránh lỗi Infinite Yield
 s.Parent = workspace
