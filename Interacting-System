@@ -1,0 +1,505 @@
+
+-- Services & Variables
+local TweenService = game:GetService("TweenService")
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local currentRooms = workspace:WaitForChild("CurrentRooms")
+local hasKeyHitbox = false
+
+local function SetupDoorNormal(obj)
+	local door = obj:FindFirstChild("Door")
+	if obj:IsA("Model") and obj.Name == "DoorNormal" and door and door:IsA("MeshPart") then
+		
+		-- Ẩn các phần Hidden và Hinge ở mô hình gốc
+		for _, v in ipairs(obj:GetDescendants()) do
+			if v:IsA("BasePart") and (v.Name == "Hidden" or v.Name == "Hinge") then
+				v.CanCollide = false
+				v.Transparency = 1
+			end
+		end
+
+		local cloneModel = obj:Clone()
+		cloneModel.Name = "DoorClone"
+		cloneModel.Parent = obj.Parent
+
+		local cloneDoor = cloneModel:FindFirstChild("Door")
+		local knob = cloneModel:FindFirstChild("Knob", true)
+		local hidden = cloneModel:FindFirstChild("Hidden", true)
+		local hinge = cloneModel:FindFirstChild("Hinge", true)
+
+		local openSound = cloneDoor and cloneDoor:FindFirstChild("Open")
+		local hitSound = cloneDoor and cloneDoor:FindFirstChild("Hit")
+
+		if cloneDoor and knob and knob:IsA("BasePart") then
+			-- Thiết lập thuộc tính cho bản sao
+			for _, v in ipairs(cloneModel:GetDescendants()) do
+				if v:IsA("BasePart") then
+					if v.Name == "Hidden" or v.Name == "Hinge" then
+						v.CanCollide = false
+						v.Transparency = 1
+					else
+						v.CanCollide = true
+						v.Transparency = 0
+					end
+				end
+			end
+
+			local oldCF = cloneDoor.CFrame
+
+			local function GetOpenCF()
+				local openAngle = 90
+				local char = LocalPlayer.Character
+				local hrp = char and char:FindFirstChild("HumanoidRootPart")
+
+				if hrp then
+					local relative = cloneDoor.CFrame:PointToObjectSpace(hrp.Position)
+					if relative.Z > 0 then
+						openAngle = -90
+					end
+				end
+
+				if hinge and hinge:IsA("BasePart") then
+					local offset = hinge.CFrame:ToObjectSpace(oldCF)
+					return hinge.CFrame * CFrame.Angles(0, math.rad(openAngle), 0) * offset
+				else
+					return oldCF * CFrame.Angles(0, math.rad(openAngle), 0)
+				end
+			end
+
+			local openPrompt = Instance.new("ProximityPrompt")
+			openPrompt.Style = Enum.ProximityPromptStyle.Custom
+			openPrompt.ActionText = "Open Door"
+			openPrompt.ObjectText = "Door"
+			openPrompt.MaxActivationDistance = 10
+			openPrompt.RequiresLineOfSight = false
+			openPrompt.Parent = knob
+
+			local closePrompt = openPrompt:Clone()
+			closePrompt.ActionText = "Close Door"
+			closePrompt.Enabled = false
+			closePrompt.Parent = knob
+
+			openPrompt.Triggered:Connect(function()
+				openPrompt.Enabled = false
+				closePrompt.Enabled = true
+				
+				if openSound and openSound:IsA("Sound") then
+					openSound:Play()
+				end
+
+				if hidden then
+					hidden.Parent = cloneModel
+				end
+
+				TweenService:Create(
+					cloneDoor,
+					TweenInfo.new(1, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out),
+					{ CFrame = GetOpenCF() }
+				):Play()
+			end)
+
+			closePrompt.Triggered:Connect(function()
+				closePrompt.Enabled = false
+				
+				if hitSound and hitSound:IsA("Sound") then
+					hitSound:Play()
+				end
+
+				local tween = TweenService:Create(
+					cloneDoor,
+					TweenInfo.new(1, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out),
+					{ CFrame = oldCF }
+				)
+
+				tween:Play()
+				tween.Completed:Wait()
+
+				if hidden then
+					hidden.Parent = nil
+				end
+
+				openPrompt.Enabled = true
+			end)
+
+			-- Xóa Door thật
+			door:Destroy()
+		end
+	end
+end
+
+local function SetupDoor(door)
+	if not (door:IsA("Model") and door.Name == "Door") then return end
+
+	-- Dùng GetDescendants để quét toàn bộ xem có KeyHitbox không, nếu có thì bỏ qua
+	local hasHitbox = false
+	for _, v in ipairs(door:GetDescendants()) do
+		if v.Name == "KeyHitbox" then
+			hasHitbox = true
+			break
+		end
+	end
+	if not hasHitbox and door.Parent then
+		for _, v in ipairs(door.Parent:GetDescendants()) do
+			if v.Name == "KeyHitbox" then
+				hasHitbox = true
+				break
+			end
+		end
+	end
+	if hasHitbox then
+		return
+	end
+
+	local moved = {}
+	local knob
+
+	for _, obj in ipairs(door:GetDescendants()) do
+		if obj:IsA("BasePart") and obj.Name == "Knob" then
+			knob = obj
+		end
+
+		if obj.Name:sub(1, 5) == "Func_"
+		or obj.Name == "ClientOpen"
+		or obj.Name == "Hidden"
+		or obj.Name == "Collision" then
+			table.insert(moved, {
+				Object = obj,
+				Parent = obj.Parent
+			})
+			obj.Parent = nil
+		end
+	end
+
+	if #moved == 0 or not knob then
+		return
+	end
+
+	local prompt = Instance.new("ProximityPrompt")
+	prompt.Style = Enum.ProximityPromptStyle.Custom
+	prompt.ActionText = "Open Door"
+	prompt.ObjectText = "Door"
+	prompt.MaxActivationDistance = 10
+	prompt.RequiresLineOfSight = false
+	prompt.Parent = knob
+
+	prompt.Triggered:Connect(function()
+		prompt:Destroy()
+
+		local char = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+		local hum = char:WaitForChild("Humanoid")
+		local hrp = char:WaitForChild("HumanoidRootPart")
+
+		local cf, size = door:GetBoundingBox()
+		local targetPos = cf.Position - cf.LookVector * (size.Z / 2 + 2)
+		local targetCF = CFrame.lookAt(targetPos, cf.Position)
+
+		hum.AutoRotate = false
+		hrp.Anchored = true
+
+		local tween = TweenService:Create(
+			hrp,
+			TweenInfo.new(0.7, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out),
+			{ CFrame = targetCF }
+		)
+
+		tween:Play()
+		tween.Completed:Wait()
+
+		hrp.Anchored = false
+		hum.AutoRotate = true
+
+		for _, info in ipairs(moved) do
+			if info.Object and info.Parent then
+				info.Object.Parent = info.Parent
+			end
+		end
+	end)
+end
+
+
+local function SetupBed(bed)
+	local prompt = bed:FindFirstChildWhichIsA("ProximityPrompt", true)
+	if prompt then
+		prompt.HoldDuration = 0.5
+	end
+end
+
+local function SetupWardrobe(wardrobe)
+	if not (wardrobe:IsA("Model") and wardrobe.Name == "Wardrobe") then return end
+	if wardrobe:GetAttribute("Singular") then return end
+
+	local prompt
+	for _, v in ipairs(wardrobe:GetDescendants()) do
+		if v:IsA("ProximityPrompt") then
+			prompt = v
+			break
+		end
+	end
+
+	if not prompt then return end
+
+	prompt.Enabled = false
+	prompt.HoldDuration = 0.5
+
+	local openPrompt = prompt:Clone()
+	openPrompt.Parent = prompt.Parent
+	openPrompt.Enabled = true
+	openPrompt.HoldDuration = 0.5
+	openPrompt.ActionText = "Open"
+
+	local closePrompt = openPrompt:Clone()
+	closePrompt.Parent = prompt.Parent
+	closePrompt.Enabled = false
+	closePrompt.ActionText = "Close"
+
+	local originalEnterSound, enterSound, exitSound
+	for _, v in ipairs(wardrobe:GetDescendants()) do
+		if v:IsA("Sound") then
+			if v.Name == "SoundEnter" then
+				originalEnterSound = v
+				enterSound = v:Clone()
+				enterSound.Name = "SoundEnterClone"
+				enterSound.Parent = v.Parent
+			elseif v.Name == "SoundExit" then
+				exitSound = v:Clone()
+				exitSound.Name = "SoundExitClone"
+				exitSound.Parent = v.Parent
+			end
+		end
+	end
+
+	local track
+	local main = wardrobe:FindFirstChild("Main", true)
+	local hiddenValue = wardrobe:FindFirstChild("HiddenPlayer", true)
+
+	local checkingMain = false
+	local checkingHidden = false
+
+	local function IsTouchingMain()
+		if not main then return false end
+		local char = LocalPlayer.Character
+		if not char then return false end
+
+		for _, part in ipairs(main:GetTouchingParts()) do
+			if part:IsDescendantOf(char) then
+				return true
+			end
+		end
+		return false
+	end
+
+	local function StartMainCheck()
+		if checkingMain then return end
+		checkingMain = true
+
+		task.spawn(function()
+			while checkingMain do
+				if closePrompt.Enabled then
+					if IsTouchingMain() then
+						closePrompt.Enabled = false
+						prompt.Enabled = true
+					else
+						prompt.Enabled = false
+						closePrompt.Enabled = true
+					end
+				end
+				task.wait(0.3)
+			end
+			checkingMain = false
+		end)
+	end
+
+	local function StopMainCheck()
+		checkingMain = false
+		prompt.Enabled = false
+	end
+
+	local function StopHiddenCheck()
+		checkingHidden = false
+	end
+
+	local function StartHiddenCheck()
+		if checkingHidden or not hiddenValue then return end
+		checkingHidden = true
+
+		task.spawn(function()
+			while checkingHidden do
+				local value = hiddenValue.Value
+				if value == LocalPlayer.Name then
+					openPrompt.Enabled = false
+					closePrompt.Enabled = false
+				else
+					checkingHidden = false
+					openPrompt.Enabled = true
+					closePrompt.Enabled = false
+					prompt.Enabled = false
+					break
+				end
+				task.wait(0.3)
+			end
+			checkingHidden = false
+		end)
+	end
+
+	local function PlayWardrobeAnimation()
+		local controller = wardrobe:FindFirstChildOfClass("AnimationController")
+		if not controller then
+			controller = Instance.new("AnimationController")
+			controller.Parent = wardrobe
+		end
+
+		local animator = controller:FindFirstChildOfClass("Animator")
+		if not animator then
+			animator = Instance.new("Animator")
+			animator.Parent = controller
+		end
+
+		local anim = Instance.new("Animation")
+		anim.AnimationId = "rbxassetid://9451146136"
+
+		if track then
+			track:Stop(0)
+			track:Destroy()
+			track = nil
+		end
+
+		track = animator:LoadAnimation(anim)
+		track:Play()
+		track:AdjustSpeed(0.8)
+
+		task.spawn(function()
+			repeat task.wait() until track.Length > 0
+			task.wait(track.Length / 2)
+			if track and track.IsPlaying then
+				track:AdjustSpeed(0)
+			end
+		end)
+	end
+
+	openPrompt.Triggered:Connect(function()
+		openPrompt.Enabled = false
+		local char = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+		local hum = char:WaitForChild("Humanoid")
+		local hrp = char:WaitForChild("HumanoidRootPart")
+
+		local cf, size = wardrobe:GetBoundingBox()
+		local targetPos = cf.Position + cf.LookVector * (size.Z / 2 + 2)
+		local targetCF = CFrame.lookAt(targetPos, cf.Position)
+
+		hum.AutoRotate = false
+		hrp.Anchored = true
+
+		local tween = TweenService:Create(
+			hrp,
+			TweenInfo.new(0.7, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out),
+			{ CFrame = targetCF }
+		)
+
+		tween:Play()
+		tween.Completed:Wait()
+
+		if enterSound then
+			enterSound:Play()
+		end
+
+		closePrompt.Enabled = true
+		StartMainCheck()
+
+		hrp.Anchored = false
+		hum.AutoRotate = true
+
+		PlayWardrobeAnimation()
+	end)
+
+	closePrompt.Triggered:Connect(function()
+		StopMainCheck()
+		StopHiddenCheck()
+
+		closePrompt.Enabled = false
+		local char = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+		local hum = char:WaitForChild("Humanoid")
+		local hrp = char:WaitForChild("HumanoidRootPart")
+
+		local cf, size = wardrobe:GetBoundingBox()
+		local targetPos = cf.Position + cf.LookVector * (size.Z / 2 + 2)
+		local targetCF = CFrame.lookAt(targetPos, cf.Position)
+
+		hum.AutoRotate = false
+		hrp.Anchored = true
+
+		local tween = TweenService:Create(
+			hrp,
+			TweenInfo.new(0.7, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out),
+			{ CFrame = targetCF }
+		)
+
+		tween:Play()
+		tween.Completed:Wait()
+
+		if exitSound then
+			exitSound:Play()
+		end
+
+		hrp.Anchored = false
+		hum.AutoRotate = true
+
+		if track then
+			track:AdjustSpeed(0.7)
+			task.spawn(function()
+				local remaining = track.Length - track.TimePosition
+				task.wait(remaining / 0.7)
+				openPrompt.Enabled = true
+			end)
+		else
+			openPrompt.Enabled = true
+		end
+	end)
+
+	prompt.Triggered:Connect(function()
+		if originalEnterSound then
+			originalEnterSound.Volume = 0
+		end
+
+		if exitSound then
+			exitSound:Play()
+		end
+
+		prompt.Enabled = false
+		StopMainCheck()
+		StartHiddenCheck()
+
+		if track then
+			track:Stop(0)
+			track:Destroy()
+			track = nil
+		end
+	end)
+end
+
+local function Process(inst)
+	if inst:IsA("Model") then
+		if inst.Name == "DoorNormal" then
+			SetupDoorNormal(inst)
+		elseif inst.Name == "Door" then
+			SetupDoor(inst)
+		elseif inst.Name == "Wardrobe" then
+			SetupWardrobe(inst)
+		elseif inst.Name == "Bed" then
+			SetupBed(inst)
+		end
+	elseif inst.Name == "KeyHitbox" then
+		hasKeyHitbox = true
+	end
+end
+
+hasKeyHitbox = currentRooms:FindFirstChild("KeyHitbox", true) ~= nil
+
+-- Khởi tạo cho các đối tượng hiện có
+for _, v in ipairs(currentRooms:GetDescendants()) do
+	Process(v)
+end
+
+-- Lắng nghe các đối tượng mới sinh ra
+currentRooms.DescendantAdded:Connect(Process)
+
+print("work")
