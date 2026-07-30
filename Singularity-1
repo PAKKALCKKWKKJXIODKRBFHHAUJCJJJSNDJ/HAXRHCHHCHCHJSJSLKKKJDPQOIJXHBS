@@ -77,7 +77,6 @@ end
 
 local entity = s:FindFirstChild("Singu") or s
 if not entity then
-	warn("⚠️ Không tìm thấy 'Singu' trong Asset!")
 	return
 end
 
@@ -107,13 +106,11 @@ TweenService:Create(
 
 local room = GetRoom()
 if not room then
-	warn("⚠️ Không tìm thấy phòng hiện tại từ LatestRoom!")
 	return
 end
 
 local entrance = room:WaitForChild("RoomEntrance", 5)
 if not entrance then
-	warn("⚠️ Không tìm thấy vị trí 'RoomEntrance' trong phòng!")
 	return
 end
 
@@ -513,8 +510,12 @@ for _, template in ipairs(templateChains) do
 end
 
 if playerChained and hum then
-		hum.Health = math.max(0, hum.Health - 60)
+	hum.Health = math.max(0, hum.Health - 60)
+
+	if hum.Health <= 0 then
+		game.ReplicatedStorage.GameStats['Player_' .. game.Players.LocalPlayer.Name].Total.DeathCause.Value = 'Singularity'
 	end
+end
 
 	-- Dọn dẹp xích và các Part/Model phụ
 	for _, beam in ipairs(createdBeams) do
