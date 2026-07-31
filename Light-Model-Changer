@@ -1,0 +1,82 @@
+coroutine.wrap(function()
+	local CurrentRooms = workspace:WaitForChild("CurrentRooms")
+	local LatestRoom = game:GetService("ReplicatedStorage"):WaitForChild("GameData"):WaitForChild("LatestRoom")
+
+	local LightReplaceModel = game:GetObjects(getcustomasset("Place_131351567799504_Model_LightStand_1785518305.txt"))[1]
+
+	local function SetupLightStand(model)
+	if not model:IsA("Model") then
+		return
+	end
+
+	task.wait()
+
+	local hasEnabledLight = false
+
+	for _, v in ipairs(model:GetDescendants()) do
+		if (v:IsA("PointLight")
+			or v:IsA("SpotLight")
+			or v:IsA("SurfaceLight"))
+			and v.Enabled then
+			hasEnabledLight = true
+			break
+		end
+	end
+
+	if not hasEnabledLight then
+		return
+	end
+
+	for _, v in ipairs(model:GetDescendants()) do
+		if v:IsA("BasePart") then
+			v.Transparency = 1
+			v.CanCollide = false
+		elseif v:IsA("PointLight")
+			or v:IsA("SpotLight")
+			or v:IsA("SurfaceLight")
+			or v:IsA("ParticleEmitter") then
+			v.Enabled = false
+		end
+	end
+
+	local torch = LightReplaceModel:Clone()
+	torch:PivotTo(model:GetPivot())
+	torch.Parent = model.Parent
+end
+
+	local function HookRoom(room)
+		local assets = room:FindFirstChild("Assets")
+		if not assets then
+			return
+		end
+
+		local fixtures = assets:FindFirstChild("Light_Fixtures")
+		if not fixtures then
+			return
+		end
+
+		for _, v in ipairs(fixtures:GetDescendants()) do
+			if v:IsA("Model") and (v.Name == "LightStand" or v.Name == "LightStandSingle") then
+				SetupLightStand(v)
+			end
+		end
+
+		fixtures.DescendantAdded:Connect(function(v)
+			if v:IsA("Model") and (v.Name == "LightStand" or v.Name == "LightStandSingle") then
+				SetupLightStand(v)
+			end
+		end)
+	end
+
+	local room = CurrentRooms:FindFirstChild(tostring(LatestRoom.Value))
+	if room then
+		HookRoom(room)
+	end
+
+	LatestRoom.Changed:Connect(function()
+		local room = CurrentRooms:FindFirstChild(tostring(LatestRoom.Value))
+		if room then
+			HookRoom(room)
+		end
+	end)
+end)()
