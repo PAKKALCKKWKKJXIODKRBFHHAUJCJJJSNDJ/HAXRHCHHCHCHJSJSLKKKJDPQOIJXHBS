@@ -1,0 +1,146 @@
+-- ts file was generated at discord.gg/25ms
+
+local _LocalPlayer = game.Players.LocalPlayer
+local u2 = _LocalPlayer.Character or _LocalPlayer.CharacterAdded:Wait()
+local _CurrentCamera = workspace.CurrentCamera
+local _TweenService = game:GetService('TweenService')
+local _Debris = game:GetService('Debris')
+local u6 = game:GetObjects('rbxassetid://90250291645240')[1]
+
+u6.Parent = workspace
+
+local u7 = u6:FindFirstChildWhichIsA('BasePart') or u6:FindFirstChildWhichIsA('Part')
+
+u7.CFrame = u2.HumanoidRootPart.CFrame * CFrame.new(0, 0, -7)
+u7.CanCollide = false
+u7.Anchored = true
+
+local u9 = u7:WaitForChild('HORROR SCREAM 15')
+
+u9.Parent = workspace
+u9.Looped = false
+
+local u10 = 2
+local u11 = 1
+local u12 = tick()
+local u13 = tick()
+local u14 = true
+
+for _, v in ipairs(u6:GetDescendants()) do
+	if v:IsA("Sound") then
+		v.Playing = false
+
+		if v.Name == "PlaySound" then
+			v.Playing = true
+		end
+	end
+end
+
+local function u17()
+    local success, v15 = pcall(function()
+        return loadstring(game:HttpGet('https://raw.githubusercontent.com/RegularVynixu/Utilities/main/Doors/Custom%20Achievements/Source.lua'))()
+    end)
+
+    if success and v15 then
+        if not game:GetService('ReplicatedStorage'):FindFirstChild('shock') then
+            local _Part = Instance.new('Part')
+
+            _Part.Name = 'shock'
+            _Part.Parent = game:GetService('ReplicatedStorage')
+
+            v15({
+                Title = 'Shocking Experience',
+                Desc = 'Look at me.',
+                Reason = 'Encounter Shocker.',
+                Image = 'rbxassetid://17857830685',
+            })
+        end
+    end
+end
+
+local function u24()
+
+    local _Humanoid = u2:FindFirstChild('Humanoid')
+
+    if _Humanoid then
+        _Humanoid:TakeDamage(30)
+    end
+    
+    u9:Play()
+    _Debris:AddItem(u9, u9.TimeLength)
+
+    if _Humanoid and _Humanoid.Health <= 0 then
+        local gameStats = game:GetService('ReplicatedStorage'):FindFirstChild('GameStats')
+        local playerStat = gameStats and gameStats:FindFirstChild('Player_' .. _LocalPlayer.Name)
+        local deathCause = playerStat and playerStat:FindFirstChild('Total') and playerStat.Total:FindFirstChild('DeathCause')
+        
+        if deathCause then
+            deathCause.Value = 'Shocker'
+        end
+    end
+end
+
+local function u25()
+    if u7 and u7.Parent then
+        return (u7.Position - _CurrentCamera.CFrame.Position).Unit:Dot(_CurrentCamera.CFrame.LookVector) > 0.75
+    else
+        return false
+    end
+end
+
+local function u29(p26, p27)
+    if u7 and u7.Parent then
+        local v28 = _TweenService:Create(u7, TweenInfo.new(p27, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {CFrame = p26})
+
+        v28:Play()
+        v28.Completed:Wait()
+    end
+end
+
+task.spawn(function()
+    while u14 do
+        task.wait(0.1)
+
+        if u25() then
+            if u10 <= tick() - u12 then
+                u14 = false
+
+                u24()
+                u29(u2.HumanoidRootPart.CFrame, 0.4)
+                u29(u7.CFrame * CFrame.new(0, -100, 0), 5)
+                u6:Destroy()
+
+                return
+            end
+
+            u13 = tick()
+        else
+            u12 = tick()
+
+            if u11 <= tick() - u13 then
+                print('Not looking for ' .. u11 .. ' seconds. Shocker despawning.')
+
+                u14 = false
+
+                u29(u7.CFrame * CFrame.new(0, -100, 0), 5)
+                u6:Destroy()
+                _Debris:AddItem(u9, 1)
+                u17()
+
+                return
+            end
+        end
+    end
+end)
+
+task.spawn(function()
+    while u6 and u6.Parent do
+        local playSound = u6:FindFirstChild('PlaySound')
+        if playSound then
+            playSound.Volume = 0
+            playSound:Destroy()
+            break
+        end
+        task.wait(0.1)
+    end
+end)
