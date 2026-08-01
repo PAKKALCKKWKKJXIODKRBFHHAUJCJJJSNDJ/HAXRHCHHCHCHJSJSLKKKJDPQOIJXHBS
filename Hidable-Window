@@ -1,0 +1,345 @@
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+
+local CurrentRooms = workspace:WaitForChild("CurrentRooms")
+
+local AnimationId = "rbxassetid://9461439496"
+local MaxLookAngle = 25
+
+local plr = Players.LocalPlayer
+
+local function setup(window)
+	if window:FindFirstChild("HidePrompt") then
+		return
+	end
+
+	local part = window.PrimaryPart or window:FindFirstChildWhichIsA("BasePart", true)
+	if not part then
+		return
+	end
+
+	local prompt = Instance.new("ProximityPrompt")
+	prompt.Name = "HidePrompt"
+	prompt.ActionText = "Hide"
+	prompt.ObjectText = "Wardrobe"
+	prompt.MaxActivationDistance = 7
+	prompt.RequiresLineOfSight = false
+	prompt.Style = Enum.ProximityPromptStyle.Custom
+	prompt.Parent = part
+
+	prompt.Triggered:Connect(function(player)
+		local char = player.Character
+		if not char or player ~= plr then return end
+		
+		local hum = char:FindFirstChildOfClass("Humanoid")
+		local hrp = char:FindFirstChild("HumanoidRootPart")
+		local head = char:FindFirstChild("Head")
+		if not hum or not hrp or not head then return end
+
+		-- Đánh dấu đang chơi để tránh spam click
+		if prompt:GetAttribute("Playing") then return end
+		prompt:SetAttribute("Playing", true)
+		prompt.Enabled = false
+
+		local cam = workspace.CurrentCamera
+		local cf = window:GetBoundingBox()
+		
+		local prePos = cf.Position + cf.LookVector * 9.5
+
+		local preGoal = CFrame.lookAt(
+			prePos,
+			prePos - cf.LookVector
+		)
+
+		local targetPos1 = cf.Position
+			- cf.LookVector * -7.5
+
+		local targetPos2 = targetPos1
+			- Vector3.new(0, 5, 0)
+
+		local goal1 = CFrame.lookAt(
+			targetPos1,
+			targetPos1 + cf.LookVector
+		)
+
+		local goal2 = CFrame.lookAt(
+			targetPos2,
+			targetPos2 + cf.LookVector
+		)
+
+		local animator = hum:FindFirstChildOfClass("Animator") or Instance.new("Animator", hum)
+		local anim = Instance.new("Animation")
+		anim.AnimationId = AnimationId
+
+		local track = animator:LoadAnimation(anim)
+		track.Priority = Enum.AnimationPriority.Action4
+
+		cam.CameraType = Enum.CameraType.Scriptable
+
+		local yaw = 0
+		local pitch = 0
+
+		local function clamp(x, a, b)
+			return math.max(a, math.min(b, x))
+		end
+
+		-- Bật camera nhìn xung quanh trước khi vào
+		local con
+		con = RunService.RenderStepped:Connect(function()
+			local delta = UserInputService:GetMouseDelta()
+			yaw = clamp(yaw - delta.X * 0.2, -MaxLookAngle, MaxLookAngle)
+			pitch = clamp(pitch - delta.Y * 0.2, -MaxLookAngle, MaxLookAngle)
+
+			cam.CFrame = head.CFrame
+				* CFrame.Angles(0, math.rad(yaw), 0)
+				* CFrame.Angles(math.rad(pitch), 0, 0)
+		end)
+
+		hrp.Anchored = true
+		
+		local lock = true
+		RunService:BindToRenderStep("PreLock", Enum.RenderPriority.Character.Value + 2, function()
+			if lock then
+				hrp.CFrame = preGoal
+			end
+		end)
+
+		hum:ChangeState(Enum.HumanoidStateType.Physics)
+		hum.AutoRotate = false
+
+		lock = false
+		RunService:UnbindFromRenderStep("PreLock")
+
+		track:Play()		
+
+		local duration1 = 0.35
+		local startTime = tick()
+		local startCFrame = hrp.CFrame
+
+		while tick() - startTime < duration1 do
+			local alpha = math.min(1, (tick() - startTime) / duration1)
+			local easedAlpha = alpha * alpha * (3 - 2 * alpha)
+
+			hrp.CFrame = startCFrame:Lerp(goal1, easedAlpha)
+			RunService.RenderStepped:Wait()
+		end
+
+		hrp.CFrame = goal1
+
+		task.wait(0.3)
+		
+		char:SetAttribute("Hiding", true)
+		
+		local hideClone
+local buttonClone
+local exitRequested = false
+
+for _, obj in ipairs(plr.PlayerGui:GetDescendants()) do
+	if obj:IsA("ImageLabel") and obj.Name == "HideVignette" then
+		hideClone = obj:Clone()
+		hideClone.Name = "HideVignetteClone"
+		hideClone.ImageTransparency = 1
+		hideClone.Visible = true
+		hideClone.Parent = obj.Parent
+
+		TweenService:Create(
+			hideClone,
+			TweenInfo.new(0.5, Enum.EasingStyle.Linear),
+			{ImageTransparency = 0}
+		):Play()
+
+	elseif obj:IsA("ImageButton") and obj.Name == "ButtonUnhide" then
+		buttonClone = obj:Clone()
+		buttonClone.Name = "ButtonUnhideClone"
+
+		local originalPos = obj.Position
+
+		buttonClone.Visible = true
+		buttonClone.Position = originalPos - UDim2.new(0, 0, 2, 0)
+		buttonClone.Parent = obj.Parent
+
+		local tween = TweenService:Create(
+	buttonClone,
+	TweenInfo.new(
+		0.8,
+		Enum.EasingStyle.Quad,
+		Enum.EasingDirection.Out
+	),
+	{Position = originalPos}
+)
+
+tween:Play()
+
+tween.Completed:Connect(function()
+	if buttonClone.Parent then
+		buttonClone.MouseButton1Click:Connect(function()
+			exitRequested = true
+		end)
+	end
+end)
+	end
+end
+
+		local duration2 = 0.15
+		startTime = tick()
+		startCFrame = hrp.CFrame
+
+		while tick() - startTime < duration2 do
+			local alpha = math.min(1, (tick() - startTime) / duration2)
+			local easedAlpha = alpha * alpha * (3 - 2 * alpha)
+
+			hrp.CFrame = startCFrame:Lerp(goal2, easedAlpha)
+			RunService.RenderStepped:Wait()
+		end
+
+		hrp.CFrame = goal2
+
+		-- Đợi animation chạy xong
+		repeat
+			RunService.RenderStepped:Wait()
+		until track.Length > 0 and track.TimePosition >= track.Length - 0.05
+
+		track:AdjustSpeed(0)
+		
+		local exiting = false
+
+		task.spawn(function()
+			while not exiting do
+				task.wait(0.1)
+
+				if hum.MoveDirection.Magnitude > 0 or exitRequested then
+					exiting = true
+
+					-- Gỡ khóa vị trí cũ NGAY LẬP TỨC trước khi chạy animation thoát
+					RunService:UnbindFromRenderStep("LockHRP")
+					
+					if buttonClone then
+	buttonClone:Destroy()
+end
+
+if hideClone then
+	hideClone:Destroy()
+end
+
+					local exitAnim = Instance.new("Animation")
+					exitAnim.AnimationId = "rbxassetid://10066064783"
+
+					local exitTrack = animator:LoadAnimation(exitAnim)
+					exitTrack.Priority = Enum.AnimationPriority.Action4
+					
+					-- Dừng hẳn track ẩn trước đó để tránh xung đột xương
+					track:Stop()
+					exitTrack:Play()
+
+					-- Chờ animation chui ra load và chạy xong mượt mà
+
+					exitTrack:Stop()
+					exitTrack:Destroy()
+					exitAnim:Destroy()
+					
+					anim:Destroy()
+					track:Destroy()
+
+					if con then
+						con:Disconnect()
+						con = nil
+					end
+
+					cam.CameraType = Enum.CameraType.Custom
+
+					for _, v in ipairs(char:GetDescendants()) do
+						if (v:IsA("BasePart") or v:IsA("Decal") or v:IsA("Texture")) then
+							v.Transparency = 0
+						end
+					end
+
+					local duration3 = 0.35
+					local startTime3 = tick()
+					local startCFrame3 = hrp.CFrame
+
+					while tick() - startTime3 < duration3 do
+						local alpha = math.min(1, (tick() - startTime3) / duration3)
+						local easedAlpha = alpha * alpha * (3 - 2 * alpha)
+
+						hrp.CFrame = startCFrame3:Lerp(preGoal, easedAlpha)
+						RunService.RenderStepped:Wait()
+					end
+
+					local duration4 = 0.7
+local startTime4 = tick()
+local startCFrame4 = hrp.CFrame
+
+while tick() - startTime4 < duration4 do
+	local alpha = math.min(1, (tick() - startTime4) / duration4)
+	local easedAlpha = alpha * alpha * (3 - 2 * alpha)
+
+	hrp.CFrame = startCFrame4:Lerp(preGoal, easedAlpha)
+	RunService.RenderStepped:Wait()
+end
+
+hrp.CFrame = preGoal
+
+hrp.Anchored = false
+hum.AutoRotate = true
+hum:ChangeState(Enum.HumanoidStateType.GettingUp)
+
+char:SetAttribute("Hiding", nil)
+					prompt:SetAttribute("Playing", nil)
+					prompt.Enabled = true
+					break
+				end
+			end
+		end)
+
+		local pos = head.Position
+		local look = head.CFrame.LookVector
+
+		-- Cố định vị trí HRP trong tủ
+		local lockPos = goal2.Position
+
+RunService:BindToRenderStep("LockHRP", Enum.RenderPriority.Character.Value + 1, function()
+	local pos = hrp.Position
+	local offset = pos - lockPos
+
+	if offset.Magnitude > 0.001 then
+		hrp.CFrame = CFrame.new(lockPos, lockPos + goal2.LookVector)
+	else
+		hrp.CFrame = CFrame.new(pos, pos + goal2.LookVector)
+	end
+end)
+
+		for _, v in ipairs(char:GetDescendants()) do
+			if (v:IsA("BasePart") or v:IsA("Decal") or v:IsA("Texture")) and v.Transparency == 0 then
+				v.Transparency = 1
+			end
+		end
+
+		con:Disconnect()
+
+		con = RunService.RenderStepped:Connect(function()
+			local delta = UserInputService:GetMouseDelta()
+
+			yaw = clamp(yaw - delta.X * 0.2, -MaxLookAngle, MaxLookAngle)
+			pitch = clamp(pitch - delta.Y * 0.2, -MaxLookAngle, MaxLookAngle)
+
+			cam.CFrame =
+				CFrame.lookAt(pos, pos + look)
+				* CFrame.Angles(0, math.rad(yaw), 0)
+				* CFrame.Angles(math.rad(pitch), 0, 0)
+		end)
+	end)
+end
+
+for _, v in ipairs(CurrentRooms:GetDescendants()) do
+	if v:IsA("Model") and v.Name == "Window" then
+		setup(v)
+	end
+end
+
+CurrentRooms.DescendantAdded:Connect(function(v)
+	if v:IsA("Model") and v.Name == "Window" then
+		setup(v)
+	end
+end)
