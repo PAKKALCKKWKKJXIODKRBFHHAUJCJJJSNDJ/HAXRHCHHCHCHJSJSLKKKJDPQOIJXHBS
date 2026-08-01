@@ -1,0 +1,235 @@
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+
+-- GUI
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "AutoEffectGui"
+screenGui.ResetOnSpawn = false
+screenGui.IgnoreGuiInset = true
+screenGui.DisplayOrder = 999999
+screenGui.Parent = playerGui
+
+-- Background
+local bg = Instance.new("Frame")
+bg.Name = "Background"
+bg.Parent = screenGui
+bg.Size = UDim2.new(1, 0, 1, 0)
+bg.Position = UDim2.new(0, 0, 0, 0)
+bg.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+bg.BackgroundTransparency = 0
+bg.BorderSizePixel = 0
+
+local bgImage = Instance.new("ImageLabel")
+bgImage.Name = "BackgroundImage"
+bgImage.Parent = screenGui
+bgImage.Size = UDim2.fromScale(1, 1)
+bgImage.Position = UDim2.fromScale(0, 0)
+bgImage.BackgroundTransparency = 1
+bgImage.Image = "rbxassetid://126496772374967"
+bgImage.ImageTransparency = 0.6
+bgImage.ScaleType = Enum.ScaleType.Stretch
+bgImage.ZIndex = 1
+
+local bgScale = Instance.new("UIScale")
+bgScale.Parent = bgImage
+bgScale.Scale = 1
+
+-- Jumpscare cũ
+local oldImage = Instance.new("ImageLabel")
+oldImage.Name = "OldImage"
+oldImage.Parent = screenGui
+oldImage.BackgroundTransparency = 1
+oldImage.Visible = true
+oldImage.Image = "rbxassetid://13272951808"
+oldImage.Size = UDim2.new(0, 200, 0, 200)
+oldImage.Position = UDim2.new(0.5, -125, 0.5, -125)
+oldImage.AnchorPoint = Vector2.new(0.5, 0.5)
+oldImage.Rotation = 0
+oldImage.ImageColor3 = Color3.fromRGB(255, 255, 255)
+oldImage.ScaleType = Enum.ScaleType.Stretch
+oldImage.ZIndex = 2
+
+-- Jumpscare mới
+local newImage = Instance.new("ImageLabel")
+newImage.Name = "NewImage"
+newImage.Parent = screenGui
+newImage.BackgroundTransparency = 1
+newImage.Visible = false
+newImage.Image = "rbxassetid://13272951808"
+newImage.Size = UDim2.new(0, 0, 0, 0)
+newImage.Position = UDim2.new(0.5, 0, 0.5, 0)
+newImage.AnchorPoint = Vector2.new(0.5, 0.5)
+newImage.Rotation = 0
+newImage.ImageColor3 = Color3.fromRGB(255, 255, 255)
+newImage.ScaleType = Enum.ScaleType.Stretch
+newImage.ZIndex = 3
+
+-- Sound cũ
+local oldSound = Instance.new("Sound")
+oldSound.Name = "OldSound"
+oldSound.Parent = workspace
+oldSound.SoundId = "rbxassetid://109582246349306"
+oldSound.Volume = 20
+oldSound.PlaybackSpeed = 1.03
+oldSound.Looped = false
+
+-- Sound mới
+local newSound = Instance.new("Sound")
+newSound.Name = "NewSound"
+newSound.Parent = screenGui
+newSound.SoundId = "rbxassetid://109582246349306"
+newSound.Volume = 10
+newSound.PlaybackSpeed = 0.7
+newSound.Looped = false
+
+-- Bảng màu gốc dành riêng cho Background
+local colors = {
+	Color3.fromRGB(160, 206, 255),
+	Color3.fromRGB(0, 123, 255),
+	Color3.fromRGB(0, 208, 255),
+	Color3.fromRGB(120, 174, 255),
+	Color3.fromRGB(255, 255, 255),
+	Color3.fromRGB(37, 84, 255),
+	Color3.fromRGB(133, 255, 237)
+}
+
+local oldActive = true
+local transitioning = false
+
+local function playSoundSafe(soundObj, timePos, speed, volume)
+	if not soundObj or not soundObj.Parent then
+		return
+	end
+
+	soundObj:Stop()
+	soundObj.TimePosition = timePos or 0
+	soundObj.PlaybackSpeed = speed or 1
+	soundObj.Volume = volume or 1
+	soundObj:Play()
+end
+
+math.randomseed(tick())
+oldSound:Play()
+
+task.spawn(function()
+	local flip = false
+
+	while oldActive and bgImage.Parent do
+		flip = not flip
+
+		bgScale.Scale = flip and -1 or 1
+
+		task.wait(0.1)
+	end
+end)
+
+task.spawn(function()
+	while oldActive and screenGui.Parent do
+		task.wait(0.0667)
+
+		local Rotation = oldImage.Rotation
+		local v2  
+		if math.random(1, 2) == 1 then
+			v2 = -Rotation
+		else
+			v2 = Rotation + math.random(-360, 360)
+		end
+
+		local v3 = v2 + math.random(-360, 360)  
+		if v3 > 180 then
+			v3 = 180
+		end
+		if v3 < -180 then
+			v3 = -180
+		end
+
+		-- Background đổi màu theo bảng màu gốc
+		bg.BackgroundColor3 = colors[math.random(1, #colors)]
+		
+		-- Image đổi màu ngẫu nhiên theo phạm vi yêu cầu
+		oldImage.ImageColor3 = Color3.fromRGB(
+			math.random(0, 255),
+			math.random(85, 255),
+			255
+		)
+
+		-- Scale cứng ngẫu nhiên mỗi lần chuyển vị trí
+		oldImage.Size = UDim2.new(0, math.random(80, 500), 0, math.random(80, 500))
+
+		-- Logic delay âm thanh phụ
+		task.delay(math.random(300, 600) / 600, function()
+			if oldSound and oldSound.Parent and oldActive then
+				playSoundSafe(oldSound, 0.25 + math.random() / 10, math.random(50, 125) / 100, 1)
+			end
+		end)
+
+		-- Tween đổi vị trí và xoay ngẫu nhiên
+		TweenService:Create(oldImage, TweenInfo.new(0.05333333333333333, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+			Position = UDim2.new(math.random(150, 800) / 1000, 0, math.random(150, 800) / 1000, 0),
+			Rotation = -v3
+		}):Play()
+	end
+end)
+
+-- Chuyển sang jumpscare mới sau 3-4 giây
+task.delay(math.random(3, 4), function()
+	if not screenGui.Parent or transitioning then
+		return
+	end
+
+	transitioning = true
+	oldActive = false
+
+	task.wait(0.2)
+	
+	-- Lấy tỉ lệ scale hiện tại và phóng to nó lên, đồng thời giữ góc nghiêng -40 độ
+	local currentSize = oldImage.Size
+	local expandedSize = UDim2.new(currentSize.X.Scale, currentSize.X.Offset * 5, currentSize.Y.Scale, currentSize.Y.Offset * 5)
+
+	-- Tween đồng thời vị trí, size, góc xoay và màu sắc sang đỏ (255, 0, 0) với thời gian 2 giây
+	local oldBackTween = TweenService:Create(oldImage, TweenInfo.new(2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+		Position = UDim2.new(0.5, 0, 0.5, 0),
+		Size = expandedSize,
+		Rotation = -40,
+		ImageColor3 = Color3.fromRGB(255, 0, 0)
+	})
+	oldBackTween:Play()
+	
+	oldBackTween.Completed:Connect(function()
+	local info = TweenInfo.new(1.5)
+	
+	local player = game:GetService("Players").LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoid = character:WaitForChild("Humanoid")
+
+humanoid.Health = 0
+
+game.ReplicatedStorage.GameStats["Player_".. player.Name].Total.DeathCause.Value = "Rebound"
+
+	local fadeImage = TweenService:Create(bgImage, info, {
+		ImageTransparency = 1
+	})
+
+	local fadeBg = TweenService:Create(bg, info, {
+		BackgroundTransparency = 1
+	})
+
+	fadeImage:Play()
+	fadeBg:Play()
+
+	fadeImage.Completed:Connect(function()
+		if screenGui and screenGui.Parent then
+			screenGui:Destroy()
+		end
+	end)
+end)
+
+	-- Dừng âm thanh cũ để không bị chồng tiếng
+	if oldSound then
+		oldSound:Stop()
+	end
+	
+	newSound:Play()
+end)
