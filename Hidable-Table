@@ -1,0 +1,360 @@
+local CurrentRooms = workspace:WaitForChild("CurrentRooms")
+
+local function LoadModel(file, url)
+	if not isfile(file) then
+		writefile(file, game:HttpGet(url))
+	end
+
+	return game:GetObjects(getcustomasset(file))[1]
+end
+
+local function HandleTable(obj)
+	if not (obj:IsA("Model") and obj.Name == "Table") then
+		return
+	end
+
+	if obj:FindFirstChild("DrawerContainer", true) then
+		return
+	end
+
+	if obj:FindFirstChild("TableCanBeHided") then
+		return
+	end
+	
+	for _, v in ipairs(obj:GetDescendants()) do
+	if v:IsA("BasePart") then
+		v.Transparency = 1
+	end
+end
+
+	local Model = LoadModel(
+		"TableCanBeHided.txt",
+		"https://raw.githubusercontent.com/lynguyen26031993-design/-u/refs/heads/main/Place_131351567799504_Model_Table_1785589098.txt"
+	)
+
+	if not Model then
+		return
+	end
+
+	Model.Name = "TableCanBeHided"
+	Model.Parent = obj
+
+	if Model.PrimaryPart and obj.PrimaryPart then
+		Model:PivotTo(obj.PrimaryPart.CFrame)
+	end
+	
+	local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+for _, v in ipairs(Model:GetDescendants()) do
+	if v:IsA("ProximityPrompt") then
+		v.Triggered:Connect(function(player)
+			if player ~= LocalPlayer then
+				return
+			end
+
+			local char = LocalPlayer.Character
+			if not char then
+				return
+			end
+			
+			char:SetAttribute("Hiding", true)
+			
+			v.Enabled = false
+
+			local hum = char:FindFirstChildOfClass("Humanoid")
+			local hrp = char:FindFirstChild("HumanoidRootPart")
+			if not hum or not hrp then
+				return
+			end
+			
+			hum.AutoRotate = false
+			
+			local head = char:WaitForChild("Head")
+local cam = workspace.CurrentCamera
+
+cam.CameraType = Enum.CameraType.Scriptable
+
+local camCon
+camCon = game:GetService("RunService").RenderStepped:Connect(function()
+	if head.Parent then
+		cam.CFrame = head.CFrame
+	end
+end)
+
+			local cf = Model:GetBoundingBox()
+
+for _, obj in ipairs(Model:GetDescendants()) do
+	if obj:IsA("BasePart") then
+		obj.CanCollide = false
+	end
+end
+
+for _, obj in ipairs(char:GetDescendants()) do
+	if obj:IsA("BasePart") then
+		obj.CanCollide = false
+	end
+end
+
+local TweenService = game:GetService("TweenService")
+
+hrp.Anchored = true
+
+local bla = true
+
+local cf, size = Model:GetBoundingBox()
+
+local RunService = game:GetService("RunService")
+
+local faceCon
+faceCon = RunService.RenderStepped:Connect(function()
+	if hrp.Parent then
+	if bla then
+		local pos = hrp.Position
+		local look = Model.PrimaryPart.CFrame.LookVector
+		hrp.CFrame = CFrame.lookAt(pos, pos + look)
+		else
+		local pos = hrp.Position
+		local look = Model.PrimaryPart.CFrame.LookVector
+		hrp.CFrame = CFrame.lookAt(pos, pos + look)
+	end
+	end
+end)
+
+local look = - Model.PrimaryPart.CFrame.LookVector
+
+local pos =
+	cf.Position
+	+ Vector3.new(0, size.Y / 2 - 2, 0)
+	+ look * 1
+
+hrp.CFrame = CFrame.lookAt(pos, pos + look)
+
+TweenService:Create(
+	hrp,
+	TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+	{
+		CFrame = hrp.CFrame + Vector3.new(0, 3, 0)
+	}
+):Play()
+
+task.wait(0.25)
+
+local goal = hrp.CFrame - (Model.PrimaryPart.CFrame.LookVector * 2.3)
+
+local tween = TweenService:Create(
+	hrp,
+	TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+	{
+		CFrame = goal
+	}
+)
+
+tween:Play()
+
+tween.Completed:Wait()
+
+bla = false
+
+local po = hrp.Position
+local loo = Model.PrimaryPart.CFrame.LookVector
+
+hrp.CFrame = CFrame.lookAt(po, po + loo)
+
+			local animator = hum:FindFirstChildOfClass("Animator") or Instance.new("Animator", hum)
+
+			local anim1 = Instance.new("Animation")
+			anim1.AnimationId = "rbxassetid://10065788495"
+
+			local track1 = animator:LoadAnimation(anim1)
+			track1.Priority = Enum.AnimationPriority.Action4
+			track1:Play()
+			
+						local hideClone
+local buttonClone
+local exitRequested = false
+			
+			track1.Ended:Connect(function() 
+
+for _, obj in ipairs(game.Players.LocalPlayer.PlayerGui:GetDescendants()) do
+	if obj:IsA("ImageLabel") and obj.Name == "HideVignette" then
+		hideClone = obj:Clone()
+		hideClone.Name = "HideVignetteClone"
+		hideClone.ImageTransparency = 1
+		hideClone.Visible = true
+		hideClone.Parent = obj.Parent
+
+		TweenService:Create(
+			hideClone,
+			TweenInfo.new(0.5, Enum.EasingStyle.Linear),
+			{ImageTransparency = 0}
+		):Play()
+
+	elseif obj:IsA("ImageButton") and obj.Name == "ButtonUnhide" then
+		buttonClone = obj:Clone()
+		buttonClone.Name = "ButtonUnhideClone"
+
+		local originalPos = obj.Position
+
+		buttonClone.Visible = true
+		buttonClone.Position = originalPos - UDim2.new(0, 0, 2, 0)
+		buttonClone.Parent = obj.Parent
+
+		local tween = TweenService:Create(
+	buttonClone,
+	TweenInfo.new(
+		0.8,
+		Enum.EasingStyle.Quad,
+		Enum.EasingDirection.Out
+	),
+	{Position = originalPos}
+)
+
+tween:Play()
+
+tween.Completed:Connect(function()
+	if buttonClone.Parent then
+		buttonClone.MouseButton1Click:Connect(function()
+			exitRequested = true
+		end)
+	end
+end)
+	end
+end
+end) 
+
+			repeat
+				task.wait()
+			until track1.Length > 0
+
+			task.spawn(function()
+				while track1.IsPlaying do
+					task.wait()
+
+					if track1.TimePosition >= track1.Length - 0.01 then
+						track1:Stop()
+
+						local anim2 = Instance.new("Animation")
+						anim2.AnimationId = "rbxassetid://10065857481"
+
+						local track2 = animator:LoadAnimation(anim2)
+						track2.Priority = Enum.AnimationPriority.Action4
+track2:Play()
+
+anim1:Destroy()
+
+task.spawn(function()
+	while track2.IsPlaying do
+		task.wait(0.1)
+
+		if hum.MoveDirection.Magnitude > 0 or exitRequested then
+			track2:Stop()
+			
+			if buttonClone then
+	buttonClone:Destroy()
+end
+
+if hideClone then
+	hideClone:Destroy()
+end
+
+			local exitAnim = Instance.new("Animation")
+			exitAnim.AnimationId = "rbxassetid://10066064783"
+
+			local exitTrack = animator:LoadAnimation(exitAnim)
+			exitTrack.Priority = Enum.AnimationPriority.Action4
+			exitTrack:Play()
+
+			repeat
+	task.wait()
+until exitTrack.Length > 0
+
+while exitTrack.IsPlaying do
+	task.wait()
+
+	if exitTrack.TimePosition >= exitTrack.Length - 0.01 then
+	exitTrack:Stop()
+	
+	char:SetAttribute("Hiding", nil)
+
+		local goal = hrp.CFrame + (hrp.CFrame.LookVector * 4.5)
+
+		local tween = TweenService:Create(
+			hrp,
+			TweenInfo.new(0.6, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+			{
+				CFrame = CFrame.new(goal.Position) * (hrp.CFrame - hrp.Position)
+			}
+		)
+
+		tween:Play()
+		tween.Completed:Wait()
+		
+		for _, obj in ipairs(char:GetDescendants()) do
+	if obj:IsA("BasePart") then
+		obj.CanCollide = true
+	end
+end
+
+		hrp.Anchored = true
+
+		exitTrack:Stop()
+		break
+	end
+end
+
+local finalCF = hrp.CFrame
+
+exitTrack:Destroy()
+exitAnim:Destroy()
+
+hrp.CFrame = finalCF
+task.wait()
+
+hrp.Anchored = false
+hrp.CFrame = finalCF
+task.wait()
+
+hrp.CFrame = finalCF
+
+hrp.Anchored = false
+
+if faceCon then
+	faceCon:Disconnect()
+	faceCon = nil
+end
+
+if camCon then
+	camCon:Disconnect()
+	camCon = nil
+end
+
+if lockCon then
+	lockCon:Disconnect()
+	lockCon = nil
+end
+
+lockCF = nil
+
+cam.CameraType = Enum.CameraType.Custom
+v.Enabled = true
+
+			break
+		end
+	end
+end)
+
+break
+					end
+				end
+			end)
+		end)
+	end
+end
+end
+
+for _, obj in ipairs(CurrentRooms:GetDescendants()) do
+	HandleTable(obj)
+end
+
+CurrentRooms.DescendantAdded:Connect(HandleTable)
