@@ -1,5 +1,6 @@
 local Players = game:GetService("Players")
 local Player = Players.LocalPlayer
+local UserInputService = game:GetService("UserInputService")
 
 local MainFrame = Player.PlayerGui:WaitForChild("MainUI"):WaitForChild("MainFrame")
 local MobileButtons = MainFrame:WaitForChild("MobileButtons")
@@ -33,6 +34,10 @@ local SprintEffect = LoadObject(
 	"Place_131351567799504_ImageLabel_HC_StaminaVignette_1785381333.txt", -- m tự thay
 	MainFrame
 )
+
+local IsMobile = UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled
+
+SprintButton.Visible = IsMobile
 
 local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
@@ -96,24 +101,11 @@ local function SetSprint(state)
 	end
 end
 
-SprintButton.MouseButton1Click:Connect(function()
-
+local function ToggleSprint()
 	if Sprinting then
 		SetSprint(false)
 
-ManualFade = true
-
-TweenService:Create(
-	SprintEffect,
-	TweenInfo.new(2),
-	{
-		ImageTransparency = 1
-	}
-):Play()
-
-task.delay(2, function()
-	ManualFade = false
-end)
+		ManualFade = true
 
 		TweenService:Create(
 			SprintEffect,
@@ -123,12 +115,30 @@ end)
 			}
 		):Play()
 
+		task.delay(2, function()
+			ManualFade = false
+		end)
+
 		Humanoid.WalkSpeed = 15
 	else
 		SetSprint(true)
-ManualFade = false
+		ManualFade = false
 	end
-end)
+end
+
+if IsMobile then
+	SprintButton.MouseButton1Click:Connect(ToggleSprint)
+else
+	UserInputService.InputBegan:Connect(function(input, gameProcessed)
+		if gameProcessed then
+			return
+		end
+
+		if input.KeyCode == Enum.KeyCode.Q then
+			ToggleSprint()
+		end
+	end)
+end
 
 task.spawn(function()
 	while true do
