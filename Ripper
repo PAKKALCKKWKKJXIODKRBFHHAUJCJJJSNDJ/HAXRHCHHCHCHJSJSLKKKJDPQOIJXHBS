@@ -31,7 +31,7 @@ local function FadeDestroy(model)
 		if v:IsA("Sound") then
 			pcall(function()
 				TweenService:Create(v, info, {
-					Volume = 0
+					PlaybackSpeed = 0
 				}):Play()
 			end)
 
