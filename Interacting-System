@@ -300,13 +300,6 @@ local function SetupDoor(door)
 	end)
 end
 
-local function SetupBed(bed)
-	local prompt = bed:FindFirstChildWhichIsA("ProximityPrompt", true)
-	if prompt then
-		prompt.HoldDuration = 0.5
-	end
-end
-
 local function SetupWardrobe(wardrobe)
 	if not (wardrobe:IsA("Model") and wardrobe.Name == "Wardrobe") then return end  
 	if wardrobe:GetAttribute("WardrobeScanned") then return end
@@ -613,9 +606,6 @@ local function Process(inst)
 					SetupWardrobe(inst)
 				end
 			end)
-
-		elseif inst.Name == "Bed" then
-			SetupBed(inst)
 		end
 
 	elseif inst.Name == "KeyHitbox" then
