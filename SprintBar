@@ -7,7 +7,11 @@ local MobileButtons = MainFrame:WaitForChild("MobileButtons")
 local HeartBar = MainFrame:WaitForChild("Healthbar")
 HeartBar.Position = UDim2.new(0, 10, 0.975000024, -20)
 
-local function LoadObject(file, parent)
+local function LoadObject(file, url, parent)
+	if not isfile(file) then
+		writefile(file, game:HttpGet(url))
+	end
+
 	local asset = getcustomasset(file)
 	local obj = game:GetObjects(asset)[1]
 
@@ -22,16 +26,19 @@ local ManualFade = false
 
 local SprintBar = LoadObject(
 	"Place_131351567799504_Frame_HC_Sprintbar_1785379229.txt",
+	"https://raw.githubusercontent.com/lynguyen26031993-design/-u/refs/heads/main/Place_131351567799504_Frame_HC_Sprintbar_1785379229%20(1).txt",
 	MainFrame
 )
 
 local SprintButton = LoadObject(
 	"Place_131351567799504_ImageButton_SprintButton_1785380149.txt",
+	"https://raw.githubusercontent.com/lynguyen26031993-design/-u/refs/heads/main/Place_131351567799504_ImageButton_SprintButton_1785380149%20(1).txt",
 	MobileButtons
 )
 
 local SprintEffect = LoadObject(
-	"Place_131351567799504_ImageLabel_HC_StaminaVignette_1785381333.txt", -- m tự thay
+	"Place_131351567799504_ImageLabel_HC_StaminaVignette_1785381333.txt",
+	"https://raw.githubusercontent.com/lynguyen26031993-design/-u/refs/heads/main/Place_131351567799504_ImageLabel_HC_StaminaVignette_1785381333%20(1).txt",
 	MainFrame
 )
 
