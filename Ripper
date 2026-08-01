@@ -25,13 +25,13 @@ local function FadeDestroy(model)
 		return
 	end
 
-	local info = TweenInfo.new(2, Enum.EasingStyle.Linear)
+	local info = TweenInfo.new(3, Enum.EasingStyle.Linear)
 
 	for _, v in ipairs(model:GetDescendants()) do
 		if v:IsA("Sound") then
 			pcall(function()
 				TweenService:Create(v, info, {
-					PlaybackSpeed = 0
+					Volume = 0
 				}):Play()
 			end)
 
@@ -70,7 +70,7 @@ local function FadeDestroy(model)
 		end
 	end
 
-	task.delay(2, function()
+	task.delay(3, function()
 		if model.Parent then
 			model:Destroy()
 		end
@@ -139,8 +139,71 @@ local entity = Spawner:Create({
 
 entity:SetCallback("OnSpawned", function()
 	print("Entity has spawned")
+	
+	local _Sound = Instance.new('Sound')
+
+_Sound.SoundId = 'rbxassetid://101665501585468'
+_Sound.PlaybackSpeed = 1
+_Sound.Looped = false
+_Sound.Parent = workspace
+_Sound.Volume = 5
+
+_Sound:Play()
 
 	light(4, Color3.fromRGB(85, 0, 0), Color3.fromRGB(255, 0, 0))
+	
+	local entityModel = workspace:FindFirstChild("RipperBla")
+		local ripe = entityModel and entityModel:FindFirstChild("Ripe")
+	
+	local Github = GetGitSound("https://github.com/cakmay227-svg/random/raw/refs/heads/main/XRecorder_Edited_20260801_01.mp3?raw=true", "jjjciie")
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+
+local breaking = Instance.new("Sound")
+breaking.SoundId = Github.SoundId
+breaking.PlaybackSpeed = 1
+breaking.Parent = workspace
+breaking.Looped = false
+breaking.RollOffMaxDistance = 1000000000
+breaking.Volume = 4
+
+local player = Players.LocalPlayer
+
+task.spawn(function()
+	local conn
+
+	conn = RunService.Heartbeat:Connect(function()
+		local character = player.Character
+		local hrp = character and character:FindFirstChild("HumanoidRootPart")
+
+		if not hrp or not ripe or not breaking.Parent then
+			if conn then
+				conn:Disconnect()
+			end
+			return
+		end
+
+		local inRange = (ripe.Position - hrp.Position).Magnitude <= 150
+
+		if inRange then
+			if not breaking.IsPlaying then
+				breaking:Play()
+			end
+		else
+			if breaking.IsPlaying then
+				breaking:Stop()
+			end
+		end
+	end)
+
+	breaking.Ended:Connect(function()
+		if conn then
+			conn:Disconnect()
+		end
+	end)
+end)
+
 	task.spawn(function()
 		local sound5 = Instance.new("Sound")
 		sound5.PlaybackSpeed = 1
@@ -269,42 +332,135 @@ local hasTriggered = false
 
 entity:SetCallback("OnEnterRoom", function(room: Model, firstTime: boolean)
 	-- 1. Xử lý hiệu ứng nổ tung các mảnh nội thất trong phòng (Giữ nguyên của bạn)
-	task.spawn(function()
-		for _, obj in ipairs(room:GetDescendants()) do
-			if obj:IsA("BasePart") then
-				local model = obj:FindFirstAncestorOfClass("Model")
-				if model and model:FindFirstChildOfClass("Humanoid") then
-					continue
+
+local assetContainer = room:WaitForChild("Assets")
+
+		task.spawn(function()
+			task.wait(0.05)
+
+			local breakSound = Instance.new("Sound")
+			breakSound.SoundId = "rbxassetid://9114223171"
+			breakSound.Volume = 1
+			breakSound.Parent = room
+			breakSound:Play()
+			breakSound.Ended:Connect(function() breakSound:Destroy() end)
+
+			local breakSounds = {
+				"rbxassetid://126645609816652",
+				"rbxassetid://130869638485735",
+				"rbxassetid://7158347304",
+				"rbxassetid://127327591850649",
+				"rbxassetid://133653755194228",
+				"rbxassetid://117158373103667",
+				"rbxassetid://104568144438070"
+			}
+
+			local blacklist = {"wardrobe", "bed", "rug", "key", "drawer", "breaker", "table", "desk", "gold", "dresser"}
+
+			for _, item in pairs(assetContainer:GetChildren()) do
+				if item:IsA("Model") and item.Name ~= "Door" and item.Name ~= "HidingSpots" then
+
+					local isBlacklisted = false
+					local itemNameLower = string.lower(item.Name)
+					for _, word in ipairs(blacklist) do
+						if string.find(itemNameLower, word) then
+							isBlacklisted = true
+							break
+						end
+					end
+
+					if not isBlacklisted then
+						local primary = item.PrimaryPart or item:FindFirstChildWhichIsA("BasePart")
+
+						if primary then
+							-- Thread out the model destruction to let parts stagger their sound playbacks
+							task.spawn(function()
+								for _, v in ipairs(item:GetDescendants()) do
+									if v:IsA("BasePart") then
+										local lowerName = string.lower(v.Name)
+
+										if not string.find(lowerName, "floor") and not string.find(lowerName, "hitbox") then
+
+											-- STAGGER DELAY: Breaks up the 'one sound' audio compression
+											task.wait(math.random(1, 4) / 100)
+
+											local randomSoundId = breakSounds[math.random(1, #breakSounds)]
+
+											local s = Instance.new("Sound")
+											s.SoundId = randomSoundId
+											s.Volume = math.random(12, 24) / 10 
+											s.PlaybackSpeed = math.random(85, 115) / 100
+											s.RollOffMaxDistance = 100
+											s.Parent = v
+											s:Play()
+
+											s.Ended:Connect(function()
+												s:Destroy()
+											end)
+
+											v.Anchored = false
+											v.CanCollide = true 
+
+											v.CustomPhysicalProperties = PhysicalProperties.new(0.01, 0.01, 0.5, 1, 1)
+
+											pcall(function()
+												if v:CanSetNetworkOwnership() then
+													v:SetNetworkOwner(localPlayer)
+												end
+											end)
+
+											v.CFrame = v.CFrame + Vector3.new(0, 0.05, 0)
+											
+											v.AssemblyLinearVelocity = Vector3.new(
+	math.random(-120, 120),
+	math.random(40, 90),
+	math.random(-120, 120)
+)
+
+v.AssemblyAngularVelocity = Vector3.new(
+	math.random(-70, 70),
+	math.random(-70, 70),
+	math.random(-70, 70)
+)
+
+local mass = v:GetMass()
+
+v:ApplyImpulse(Vector3.new(
+	math.random(-120,120),
+	math.random(60,120),
+	math.random(-120,120)
+) * mass)
+
+v:ApplyAngularImpulse(Vector3.new(
+	math.random(-60,60),
+	math.random(-60,60),
+	math.random(-60,60)
+) * mass)
+										end
+									end
+								end
+							end)
+
+							primary.Anchored = true
+							task.wait()
+							primary.Anchored = false
+
+							primary.AssemblyLinearVelocity = Vector3.new(
+	math.random(-140, 140),
+	math.random(60, 110),
+	math.random(-140, 140)
+)
+
+primary.AssemblyAngularVelocity = Vector3.new(
+	math.random(-80, 80),
+	math.random(-80, 80),
+	math.random(-80, 80)
+)
+							end
+					end
 				end
-
-				if IsBlacklisted(obj.Name) then
-					continue
-				end
-
-				if IsInsideBlacklistedModel(obj) then
-					continue
-				end
-
-				obj.Anchored = true
-				task.wait()
-				obj.Anchored = false
-				obj.Massless = true
-				obj.CanCollide = true
-
-				obj.AssemblyLinearVelocity = Vector3.new(
-					math.random(-150, 150),
-					math.random(50, 50),
-					math.random(-180, 180)
-				)
-
-				obj.AssemblyAngularVelocity = Vector3.new(
-					math.random(-25,25),
-					math.random(-25,25),
-					math.random(-25,25)
-				)
 			end
-		end
-	end)
+		end)
 
 	-- Kiểm tra tên phòng xem có trùng khớp không
 	local latestRoomNum = tostring(game.ReplicatedStorage.GameData.LatestRoom.Value)
@@ -366,45 +522,9 @@ end
 
 				if chance == 1 then
 
-					task.wait(3)
-
 				else
 
-entityModel:SetAttribute("DoorBreaked", true)
-
-					local originalCFrame = entityRoot.CFrame
-
-
-					-- 1. Rung lần 1 & Phát sound đầu tiên
-					local camShake1 = CameraShaker.new(Enum.RenderPriority.Camera.Value, function(shakeCf)
-						camera.CFrame = camera.CFrame * shakeCf
-					end)
-					camShake1:Start()
-					camShake1:ShakeOnce(10, 3.5, 0.1, 1, 15, 0.5)
-					entityRoot.Despawn2:Play()
-
-					wait(1)
-
-					local backCFrame = originalCFrame * CFrame.new(0, 0, 25) 
-					local tweenBackInfo = TweenInfo.new(2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-					local tweenBack = TweenService:Create(entityRoot, tweenBackInfo, {CFrame = backCFrame})
-
-					tweenBack:Play()
-					tweenBack.Completed:Wait()
-
-					local tweenForwardInfo = TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
-					local tweenForward = TweenService:Create(entityRoot, tweenForwardInfo, {CFrame = originalCFrame})
-					tweenForward:Play()
-					wait(0.3)
-
-					local camShake2 = CameraShaker.new(Enum.RenderPriority.Camera.Value, function(shakeCf)
-						camera.CFrame = camera.CFrame * shakeCf
-					end)
-					camShake2:Start()
-					camShake2:ShakeOnce(30, 11.5, 0.1, 2, 15, 0.5)
-
-					entityRoot.Despawn3:Play()
-					entityRoot.Despawn1:Play()
+		            entityRoot.DoorOpen1.Volume = 5
 					entityRoot.DoorOpen1:Play()	
 					
 					local CurrentRooms = workspace:WaitForChild("CurrentRooms")
@@ -488,15 +608,13 @@ for _, v in ipairs(doorModel:GetDescendants()) do
 end
 
 HandleHidden(cloneModel)
-
-					task.wait(3)
 				end
 
 				if entityModel and entityModel.Parent then
 					FadeDestroy(entityModel)
 				end
 
-				task.wait(2)
+				task.wait(3)
 
 				hasTriggered = false 
 			end)
