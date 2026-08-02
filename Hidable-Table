@@ -264,6 +264,39 @@ end
 			local exitTrack = animator:LoadAnimation(exitAnim)
 			exitTrack.Priority = Enum.AnimationPriority.Action4
 			exitTrack:Play()
+			
+			local function restoreCollision()
+	local hrp = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+	if not hrp then
+		return
+	end
+
+	task.spawn(function()
+		while true do
+			local touching = false
+
+			for _, part in ipairs(hrp:GetTouchingParts()) do
+				if part:IsDescendantOf(Model) then
+					touching = true
+					break
+				end
+			end
+
+			if not touching then
+				break
+			end
+
+			task.wait()
+		end
+
+		for _, obj in ipairs(Model:GetDescendants()) do
+			if obj:IsA("BasePart") then
+				obj.CanCollide = true
+				obj.CanTouch = true
+			end
+		end
+	end)
+end
 
 			repeat
 	task.wait()
@@ -295,6 +328,15 @@ while exitTrack.IsPlaying do
 		obj.CanCollide = true
 	end
 end
+
+for _, obj in ipairs(Model:GetDescendants()) do
+	if obj:IsA("BasePart") then
+		obj.CanCollide = false
+		obj.CanTouch = true
+	end
+end
+
+restoreCollision()
 
 		hrp.Anchored = true
 
