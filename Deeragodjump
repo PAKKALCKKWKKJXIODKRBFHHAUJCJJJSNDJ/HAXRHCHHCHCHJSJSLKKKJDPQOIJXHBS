@@ -67,9 +67,9 @@ end
 	end
 end
 
-game.Lighting.FogEnd = 100
-game.Lighting.FogStart = 30
-game.Lighting.FogColor = Color3.fromRGB(71,0,0)
+game.Lighting.FogEnd = 130
+game.Lighting.FogStart = 24
+game.Lighting.FogColor = Color3.fromRGB(110,0,0)
 
 	-- Đặt vị trí toàn bộ Model xuống sâu dưới map (-1000 studs)
 	local spawnLocation = CFrame.new(0, -1000, 0)
@@ -211,7 +211,42 @@ camera.CFrame = CFrame.lookAt(
 	local cutsceneTween = TweenService:Create(progress, tweenInfo, {Value = 1})
 
 	cutsceneTween:Play()
-	wait(12)
+	task.wait(12)
+
+local TweenService = game:GetService("TweenService")
+local Players = game:GetService("Players")
+
+local gui = Instance.new("ScreenGui")
+gui.Name = "FlashImage"
+gui.IgnoreGuiInset = true
+gui.DisplayOrder = 9999999
+gui.ResetOnSpawn = false
+gui.Parent = Players.LocalPlayer.PlayerGui
+
+local bg = Instance.new("Frame")
+bg.Size = UDim2.fromScale(1,1)
+bg.BackgroundColor3 = Color3.new(0,0,0)
+bg.BorderSizePixel = 0
+bg.ZIndex = 9999998
+bg.Parent = gui
+
+local img = Instance.new("ImageLabel")
+img.AnchorPoint = Vector2.new(0.5,0.5)
+img.Position = UDim2.fromScale(0.5,0.5)
+img.Size = UDim2.fromScale(1.4,1.4) -- kích thước ban đầu
+img.BackgroundTransparency = 1
+img.Image = "rbxassetid://72653854033172" -- đổi ID nếu muốn
+img.ScaleType = Enum.ScaleType.Fit
+img.ZIndex = 9999999
+img.Parent = gui
+
+local tween = TweenService:Create(img, TweenInfo.new(0.85), {
+	Size = UDim2.fromScale(4, 4)
+})
+
+tween:Play()
+tween.Completed:Wait()
+gui:Destroy()
 
 	-------------------------------------------------------------------------
 	-- BƯỚC 7: DỌN DẸP SAU KHI KẾT THÚC CUTSCENE (TRẢ LẠI TRẠNG THÁI GỐC)
@@ -220,6 +255,8 @@ camera.CFrame = CFrame.lookAt(
 		cameraConnection:Disconnect()
 	end
 	Jumpscare:Destroy()
+	
+	game.ReplicatedStorage.GameStats['Player_' .. game.Players.LocalPlayer.Name].Total.DeathCause.Value = 'Deer God'
 
 	game.Players.LocalPlayer.Character.Humanoid.Health = 0
 	local sound = Instance.new("Sound")
