@@ -1,0 +1,344 @@
+game:GetService("TextChatService").TextChannels.RBXGeneral:DisplaySystemMessage("<font color='#f22800'>[Hardcore Mode Reignited (Recreated)]: Script Succesfully Executed/Loaded.</font>")
+
+local roomsFolder = workspace:WaitForChild("CurrentRooms")
+
+local SavedClones = {}
+
+local function clonePath(room)
+    if SavedClones[room] then return end
+
+    local nodes = room:FindFirstChild("PathfindNodes")
+    if not nodes then return end
+
+    local clone = nodes:Clone()
+    clone.Name = "PathfindNodes"
+    clone.Parent = room -- hoặc ReplicatedStorage nếu thích
+
+    SavedClones[room] = clone
+end
+
+local function removeClone(room)
+    if SavedClones[room] then
+        SavedClones[room]:Destroy()
+        SavedClones[room] = nil
+    end
+end
+
+-- 🔥 CHECK CỰC NHANH (Heartbeat level)
+game:GetService("RunService").Heartbeat:Connect(function()
+    for _, room in ipairs(roomsFolder:GetChildren()) do
+        if not SavedClones[room] then
+            clonePath(room)
+        end
+    end
+end)
+
+-- dọn clone nếu room bị xoá
+roomsFolder.ChildRemoved:Connect(function(room)
+    removeClone(room)
+end)
+
+task.spawn(function() 
+require(game.Players.LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game).caption("Hardcore Mode Reignited (Recreated) Actived!",true)
+task.wait(2)
+require(game.Players.LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game).caption("Recreated by Guestly",true)
+task.wait(2)
+require(game.Players.LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game).caption("Origin by pyxlfunkin and credits to pyxlfunkin's team. ",true)
+task.wait(2)
+require(game.Players.LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game).caption("Enjoy!",true)
+end)
+
+task.spawn(function()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/Hidable-Table"))()
+end)
+
+task.spawn(function()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/eoyoustme/Hardcore/refs/heads/main/Guiding%20light"))()
+end)
+
+task.spawn(function()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/Hidable-Window"))()
+end)
+
+task.spawn(function()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/Interacting-System"))()
+end)
+
+task.spawn(function()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/Light-Model-Changer"))()
+end)
+
+task.spawn(function()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/SprintBar"))()
+end)
+
+local CurrentRooms = workspace:WaitForChild("CurrentRooms")
+
+local function checkRoom(room)
+	if not (room:IsA("Model") and room.Name == "0") then
+		return
+	end
+
+	for _, v in ipairs(room:GetDescendants()) do
+		if v:IsA("Model") and v.Name == "Luggage_Cart_Crouch" then
+			v:Destroy()
+		end
+	end
+end
+
+game.ReplicatedStorage.GameData.LatestRoom.Changed:Wait()
+
+require(game.Players.LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game).caption("Hardcore Initiated",true)
+
+local function GetGitSound(GithubSnd, SoundName)
+		local url = GithubSnd
+		if not isfile(SoundName .. ".mp3") then
+			writefile(SoundName .. ".mp3", game:HttpGet(url))
+		end
+		local sound = Instance.new("Sound")
+		sound.SoundId = (getcustomasset or getsynasset)(SoundName .. ".mp3")
+		return sound
+	end
+	local Jumpscare = GetGitSound("https://github.com/eoyoustme/Hardcore/blob/main/Doors%20hardcore%20reignited%20Door%201%20OST.mp3?raw=true","Ost")
+	Jumpscare.Parent = workspace
+	Jumpscare.Volume = 1.7
+	Jumpscare.Name = "ThemebLla" 
+	Jumpscare.PlaybackSpeed = 1
+	Jumpscare:Play()
+	
+
+	task.spawn(function()
+	task.wait(7.6)
+	local TweenService = game:GetService("TweenService")
+	local CoreGui = game:GetService("CoreGui")
+	local UserInputService = game:GetService("UserInputService")
+
+	local ScreenGui = Instance.new("ScreenGui")
+	ScreenGui.Name = "HardcoreReiginitedCredits"
+	ScreenGui.ResetOnSpawn = false
+	ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
+	local CanvasGroup = Instance.new("CanvasGroup")
+	CanvasGroup.Size = UDim2.new(1, 0, 1, 0)
+	CanvasGroup.BackgroundTransparency = 1
+	CanvasGroup.GroupTransparency = 1 
+	CanvasGroup.Parent = ScreenGui
+
+	local targetTextSize = 40
+if UserInputService.TouchEnabled then 
+	targetTextSize = 25
+end
+
+	local TextLabel = Instance.new("TextLabel")
+	TextLabel.Size = UDim2.new(0.25, 0, 0.25, 0)
+	TextLabel.Position = UDim2.new(0.9, 0, 0.5, 0) 
+	TextLabel.AnchorPoint = Vector2.new(1, 0.5) 
+	TextLabel.BackgroundTransparency = 1
+	TextLabel.Font = Enum.Font.Oswald
+	TextLabel.TextSize = targetTextSize
+	TextLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+	TextLabel.TextXAlignment = Enum.TextXAlignment.Center 
+	TextLabel.TextYAlignment = Enum.TextYAlignment.Center
+	TextLabel.RichText = true
+
+	TextLabel.Text = [[
+<font color="rgb(255,0,0)">DOORS Hardcore: <font color="rgb(163,0,0)">Reignited</font></font> <font color="rgb(153,255,163)">(Recreated)</font> <font color="rgb(145,220,255)">by Guestly (Outernal)</font>
+<u>Credits to:</u>
+<font color="rgb(255,228,130)">OG Hunger</font> <font color="rgb(235,87,87)">[Helper]</font>
+<font color="rgb(135,51,51)">Dripocapy</font> <font color="rgb(235,87,87)">[Contributed]</font>
+<font color="rgb(119,61,212)">March (Chrobahh)</font> <font color="rgb(235,87,87)">[Developer]</font> 
+<font color="rgb(255,222,224)">Crookie</font> <font color="rgb(255,255,255)">[Logo Design]</font>
+<font color="rgb(201,73,81)">Noonie and Ping</font> <font color="rgb(255,255,255)">[Creators of OG Hardcore]</font>
+<font color="rgb(230,130,250)">You! [For Playing!]</font>
+]]
+
+	local UIStroke = Instance.new("UIStroke")
+	UIStroke.Thickness = 0.5
+	UIStroke.Color = Color3.fromRGB(0, 0, 0)
+	UIStroke.Transparency = 0.2
+	UIStroke.Parent = TextLabel
+
+	TextLabel.Parent = CanvasGroup
+
+	if syn and syn.protect_gui then
+		syn.protect_gui(ScreenGui)
+		ScreenGui.Parent = CoreGui
+	elseif gethui then
+		ScreenGui.Parent = gethui()
+	else
+		ScreenGui.Parent = CoreGui
+	end
+
+	local faker = TweenInfo.new(1.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+	local fakerthua = TweenInfo.new(1.5, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
+
+	local fakerwin = TweenService:Create(CanvasGroup, faker, {GroupTransparency = 0})
+	local fakerthuavl = TweenService:Create(CanvasGroup, fakerthua, {GroupTransparency = 1})
+
+	fakerwin:Play()
+	fakerwin.Completed:Wait()
+
+	task.wait(10)
+
+	fakerthuavl:Play()
+	fakerthuavl.Completed:Wait()
+
+	ScreenGui:Destroy()
+end)
+	
+	local stop = false
+	
+	task.spawn(function()
+	workspace.ChildAdded:Connect(function(v)
+	if not stop then
+		if v:IsA("Model") and v.Name == "RushMoving" then
+		task.wait(7)
+			local theme = workspace:FindFirstChild("ThemebLla")
+			if theme then
+				theme:Destroy()
+			end
+			stop = true
+		end
+		end
+	end)
+end)
+
+-- [[ REBLAHARDCOREDI - ABSOLUTE EPOCH SYNC & FILE CACHE SYSTEM ]] --
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local LatestRoom = ReplicatedStorage:WaitForChild("GameData"):WaitForChild("LatestRoom")
+
+-- Tạo thư mục riêng biệt trong workspace của executor để quản lý cache
+local CACHE_FOLDER = "REBLAHARDCOREDI_Cache"
+if makefolder and not isfolder(CACHE_FOLDER) then
+    pcall(makefolder, CACHE_FOLDER)
+end
+
+-- 1. THUẬT TOÁN HASH ĐỒNG BỘ ĐỘC LẬP (DJB2 Hash Engine)
+local function GetSyncedRoll(saltString)
+    local hash = 5381
+    local str = tostring(saltString)
+    for i = 1, #str do
+        hash = (bit32.lshift(hash, 5) + hash) + string.byte(str, i)
+        hash = bit32.band(hash, 0x7FFFFFFF)
+    end
+    return (hash % 100) + 1
+end
+
+-- 2. HÀM TẢI VÀ THỰC THI VỚI FILE CACHE VĨNH VIỄN (WRITEFILE / ISFILE / READFILE)
+local function SafeLoadFileCached(url)
+    task.spawn(function()
+        pcall(function()
+            -- Tạo tên file an toàn từ URL (chuyển các ký tự đặc biệt thành dấu gạch dưới)
+            local fileName = CACHE_FOLDER .. "/" .. url:gsub("[^%w]", "_") .. ".lua"
+            local code = nil
+            
+            -- Kiểm tra xem file cache đã tồn tại từ trước (hoặc từ phiên chơi trước) chưa
+            if isfile and isfile(fileName) then
+                local success, result = pcall(readfile, fileName)
+                if success and result and result ~= "" then
+                    code = result
+                end
+            end
+            
+            -- Nếu chưa có file cache (hoặc đọc lỗi), tiến hành tải từ GitHub và lưu vào ổ cứng
+            if not code then
+                local success, result = pcall(function()
+                    return game:HttpGet(url)
+                end)
+                if success and result and result ~= "" then
+                    code = result
+                    if writefile then
+                        pcall(writefile, fileName, code)
+                    end
+                end
+            end
+            
+            -- Thực thi mã nguồn
+            if code then
+                local func, err = loadstring(code)
+                if func then
+                    func()
+                end
+            end
+        end)
+    end)
+end
+
+------------------------------------------------------------------
+-- A. NHÓM ENTITY CHẠY THEO LƯỚI THỜI GIAN TOÀN CỤC (TIME-BASED GRID)
+------------------------------------------------------------------
+local TimeEntities = {
+    { Name = "Shocker",    Interval = 35,  Chance = 80, Url = "https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/Shocker" },
+    { Name = "Limbo",      Interval = 200, Chance = 40, Url = "https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/Limbo" },
+    { Name = "Silence",    Interval = 240, Chance = 45, Url = "https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/Silence" },
+    { Name = "Deer God",   Interval = 400, Chance = 20, Url = "https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/DeerGod" },
+}
+
+------------------------------------------------------------------
+-- B. NHÓM ENTITY CHẠY THEO SỐ PHÒNG + COOLDOWN (ROOM-BASED)
+------------------------------------------------------------------
+local RoomEntities = {
+    { Name = "Cease",       Interval = 160, Chance = 35, Url = "https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/Cease" },
+    { Name = "Ripper",      Interval = 140, Chance = 70, Url = "https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/Ripper" },
+    { Name = "Singularity", Interval = 90,  Chance = 60, Url = "https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/Singularity-1" },
+    { Name = "Rebound",     Interval = 330, Chance = 40, Url = "https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/Rebound" },
+}
+
+for _, entity in ipairs(RoomEntities) do
+	task.spawn(function()
+		local lastEvaluatedRoom = tonumber(LatestRoom.Value) or 1
+		local lastTrigger = tick()
+
+		local function ProcessRoomCheck()
+			local currentRoom = tonumber(LatestRoom.Value) or 1
+
+			if currentRoom == lastEvaluatedRoom then
+				return
+			end
+
+			lastEvaluatedRoom = currentRoom
+
+			if tick() - lastTrigger < entity.Interval then
+				return
+			end
+
+			lastTrigger = tick()
+
+			local roll = GetSyncedRoll(entity.Name .. "_Room_" .. currentRoom)
+			if roll <= entity.Chance then
+				SafeLoadFileCached(entity.Url)
+			end
+		end
+
+		LatestRoom.Changed:Connect(ProcessRoomCheck)
+	end)
+end
+
+game.ReplicatedStorage.GameData.LatestRoom.Changed:Wait()
+
+for _, entity in ipairs(TimeEntities) do
+	task.spawn(function()
+		local startTime = tick()
+		local cycle = 0
+
+		while true do
+			local elapsed = tick() - startTime
+
+			if elapsed >= entity.Interval then
+				startTime = tick()
+				cycle += 1
+
+				local roll = GetSyncedRoll(entity.Name .. "_" .. cycle)
+				if roll <= entity.Chance then
+					SafeLoadFileCached(entity.Url)
+				end
+			end
+
+			task.wait(0.25)
+		end
+	end)
+end
+
+workspace:WaitForChild("SeekMovingNewClone", 1000000000000)
+loadstring(game:HttpGet("https://raw.githubusercontent.com/eoyoustme/Hardcore/refs/heads/main/Seek"))() 
