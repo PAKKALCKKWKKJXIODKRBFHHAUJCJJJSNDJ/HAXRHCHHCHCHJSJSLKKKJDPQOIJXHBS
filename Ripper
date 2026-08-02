@@ -350,7 +350,7 @@ local assetContainer = room:WaitForChild("Assets")
 
 			local breakSound = Instance.new("Sound")
 			breakSound.SoundId = "rbxassetid://9114223171"
-			breakSound.Volume = 1
+			breakSound.Volume = 0.2
 			breakSound.Parent = room
 			breakSound:Play()
 			breakSound.Ended:Connect(function() breakSound:Destroy() end)
