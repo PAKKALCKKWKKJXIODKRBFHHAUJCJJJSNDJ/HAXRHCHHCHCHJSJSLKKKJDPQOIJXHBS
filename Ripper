@@ -18,6 +18,16 @@ function light(tim,color0,color1)
 	end
 end
 
+local function GetGitSound(GithubSnd, SoundName)
+					local url = GithubSnd
+					if not isfile(SoundName .. ".mp3") then
+						writefile(SoundName .. ".mp3", game:HttpGet(url))
+					end
+					local sound = Instance.new("Sound")
+					sound.SoundId = (getcustomasset or getsynasset)(SoundName .. ".mp3")
+					return sound
+				end
+
 local TweenService = game:GetService("TweenService")
 
 local function FadeDestroy(model)
@@ -388,7 +398,7 @@ local assetContainer = room:WaitForChild("Assets")
 
 											local s = Instance.new("Sound")
 											s.SoundId = randomSoundId
-											s.Volume = math.random(12, 24) / 10 
+											s.Volume = 0.4
 											s.PlaybackSpeed = math.random(85, 115) / 100
 											s.RollOffMaxDistance = 100
 											s.Parent = v
@@ -754,15 +764,6 @@ entity:SetCallback("OnDamagePlayer", function(newHealth)
 
 				SetAllParticlesTimeScale(entityModel, 0)
 
-				local function GetGitSound(GithubSnd, SoundName)
-					local url = GithubSnd
-					if not isfile(SoundName .. ".mp3") then
-						writefile(SoundName .. ".mp3", game:HttpGet(url))
-					end
-					local sound = Instance.new("Sound")
-					sound.SoundId = (getcustomasset or getsynasset)(SoundName .. ".mp3")
-					return sound
-				end
 				-- Lấy âm thanh từ GitHub
 				local Jumpscare = GetGitSound("https://github.com/eoyoustme/back/raw/main/Kill_with_static.mp3","Kill")
 				Jumpscare.Parent = workspace
