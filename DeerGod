@@ -1,0 +1,298 @@
+
+local Speed = 12
+local shuold = true
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Workspace = game:GetService("Workspace")
+
+local player = Players.LocalPlayer
+local Character = player.Character or player.CharacterAdded:Wait()
+local playerGui = player:WaitForChild("PlayerGui")
+
+-- UI Caption
+local mainUI = playerGui:FindFirstChild("MainUI")
+local caption = mainUI and mainUI:FindFirstChild("MainFrame") and mainUI.MainFrame:FindFirstChild("Caption")
+local ogFont = caption.FontFace 
+local ogSize = caption.TextSize
+local ogColor = caption.TextColor3
+
+-- Tìm phòng hiện tại an toàn
+local lastroom = ReplicatedStorage:WaitForChild("GameData"):WaitForChild("LatestRoom")
+local notlastest = game.ReplicatedStorage.GameData.LatestRoom
+local currentRoom = Workspace:WaitForChild("CurrentRooms"):FindFirstChild(tostring(notlastest.Value - 3))
+local RoomEntrance = currentRoom and (currentRoom:FindFirstChild("RoomEntrance") or currentRoom:FindFirstChild("RoomStart") or currentRoom.PrimaryPart)
+
+-- Hàm tải Âm thanh từ Github
+local function GetGitSound(GithubSnd, SoundName)
+	if not (writefile and isfile and getcustomasset and game.HttpGet) then return nil end
+	if not isfile(SoundName .. ".mp3") then
+		local success, content = pcall(function() return game:HttpGet(GithubSnd) end)
+		if success and content then
+			writefile(SoundName .. ".mp3", content)
+		else
+			return nil
+		end
+	end
+	local sound = Instance.new("Sound")
+	local getasset = getcustomasset or getsynasset
+	if getasset then
+		sound.SoundId = getasset(SoundName .. ".mp3")
+	end
+	return sound
+end
+
+-- Hàm tải Model từ Github
+local function getgithubmodeL(url)
+	if not (writefile and getcustomasset and request) then return nil end
+	local fileName = string.match(url, "([^/]+)$") or "temp_model.rbxm"
+	local response = request({Url = url, Method = "GET"})
+	if not response or response.StatusCode ~= 200 then return nil end
+	writefile(fileName, response.Body)
+	local assetId = (getcustomasset or getsynasset)(fileName)
+	local success, result = pcall(function() return game:GetObjects(assetId)[1] end)
+	return success and result or nil
+end
+
+-- Phát nhạc nền thực thể
+local Lord = GetGitSound("https://github.com/eoyoustme/Hardcore/blob/main/Your_Consenting_Mind.mp3?raw=true", "Your")
+if Lord then
+	Lord.Parent = Workspace
+	Lord.Volume = 3
+	Lord.PlaybackSpeed = 1
+	Lord:Play()
+end
+
+-- Hiện Caption thông báo
+if caption then
+caption.FontFace = Font.new(
+    "rbxasset://fonts/families/Fondamento.json",
+    Enum.FontWeight.Regular,
+    Enum.FontStyle.Normal
+)
+
+local gradient = caption:FindFirstChildOfClass("UIGradient")
+if gradient then
+	gradient:Destroy()
+end
+
+caption.TextColor3 = Color3.new(1,1,1)
+
+gradient = Instance.new("UIGradient")
+gradient.Rotation = 90
+caption.TextScaled = false
+caption.TextSize = 30
+gradient.Color = ColorSequence.new(
+	Color3.fromRGB(131,69,255),
+	Color3.fromRGB(85,0,255)
+)
+gradient.Parent = caption
+
+	task.spawn(function()
+		caption.TextTransparency = 0
+		caption.Visible = true
+		caption.Text = "You're being followed..."
+
+		local info = TweenInfo.new(5, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut)
+		local tween = TweenService:Create(caption, info, {TextTransparency = 1})
+		tween:Play()
+	end)
+end
+
+-- Tải Model Deer Lord
+local Deerlord = "rbxassetid://105178870263090"
+
+local ok, s = pcall(function()
+	return game:GetObjects(Deerlord)[1]
+end)
+
+if not ok or not s then
+	warn("Không thể tải Model Deer God!")
+	return
+end
+
+s.Parent = workspace
+
+if not s then
+	warn("Không thể tải Model Deer God từ GitHub!")
+	return
+end
+
+s.Parent = Workspace
+local entity = s:FindFirstChildWhichIsA("BasePart") or s.PrimaryPart
+
+if not entity then
+	warn("Không tìm thấy BasePart trong model Deer God.")
+	s:Destroy()
+	return
+end
+
+entity.Anchored = true 
+entity.CanCollide = false
+s.PrimaryPart = entity
+
+-- Đặt vị trí xuất hiện
+local hrp = Character:WaitForChild("HumanoidRootPart", 5)
+if RoomEntrance then
+	s:PivotTo(RoomEntrance.CFrame)
+elseif hrp then
+	s:PivotTo(hrp.CFrame * CFrame.new(0, 0, 100))
+end
+
+-- Vòng lặp di chuyển đuổi theo Player
+local connection
+local function followPlayer(dt)
+	local currentHrp = Character:FindFirstChild("HumanoidRootPart")
+	if not currentHrp or not entity then return end
+
+	local currentPos = entity.Position
+	local targetPos = currentHrp.Position
+	local distance = (targetPos - currentPos).Magnitude
+
+	if distance > 0.5 then
+		local direction = (targetPos - currentPos).Unit
+		local newPos = currentPos + (direction * Speed * dt)
+		if (targetPos - newPos).Magnitude > 0.1 then
+			s:PivotTo(CFrame.lookAt(newPos, Vector3.new(targetPos.X, newPos.Y, targetPos.Z)))
+		end
+	end
+end
+
+connection = RunService.RenderStepped:Connect(function(dt)
+	if not entity or not entity.Parent or not s or not s.Parent then
+		if connection then connection:Disconnect() end
+		return
+	end
+	followPlayer(dt)
+end)
+
+local death = true
+local attacking = false
+
+local function PlayJumpscare1()
+	pcall(function() loadstring(game:HttpGet("https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/Deeragodjump"))() end)
+end
+
+local function PlayJumpscare2()
+	pcall(function() loadstring(game:HttpGet("https://raw.githubusercontent.com/eoyoustme/Impossible/refs/heads/main/Deerforse"))() end)
+end
+
+-- Hàm dọn dẹp bộ nhớ khi ngưng thực thể
+local function cleanup()
+	death = false
+	shuold = false
+	if connection then connection:Disconnect() end
+	if s then s:Destroy() end
+	if Lord then Lord:Destroy() end
+
+	local cac5 = playerGui:FindFirstChild("JumpscareOverlay")
+	if cac5 then cac5:Destroy() end
+end
+
+-- Vòng lặp tấn công
+task.spawn(function()
+	while death and task.wait(0.1) do
+		if entity and entity.Parent and Character and Character.Parent then
+			local currentHrp = Character:FindFirstChild("HumanoidRootPart")
+			local hum = Character:FindFirstChildOfClass("Humanoid")
+
+			if currentHrp and hum and hum.Health > 0 then
+				local distance = (currentHrp.Position - entity.Position).Magnitude
+
+				-- Kiểm tra khoảng cách va chạm (6 stud)
+				if distance <= 6 then
+					if not Character:GetAttribute("Hiding") then
+						if not attacking then
+							attacking = true
+							hum:TakeDamage(0)
+
+							PlayJumpscare1()
+
+							cleanup()
+							task.wait(2)
+							attacking = false
+							break
+						end
+					end
+				end
+			end
+		end
+	end
+end)
+
+-- Hiệu ứng Overlay nhấp nháy
+task.spawn(function()
+	local screenGui = Instance.new("ScreenGui")
+	screenGui.Name = "JumpscareOverlay"
+	screenGui.IgnoreGuiInset = true
+	screenGui.DisplayOrder = 999999
+	screenGui.Parent = playerGui
+
+	local imageLabel = Instance.new("ImageLabel")
+	imageLabel.BackgroundTransparency = 1
+	imageLabel.BorderSizePixel = 0
+	imageLabel.Position = UDim2.new(0, 0, 0, 0)
+	imageLabel.Size = UDim2.new(1, 0, 1, 0) 
+	imageLabel.ImageTransparency = 0.85
+	imageLabel.Parent = screenGui
+
+	local jumpscareImages = {
+	 "rbxassetid://15813725670", "rbxassetid://15813727511" ,"rbxassetid://15813727319","rbxassetid://15813727319","rbxassetid://15813726972", "rbxassetid://15813726866","rbxassetid://15813726700","rbxassetid://15813726584",
+	"rbxassetid://15813726463",	"rbxassetid://15813726313" }
+	
+	while shuold and screenGui and screenGui.Parent do
+		for _, img in ipairs(jumpscareImages) do
+			if not shuold or not screenGui.Parent then break end
+			imageLabel.Image = img
+			imageLabel.ImageTransparency = math.random(80, 100) / 100
+			task.wait(0.06)
+		end
+	end
+end)
+
+task.spawn(function()
+	local dialogs = {
+	{text = "\"Join us.\"", sound = "rbxassetid://6250814572"},
+	{text = "\"Why do you run, child?\"", sound = "rbxassetid://6250812725"},
+	{text = "\"Your submission is inevitable. \"", sound = "rbxassetid://6250815445"},
+	{text = "\"Your flesh will sustain my children. \"", sound = "rbxassetid://6250816544"}
+}
+
+	while shuold do
+		task.wait(math.random(7, 10))
+		if not shuold then break end
+
+		local chosen = dialogs[math.random(#dialogs)]
+
+		if caption then
+			caption.TextTransparency = 0
+			caption.Visible = true
+			caption.Text = chosen.text
+		end
+	end
+end)
+
+-- Vòng lặp thoại và tiếng kêu của Monster
+
+local roomCount = Random.new():NextInteger(7, 12)
+
+for i = 1, roomCount do
+	lastroom.Changed:Wait()
+end
+
+cleanup()
+
+if caption then
+	caption.TextTransparency = 0
+	caption.Visible = true
+	caption.TextScaled = true
+	caption.TextSize = ogSize
+	caption.FontFace = ogFont
+	caption.TextColor3 = ogColor
+	caption:FindFirstChildOfClass("UIGradient"):Destroy() 
+	local info = TweenInfo.new(5, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut)
+	local tween = TweenService:Create(caption, info, {TextTransparency = 1})
+	tween:Play()
+end
