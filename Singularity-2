@@ -96,26 +96,31 @@ end
 local selectedWardrobe
 
 local function FindWardrobe()
+	local validWardrobes = {}
+	
 	for _, obj in ipairs(room:GetDescendants()) do
 		if obj:IsA("Model") and obj.Name == "Wardrobe" then
 			if obj:GetAttribute("Singulared") then
 				continue
 			end
 			
-			-- Nếu bật testmode, bắt buộc tủ phải có sẵn attribute "Singular"
 			if testmode then
 				if obj:GetAttribute("Singular") then
-					obj:SetAttribute("Singulared", true)
-					return obj
+					table.insert(validWardrobes, obj)
 				end
 			else
-				-- Nếu testmode = false thì nhận tủ đầu tiên tìm thấy (như cũ)
-				obj:SetAttribute("Singulared", true)
-				return obj
+				table.insert(validWardrobes, obj)
 			end
 		end
 	end
-	return nil -- Không tìm thấy tủ thỏa mãn thì trả về nil
+	
+	if #validWardrobes > 0 then
+		local chosen = validWardrobes[1]
+		chosen:SetAttribute("Singulared", true)
+		return chosen
+	end
+	
+	return nil
 end
 
 selectedWardrobe = FindWardrobe()
