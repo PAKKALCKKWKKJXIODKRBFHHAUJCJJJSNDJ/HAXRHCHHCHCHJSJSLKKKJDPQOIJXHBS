@@ -441,7 +441,7 @@ end)
 	end
 
 	-- 4. ĐỜI 1.2 GIÂY SAU KHI ĐỦ XÍCH RỒI MỚI BẮT ĐẦU KÉO VỀ
-	task.wait(0.4)
+	task.wait(0.2)
 
 local rangeTween = TweenService:Create(
 	light,
