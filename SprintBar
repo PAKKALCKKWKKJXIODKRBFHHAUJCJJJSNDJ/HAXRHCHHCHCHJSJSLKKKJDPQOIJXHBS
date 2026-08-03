@@ -52,6 +52,8 @@ local RunService = game:GetService("RunService")
 local Character = Player.Character or Player.CharacterAdded:Wait()
 local Humanoid = Character:WaitForChild("Humanoid")
 
+local BaseSpeed = Humanoid.WalkSpeed
+
 local Bar = MainFrame.HC_Sprintbar.Bar.Bar
 local ExhaustedColor = Color3.fromRGB(172, 36, 38)
 local OriginalColors = {}
@@ -126,10 +128,16 @@ local function ToggleSprint()
 			ManualFade = false
 		end)
 
-		Humanoid.WalkSpeed = 15
+		if not Disabled then
+			Humanoid.WalkSpeed = BaseSpeed
+		end
 	else
 		SetSprint(true)
 		ManualFade = false
+
+		if not Disabled then
+			Humanoid.WalkSpeed = BaseSpeed + 5
+		end
 	end
 end
 
@@ -152,16 +160,11 @@ task.spawn(function()
 		if Humanoid.Parent ~= Character then
 			Character = Player.Character or Player.CharacterAdded:Wait()
 			Humanoid = Character:WaitForChild("Humanoid")
+			BaseSpeed = Humanoid.WalkSpeed
 		end
 
-		if Sprinting then
-			if Disabled then
-				Humanoid.WalkSpeed = 13
-			else
-				Humanoid.WalkSpeed = 19
-			end
-		else
-			Humanoid.WalkSpeed = 15
+		if Disabled then
+			Humanoid.WalkSpeed = BaseSpeed - 2
 		end
 
 		task.wait()
@@ -216,7 +219,7 @@ task.wait(2)
 	):Play()
 	end)
 
-	Humanoid.WalkSpeed = 13
+	Humanoid.WalkSpeed = BaseSpeed - 2
 	require(game.Players.LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game).caption("You're exhausted.",true)
 
 	task.delay(0.7, function()
@@ -227,6 +230,12 @@ end
 if Disabled and Stamina >= 95 then
 	Disabled = false
 	TweenSprintBar(false)
+
+	if Sprinting then
+		Humanoid.WalkSpeed = BaseSpeed + 5
+	else
+		Humanoid.WalkSpeed = BaseSpeed
+	end
 end
 end)
 
@@ -234,13 +243,15 @@ Player.CharacterAdded:Connect(function(char)
 	Character = char
 	Humanoid = char:WaitForChild("Humanoid")
 
+	BaseSpeed = Humanoid.WalkSpeed
+
 	if Sprinting then
-	if Disabled then
-		Humanoid.WalkSpeed = 13
+		if Disabled then
+			Humanoid.WalkSpeed = BaseSpeed - 2
+		else
+			Humanoid.WalkSpeed = BaseSpeed + 5
+		end
 	else
-		Humanoid.WalkSpeed = 19
+		Humanoid.WalkSpeed = BaseSpeed
 	end
-else
-	Humanoid.WalkSpeed = 15
-end
 end)
