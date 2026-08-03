@@ -1,4 +1,4 @@
-local testmode = true
+local testmode = false
 
 local function GetRoom()
 	local currentRooms = workspace:FindFirstChild("CurrentRooms")
@@ -468,7 +468,7 @@ table.insert(createdAttachments, fakeAtt)
 			beamToUse.Attachment1 = fakeAtt
 			beamToUse.Enabled = true
 			
-			local chainTime = math.clamp(target.distance / 20, 0.3, 0.8)
+			local chainTime = math.clamp(target.distance / 30, 0.3, 0.8)
 			
 			TweenService:Create(
     fakePart,
@@ -511,7 +511,7 @@ end)
 	end
 
 	-- 4. ĐỜI 1.2 GIÂY SAU KHI ĐỦ XÍCH RỒI MỚI BẮT ĐẦU KÉO VỀ
-	task.wait(0.8)
+	task.wait(0.2)
 
 local rangeTween = TweenService:Create(
 	light,
@@ -610,20 +610,35 @@ end
 		hrp.Anchored = false
 	end
 
-	-- Hiệu ứng hình ảnh & Âm thanh máu me xung quanh
-	local chain = Instance.new("ColorCorrectionEffect", game.Lighting) 
-	game.Debris:AddItem(chain, 24)
-	chain.Name = "Warn"
-	chain.TintColor = Color3.fromRGB(85, 0, 0) 
-	chain.Saturation = -0.7 
-	chain.Contrast = 0.2
+	local Lighting = game:GetService("Lighting")
+local TweenService = game:GetService("TweenService")
 
-	game.TweenService:Create(chain, TweenInfo.new(8), {TintColor = Color3.fromRGB(255, 255, 255), Saturation = 0, Contrast = 0}):Play()
+local cc = Instance.new("ColorCorrectionEffect")
+cc.Name = "BlackWhiteFX"
+cc.Saturation = -1
+cc.Brightness = -0.1
+cc.Contrast = 0
+cc.Parent = Lighting
 
-	if game.Lighting:FindFirstChild("MainColorCorrection") then
-		local TW = TweenService:Create(game.Lighting.MainColorCorrection, TweenInfo.new(5), {TintColor = Color3.fromRGB(255, 255, 255)})
-		TW:Play()
-	end
+task.spawn(function()
+	task.wait(2)
+
+	local tween = TweenService:Create(
+		cc,
+		TweenInfo.new(3.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+		{
+			Saturation = 0,
+			Brightness = 0,
+			Contrast = 0
+		}
+	)
+
+	tween:Play()
+
+	tween.Completed:Once(function()
+		cc:Destroy()
+	end)
+end)
 
 	local CameraShaker = require(game.ReplicatedStorage:WaitForChild("CameraShaker"))
 	local camera = workspace.CurrentCamera
