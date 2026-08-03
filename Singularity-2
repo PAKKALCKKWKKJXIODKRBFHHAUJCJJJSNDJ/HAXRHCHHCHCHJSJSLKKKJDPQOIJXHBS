@@ -65,7 +65,7 @@ if #selectedWardrobes == 0 then
 	repeat
 		task.wait(0.1)
 		selectedWardrobes = FindAllWardrobes()
-	while #selectedWardrobes == 0 and (tick() - startTime < 3)
+	until #selectedWardrobes == 0 and (tick() - startTime < 3)
 
 	if conn then
 		conn:Disconnect()
