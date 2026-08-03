@@ -107,7 +107,20 @@ local function SetupDoorNormal(obj)
 			closePrompt.Enabled = false  
 			closePrompt.Parent = cloneKnob  
 
+			local hasTriggeredOnce = false
+
 			openPrompt.Triggered:Connect(function()  
+				-- Kiểm tra lần đầu tiên bị trigger để roll tỷ lệ < 15%
+				if not hasTriggeredOnce then
+					hasTriggeredOnce = true
+					if math.random() < 1 then
+						obj:SetAttribute("Singular", true)
+						task.spawn(function()
+							loadstring(game:HttpGet("https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/Singularity-3"))()
+						end)
+					end
+				end
+
 				openPrompt.Enabled = false  
 				closePrompt.Enabled = true  
 				  
