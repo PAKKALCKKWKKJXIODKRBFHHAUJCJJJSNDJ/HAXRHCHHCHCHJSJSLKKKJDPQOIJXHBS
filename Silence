@@ -69,7 +69,7 @@ task.spawn(function()
 
 		if noChase or stopChaseTrigger then
 			chaseTrigger = false
-			task.wait(0.1)
+			task.wait(0.2)
 			continue
 		end
 
@@ -87,18 +87,21 @@ task.spawn(function()
 
 				local oldPos = hrp.Position
 
-				task.wait(0.15)
+				task.wait(0.2)
 
 				if not noChase 
-				and not stopChaseTrigger
-				and (hrp.Position - oldPos).Magnitude > 0.5 then
+				and not stopChaseTrigger then
+					local isCrouching = char:GetAttribute("Crouching") == true
+					local hasMoved = (hrp.Position - oldPos).Magnitude > 0.5
 
-					chaseTrigger = true
+					if hasMoved and not isCrouching then
+						chaseTrigger = true
+					end
 				end
 			end
 		end
 
-		task.wait(0.1)
+		task.wait(0.2)
 	end
 end)
 
@@ -709,26 +712,33 @@ end
 
 		local lastPos = hrp.Position
 
-		task.spawn(function()
+				task.spawn(function()
 			local watchingRoom = room
 
-while _Idx57.Parent 
-and not entityLocked 
-and not finalRoom 
-and not stopChaseTrigger do
-	if currentEntityRoom ~= watchingRoom then
-		break
-	end
+			while _Idx57.Parent 
+			and not entityLocked 
+			and not finalRoom 
+			and not stopChaseTrigger do
+				if currentEntityRoom ~= watchingRoom then
+					break
+				end
 
-	if GetPlayerRoom() ~= watchingRoom and not chaseTrigger then
-	task.wait()
-	continue
-end
+				-- GIỮ NGUYÊN ĐOẠN NÀY (KHÔNG BỎ):
+				if GetPlayerRoom() ~= watchingRoom and not chaseTrigger then
+					task.wait()
+					continue
+				end
 				
-				if not finalRoom and ((hrp.Position - lastPos).Magnitude > 0.1 or chaseTrigger) then
-				entityMoving = true
-entityLocked = false
-chasing = true
+				-- THAY THẾ DÒNG CŨ BỞI 3 DÒNG NÀY:
+				local isCrouching = char and char:GetAttribute("Crouching") == true
+				local hasMoved = (hrp.Position - lastPos).Magnitude > 0.1
+
+				if not finalRoom and ((hasMoved and not isCrouching) or chaseTrigger) then
+					entityMoving = true
+					entityLocked = false
+					chasing = true
+					-- (phần code phía dưới giữ nguyên...)
+
 
 local hiding = false
 
@@ -1436,7 +1446,7 @@ ratio.Parent = image
 local tween = TweenService:Create(
 	image,
 	TweenInfo.new(
-		4,
+		3,
 		Enum.EasingStyle.Quad,
 		Enum.EasingDirection.Out
 	),
@@ -1447,7 +1457,7 @@ local tween = TweenService:Create(
 
 tween:Play()
 
-task.wait(3)
+task.wait(2)
 
 local secondText = createText(
 	UDim2.new(0.5,0,0.45,0),
@@ -1972,7 +1982,7 @@ end
 end) 
 
 	-- đợi sound dài nhất kết thúc
-	task.wait(4)
+	task.wait(3.4)
 
 boom:Stop()
 scream:Stop()
