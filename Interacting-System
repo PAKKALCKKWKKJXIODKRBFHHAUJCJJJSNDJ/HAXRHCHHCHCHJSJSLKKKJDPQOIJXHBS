@@ -27,8 +27,18 @@ local function SetupDoorNormal(obj)
 	if obj:GetAttribute("DoorNormalScanned") then return end
 	obj:SetAttribute("DoorNormalScanned", true)
 
-	local door = obj:FindFirstChild("Door")
-	if obj:IsA("Model") and obj.Name == "DoorNormal" and door and door:IsA("MeshPart") then
+	-- Đợi các bộ phận bên trong DoorNormal load xong hoàn tất (tránh quá sớm hay quá muộn)
+	task.spawn(function()
+		local door, knob
+		while obj.Parent and (not door or not knob) do
+			door = obj:FindFirstChild("Door")
+			knob = obj:FindFirstChild("Knob", true)
+			if not door or not knob then
+				task.wait(0.05)
+			end
+		end
+
+		if not obj.Parent or not door or not door:IsA("MeshPart") then return end
 
 		for _, v in ipairs(obj:GetDescendants()) do  
 			if v:IsA("BasePart") and (v.Name == "Hidden" or v.Name == "Hinge") then  
@@ -42,14 +52,14 @@ local function SetupDoorNormal(obj)
 		cloneModel.Parent = obj.Parent  
 
 		local cloneDoor = cloneModel:FindFirstChild("Door")  
-		local knob = cloneModel:FindFirstChild("Knob", true)  
+		local cloneKnob = cloneModel:FindFirstChild("Knob", true)  
 		local hidden = cloneModel:FindFirstChild("Hidden", true)  
 		local hinge = cloneModel:FindFirstChild("Hinge", true)  
 
 		local openSound = cloneDoor and cloneDoor:FindFirstChild("Open")  
 		local hitSound = cloneDoor and cloneDoor:FindFirstChild("Hit")  
 
-		if cloneDoor and knob and knob:IsA("BasePart") then  
+		if cloneDoor and cloneKnob and cloneKnob:IsA("BasePart") then  
 			for _, v in ipairs(cloneModel:GetDescendants()) do  
 				if v:IsA("BasePart") then  
 					if v.Name == "Hidden" or v.Name == "Hinge" then  
@@ -90,12 +100,12 @@ local function SetupDoorNormal(obj)
 			openPrompt.ObjectText = "Door"  
 			openPrompt.MaxActivationDistance = 10  
 			openPrompt.RequiresLineOfSight = false  
-			openPrompt.Parent = knob  
+			openPrompt.Parent = cloneKnob  
 
 			local closePrompt = openPrompt:Clone()  
 			closePrompt.ActionText = "Close Door"  
 			closePrompt.Enabled = false  
-			closePrompt.Parent = knob  
+			closePrompt.Parent = cloneKnob  
 
 			openPrompt.Triggered:Connect(function()  
 				openPrompt.Enabled = false  
@@ -140,8 +150,8 @@ local function SetupDoorNormal(obj)
 			end)  
 
 			door:Destroy()  
-		end  
-	end
+		end
+	end)
 end
 
 local function SetupLockedDoor(door)
@@ -221,7 +231,6 @@ local function SetupLockedDoor(door)
 		end
 	end
 
-	-- Sửa lỗi bảo vệ: Tránh crash nếu cloneDoor chưa kịp load
 	if not cloneDoor then
 		for _, v in ipairs(clone:GetDescendants()) do
 			if v:IsA("Model") and v.Name == "Door" then
@@ -266,10 +275,10 @@ local function SetupLockedDoor(door)
 					customPrompt:Destroy()
 					
 					for _, v in ipairs(clone:GetDescendants()) do
-		if v:IsA("BasePart") and v.Name == "Collision" then
-			v.CanCollide = false
-		end
-	end
+						if v:IsA("BasePart") and v.Name == "Collision" then
+							v.CanCollide = false
+						end
+					end
 
 					local char = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
 					local hum = char:WaitForChild("Humanoid")
@@ -859,19 +868,23 @@ local function Process(inst)
 			SetupDoorNormal(inst)
 		elseif inst.Name == "Door" or inst.Name == "DoorFake" then
 			SetupDoor(inst)
-		elseif inst.Name == "Wardrobe" then
+				elseif inst.Name == "Wardrobe" then
 			task.defer(function()
 				if not inst.Parent then
 					return
 				end
 
+				-- Đợi prompt xuất hiện nhưng có giới hạn thời gian (timeout) để tránh bị kẹt vĩnh viễn
 				local prompt = inst:FindFirstChildWhichIsA("ProximityPrompt", true)
-
-				while inst.Parent and not prompt do
+				local startTime = tick()
+				
+				while inst.Parent and not prompt and (tick() - startTime < 3) do
 					local d = inst.DescendantAdded:Wait()
 					if d:IsA("ProximityPrompt") then
 						prompt = d
+						break
 					end
+					prompt = inst:FindFirstChildWhichIsA("ProximityPrompt", true)
 				end
 
 				if not inst.Parent then
