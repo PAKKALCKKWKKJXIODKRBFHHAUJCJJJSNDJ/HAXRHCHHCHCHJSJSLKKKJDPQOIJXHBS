@@ -439,7 +439,7 @@ local function SetupDoor(door)
 		prompt.Style = Enum.ProximityPromptStyle.Custom  
 		prompt.ActionText = "Open Door"  
 		prompt.ObjectText = "Door"  
-		prompt.MaxActivationDistance = 10  
+		prompt.MaxActivationDistance = 7 
 		prompt.RequiresLineOfSight = false  
 		prompt.Parent = knob  
 
@@ -548,12 +548,14 @@ local function SetupWardrobe(wardrobe)
 	local prompt  
 	for _, v in ipairs(wardrobe:GetDescendants()) do  
 		if v:IsA("ProximityPrompt") then  
-			prompt = v  
+			prompt = v
 			break  
 		end  
 	end  
 
-	if not prompt then return end  
+	if not prompt then return end
+
+prompt.ActionText = "Njkx" 
 
 	prompt.Enabled = false  
 	prompt.HoldDuration = 0.5  
@@ -562,7 +564,7 @@ local function SetupWardrobe(wardrobe)
 	openPrompt.Parent = prompt.Parent  
 	openPrompt.Enabled = true  
 	openPrompt.HoldDuration = 0.5  
-	openPrompt.ActionText = "Open"  
+	openPrompt.ActionText = "Hide"  
 
 	local closePrompt = openPrompt:Clone()  
 	closePrompt.Parent = prompt.Parent  
