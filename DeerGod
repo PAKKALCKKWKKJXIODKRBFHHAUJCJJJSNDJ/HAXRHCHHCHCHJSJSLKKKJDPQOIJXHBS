@@ -458,6 +458,10 @@ fadeOut.Completed:Wait()
 gui:Destroy()
 end) 
 
+if getgenv().DeerGodStillThere ~= nil then
+	getgenv().DeerGodStillThere = false
+end
+
 	caption.TextTransparency = 0
 	caption.Visible = true
 	caption.TextScaled = true
