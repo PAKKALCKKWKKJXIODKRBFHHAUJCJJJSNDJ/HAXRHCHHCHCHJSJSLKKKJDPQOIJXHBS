@@ -664,7 +664,7 @@ if selectedWardrobe then
 		local clone = basePrompt:Clone()
 		clone.Enabled = true
 		clone.Parent = basePrompt.Parent
-		clone.ActionText = "Ja"
+		clone.ActionText = "Hide"
 		clone.ObjectText = "hc"
 		clone.HoldDuration = 0.5
 		clone.MaxActivationDistance = 10
