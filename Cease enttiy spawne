@@ -1,4 +1,4 @@
-Chỉnh chức năng script này là khi localplayer lần đầu tiên bị trúng vào hitbox của thực thể, thực thể sẽ ngừng di chuyển đổ ngột, đứng im và gọi callback "OnChecking", trong callback sẽ có line code để user muốn ngừng Idle cho thực thể lúc nào, chứa cả script user thêm vào callback đó:
+
 --[[
     __      __          _            _       ______       _   _ _            _____                                       __      _____  
     \ \    / /         (_)          ( )     |  ____|     | | (_) |          / ____|                                      \ \    / /__ \ 
