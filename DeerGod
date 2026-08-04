@@ -1,3 +1,146 @@
+local function LoadModel(file, url)
+	if not isfile(file) then
+		writefile(file, game:HttpGet(url))
+	end
+
+	return game:GetObjects(getcustomasset(file))[1]
+end
+
+local CameraShaker = require(game.ReplicatedStorage:WaitForChild("CameraShaker"))
+
+local camera = workspace.CurrentCamera
+
+local camShake = CameraShaker.new(
+	Enum.RenderPriority.Camera.Value,
+	function(shakeCFrame)
+		camera.CFrame = camera.CFrame * shakeCFrame
+	end
+)
+
+camShake:Start()
+
+
+local shaking = false
+local shakeThread
+
+
+local function StartShake()
+	if shaking then return end
+	
+	shaking = true
+
+	shakeThread = task.spawn(function()
+		while shaking do
+			camShake:ShakeOnce(
+				0.5, -- magnitude
+				2,   -- roughness
+				0.05, -- fade in
+				0.8, -- fade out
+				Vector3.new(0.05,0.05,0.05),
+				Vector3.new(0.2,0.2,0.2)
+			)
+
+			task.wait(0.7)
+		end
+	end)
+end
+
+
+local function StopShake()
+	shaking = false
+end
+
+
+-- bật
+task.spawn(function() 
+StartShake()
+end) 
+
+local TweenService = game:GetService("TweenService")
+local Players = game:GetService("Players")
+
+local gui = Instance.new("ScreenGui")
+gui.Name = "FadeImageGui"
+gui.IgnoreGuiInset = true
+gui.ResetOnSpawn = false
+gui.Parent = Players.LocalPlayer:WaitForChild("PlayerGui")
+
+local image = Instance.new("ImageLabel")
+image.Parent = gui
+image.Size = UDim2.fromScale(1, 1)
+image.Position = UDim2.fromScale(0.5, 0.5)
+image.AnchorPoint = Vector2.new(0.5, 0.5)
+image.BackgroundTransparency = 1
+image.Image = "rbxassetid://111071961137510"
+image.ScaleType = Enum.ScaleType.Stretch
+image.ImageTransparency = 1
+
+
+-- Fade In (1 giây)
+local fadeIn = TweenService:Create(
+	image,
+	TweenInfo.new(
+		1,
+		Enum.EasingStyle.Quad,
+		Enum.EasingDirection.Out
+	),
+	{
+		ImageTransparency = 0
+	}
+)
+
+fadeIn:Play()
+
+
+-- giữ ảnh ở đây
+
+-- ví dụ ngừng sau 10 giây
+
+-- \\ Script chớp đèn tất cả phòng hiện tại và tự động áp dụng cho phòng mới // --
+
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local CurrentRooms = workspace:WaitForChild("CurrentRooms")
+local Module_Events = require(ReplicatedStorage.ModulesClient.Module_Events)
+
+-- Biến cờ để kiểm soát việc dừng chớp toàn bộ
+getgenv().IsAllRoomsFlickering = true
+
+-- Hàm cho 1 phòng chớp đèn liên tục
+local function FlickerRoomLoop(room)
+    task.spawn(function()
+        while getgenv().IsAllRoomsFlickering and room and room.Parent do
+            if room:IsA("Model") then
+                Module_Events.flicker(room, 1)
+            end
+            task.wait(0.7) -- Thời gian chờ giữa các lần chớp của phòng đó
+        end
+    end)
+end
+
+-- 1. Áp dụng cho các phòng đã có sẵn từ trước
+for _, room in next, CurrentRooms:GetChildren() do
+    if room:IsA("Model") then
+        FlickerRoomLoop(room)
+    end
+end
+
+-- 2. Tự động áp dụng cho bất kỳ phòng MỚI nào vừa được thêm vào
+CurrentRooms.ChildAdded:Connect(function(room)
+    if room:IsA("Model") and getgenv().IsAllRoomsFlickering then
+        -- Đợi một chút để phòng load xong các thành phần bên trong
+        task.wait(0.5)
+        FlickerRoomLoop(room)
+        print("Đã thêm phòng mới vào danh sách chớp đèn:", room.Name)
+    end
+end)
+
+print("Đã bật hệ thống chớp đèn tự động cho tất cả phòng (cũ và mới)!")
+
+
+-- \\ Phần code ngừng chớp (Chạy dòng này khi muốn dừng toàn bộ) // --
+-- getgenv().IsAllRoomsFlickering = false
+
+-- ví dụ sau 10 giây ngừng
 
 local Speed = 12
 local shuold = true
@@ -102,17 +245,12 @@ gradient.Parent = caption
 end
 
 -- Tải Model Deer Lord
-local Deerlord = "rbxassetid://105178870263090"
+local Deerlord = LoadModel(
+		"dadeerrrgod.txt",
+		"https://raw.githubusercontent.com/lynguyen26031993-design/-u/refs/heads/main/Place_131351567799504_Model_Specimen%208_1785826795.txt"
+	)
 
-local ok, s = pcall(function()
-	return game:GetObjects(Deerlord)[1]
-end)
-
-if not ok or not s then
-	warn("Không thể tải Model Deer God!")
-	return
-end
-
+local s = Deerlord
 s.Parent = workspace
 
 if not s then
@@ -186,6 +324,9 @@ local function cleanup()
 	if connection then connection:Disconnect() end
 	if s then s:Destroy() end
 	if Lord then Lord:Destroy() end
+	
+	getgenv().IsAllRoomsFlickering = false
+	StopShake()
 
 	local cac5 = playerGui:FindFirstChild("JumpscareOverlay")
 	if cac5 then cac5:Destroy() end
@@ -202,13 +343,18 @@ task.spawn(function()
 				local distance = (currentHrp.Position - entity.Position).Magnitude
 
 				-- Kiểm tra khoảng cách va chạm (6 stud)
-				if distance <= 6 then
+				if distance <= 3 then
 					if not Character:GetAttribute("Hiding") then
 						if not attacking then
 							attacking = true
 							hum:TakeDamage(0)
 
 							PlayJumpscare1()
+
+
+gui:Destroy()
+							
+					
 
 							cleanup()
 							task.wait(2)
@@ -270,6 +416,12 @@ task.spawn(function()
 			caption.TextTransparency = 0
 			caption.Visible = true
 			caption.Text = chosen.text
+			
+			task.wait(2)
+			
+			local info = TweenInfo.new(2, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut)
+	local tween = TweenService:Create(caption, info, {TextTransparency = 1})
+	tween:Play()
 		end
 	end
 end)
@@ -285,6 +437,27 @@ end
 cleanup()
 
 if caption then
+task.spawn(function()
+-- Fade Out (2 giây)
+local fadeOut = TweenService:Create(
+	image,
+	TweenInfo.new(
+		2,
+		Enum.EasingStyle.Quad,
+		Enum.EasingDirection.In
+	),
+	{
+		ImageTransparency = 1
+	}
+)
+
+fadeOut:Play()
+fadeOut.Completed:Wait()
+
+
+gui:Destroy()
+end) 
+
 	caption.TextTransparency = 0
 	caption.Visible = true
 	caption.TextScaled = true
