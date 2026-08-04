@@ -122,7 +122,7 @@ end
 if not hasTriggeredOnce then
 	hasTriggeredOnce = true
 
-	if openAngle == -90 and math.random() < 1 then
+	if openAngle == -90 and math.random() < 0.07 then
 		obj:SetAttribute("Singular", true)
 
 		task.spawn(function()
