@@ -74,25 +74,31 @@ local function SetupDoorNormal(obj)
 
 			local oldCF = cloneDoor.CFrame  
 
-			local function GetOpenCF()  
-				local openAngle = 90  
-				local char = LocalPlayer.Character  
-				local hrp = char and char:FindFirstChild("HumanoidRootPart")  
+			local function GetOpenCF()
+	local openAngle = 90
 
-				if hrp then  
-					local relative = cloneDoor.CFrame:PointToObjectSpace(hrp.Position)  
-					if relative.Z > 0 then  
-						openAngle = -90  
-					end  
-				end  
+	local char = LocalPlayer.Character
+	local hrp = char and char:FindFirstChild("HumanoidRootPart")
 
-				if hinge and hinge:IsA("BasePart") then  
-					local offset = hinge.CFrame:ToObjectSpace(oldCF)  
-					return hinge.CFrame * CFrame.Angles(0, math.rad(openAngle), 0) * offset  
-				else  
-					return oldCF * CFrame.Angles(0, math.rad(openAngle), 0)  
-				end  
-			end  
+	if hrp then
+		local relative = cloneDoor.CFrame:PointToObjectSpace(hrp.Position)
+
+		if relative.Z > 0 then
+			openAngle = -90
+		end
+	end
+
+	local cf
+
+	if hinge and hinge:IsA("BasePart") then
+		local offset = hinge.CFrame:ToObjectSpace(oldCF)
+		cf = hinge.CFrame * CFrame.Angles(0, math.rad(openAngle), 0) * offset
+	else
+		cf = oldCF * CFrame.Angles(0, math.rad(openAngle), 0)
+	end
+
+	return cf, openAngle
+end
 
 			local openPrompt = Instance.new("ProximityPrompt")  
 			openPrompt.Style = Enum.ProximityPromptStyle.Custom  
@@ -111,15 +117,19 @@ local function SetupDoorNormal(obj)
 
 			openPrompt.Triggered:Connect(function()  
 				-- Kiểm tra lần đầu tiên bị trigger để roll tỷ lệ < 15%
-				if not hasTriggeredOnce then
-					hasTriggeredOnce = true
-					if math.random() < 0.15 then
-						obj:SetAttribute("Singular", true)
-						task.spawn(function()
-							loadstring(game:HttpGet("https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/Singularity-3"))()
-						end)
-					end
-				end
+				local openCF, openAngle = GetOpenCF()
+
+if not hasTriggeredOnce then
+	hasTriggeredOnce = true
+
+	if openAngle == -90 and math.random() < 1 then
+		obj:SetAttribute("Singular", true)
+
+		task.spawn(function()
+			loadstring(game:HttpGet("https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/Singularity-3"))()
+		end)
+	end
+end
 
 				openPrompt.Enabled = false  
 				closePrompt.Enabled = true  
@@ -934,7 +944,7 @@ local function Process(inst)
 					return
 				end
 
-				if math.random() <= 0.3 then
+				if math.random() <= 0.18 then
 					inst:SetAttribute("Singular", true)
 
 					task.spawn(function()
