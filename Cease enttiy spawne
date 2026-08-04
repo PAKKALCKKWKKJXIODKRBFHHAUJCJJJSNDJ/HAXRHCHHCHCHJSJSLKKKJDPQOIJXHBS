@@ -1,4 +1,4 @@
--- Cease
+-- CéaeBLALA
 --[[
     __      __          _            _       ______       _   _ _            _____                                       __      _____  
     \ \    / /         (_)          ( )     |  ____|     | | (_) |          / ____|                                      \ \    / /__ \ 
@@ -675,6 +675,14 @@ Module.Create = function(self, config: any): any?
         success, entityModel = true, asset
     elseif typeof(asset) == "string" then
         success, entityModel = pcall(function()
+        if asset:match("%.txt$") then
+    local temp = "temp_entity.rbxmx"
+    writefile(temp, game:HttpGet(asset))
+    asset = temp
+end
+
+local instance = LoadCustomInstance(asset)
+
 			local instance: Instance? = LoadCustomInstance(asset)
 			if typeof(instance) == "Instance" then
                 if instance.ClassName ~= "Model" then
