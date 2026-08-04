@@ -1,4 +1,3 @@
-
 --[[
     __      __          _            _       ______       _   _ _            _____                                       __      _____  
     \ \    / /         (_)          ( )     |  ____|     | | (_) |          / ____|                                      \ \    / /__ \ 
@@ -598,7 +597,7 @@ local function EntityMoveTo(model: Model, cframe: CFrame, speed: number)
 			end
 		end
 	end)
-	repeat RunService.Stepped:Wait() until reached
+	repeat RunService.RenderStepped:Wait() until reached
 end
 
 local function ReplayCurrentRoom(entity, currentIndex, pathfindNodes)
@@ -801,7 +800,7 @@ Module.Run = function(self, entity: any, copyEntity: boolean)
     local config = entity.Config
     local debug = entity.Debug
     local checkedPlayer = false
-local resumeFromRoomStart = false
+    local resumeFromRoomStart = false
 
     model:SetAttribute("Running", true)
     self.ActiveEntities[#self.ActiveEntities + 1] = entity
@@ -935,24 +934,24 @@ local resumeFromRoomStart = false
             then
                 local damage = config.Damage
                 if
-	damage.Enabled
-	and damage.Range > 0
-	and Humanoid.Health > 0
-	and (not Character:GetAttribute("Hiding") or damage.IgnoreHiding)
-	and model:GetAttribute("Damage")
-	and not model:GetAttribute("BeingBanished")
-	and (charOrigin - origin).Magnitude <= damage.Range
-	and inSight
-then
-	if not checkedPlayer then
-		checkedPlayer = true
-		model:SetAttribute("Paused", true)
-		task.spawn(entity.RunCallback, entity, "OnChecking")
-	end
+                    damage.Enabled
+                    and damage.Range > 0
+                    and Humanoid.Health > 0
+                    and (not Character:GetAttribute("Hiding") or damage.IgnoreHiding)
+                    and model:GetAttribute("Damage")
+                    and not model:GetAttribute("BeingBanished")
+                    and (charOrigin - origin).Magnitude <= damage.Range
+                    and inSight
+                then
+                    if not checkedPlayer then
+                        checkedPlayer = true
+                        model:SetAttribute("Paused", true)
+                        task.spawn(entity.RunCallback, entity, "OnChecking")
+                    end
 
-	model:SetAttribute("Damage", false)
-	DamagePlayer(entity)
-end
+                    model:SetAttribute("Damage", false)
+                    DamagePlayer(entity)
+                end
             end
 
             -- Camera shake
@@ -981,11 +980,11 @@ end
         if reboundType == "AMBUSH" then
             local pathfindNodes = GetPathfindNodesAmbush(config)
             for i, v in ipairs(pathfindNodes) do
-            if entity.ResumeFromRoomStart then
-	entity.ResumeFromRoomStart = false
-	ReplayCurrentRoom(entity, i, pathfindNodes)
-	break
-end
+                if entity.ResumeFromRoomStart then
+                    entity.ResumeFromRoomStart = false
+                    ReplayCurrentRoom(entity, i, pathfindNodes)
+                    break
+                end
 
                 local cframe = v.CFrame + Vector3.new(0, 3 + config.Entity.HeightOffset, 0)
                 EntityMoveTo(model, cframe, config.Movement.Speed)
@@ -1033,10 +1032,10 @@ end
             local nodesToCurrent, _ = GetPathfindNodesBlitz(config)
 	
             for i, n in ipairs(nodesToCurrent) do
-            if resumeFromRoomStart then
-	resumeFromRoomStart = false
-	ReplayCurrentRoom(entity, i)
-end
+                if resumeFromRoomStart then
+                    resumeFromRoomStart = false
+                    ReplayCurrentRoom(entity, i)
+                end
 
                 local cframe = n.CFrame + Vector3.new(0, 3 + config.Entity.HeightOffset, 0)
                 EntityMoveTo(model, cframe, config.Movement.Speed)
@@ -1093,10 +1092,10 @@ end
             
             local _, updatedToEnd = GetPathfindNodesBlitz(config)
             for i, n in ipairs(updatedToEnd) do
-            if resumeFromRoomStart then
-	resumeFromRoomStart = false
-	ReplayCurrentRoom(entity, i)
-end
+                if resumeFromRoomStart then
+                    resumeFromRoomStart = false
+                    ReplayCurrentRoom(entity, i)
+                end
 
                 local cframe = n.CFrame + Vector3.new(0, 3 + config.Entity.HeightOffset, 0)
                 EntityMoveTo(model, cframe, config.Movement.Speed)
@@ -1161,4 +1160,3 @@ end
 
 getgenv().VynixuEntitySpawnerV2 = Module
 return Module
--- BLA
