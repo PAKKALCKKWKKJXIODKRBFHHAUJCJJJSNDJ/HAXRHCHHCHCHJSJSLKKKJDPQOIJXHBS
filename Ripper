@@ -117,7 +117,7 @@ local entity = Spawner:Create({
 	},
 	Movement = {
 		Speed = 180,
-		Delay = 7,
+		Delay = 3,
 		Reversed = false
 	},
 	Rebounding = {
@@ -531,8 +531,32 @@ end
 				local sound, sound5, sound6, sound7
 
 				if chance == 1 then
+				
+				task.wait(2)
 
 				else
+				
+				task.wait(2)
+				
+				local originalCFrame = entityRoot.CFrame				
+				
+				local backCFrame = originalCFrame * CFrame.new(0, 0, 25) 
+					local tweenBackInfo = TweenInfo.new(2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+					local tweenBack = TweenService:Create(entityRoot, tweenBackInfo, {CFrame = backCFrame})
+
+					tweenBack:Play()
+					tweenBack.Completed:Wait()
+
+					local tweenForwardInfo = TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
+					local tweenForward = TweenService:Create(entityRoot, tweenForwardInfo, {CFrame = originalCFrame})
+					tweenForward:Play()
+					wait(0.45)
+
+					local camShake2 = CameraShaker.new(Enum.RenderPriority.Camera.Value, function(shakeCf)
+						camera.CFrame = camera.CFrame * shakeCf
+					end)
+					camShake2:Start()
+					camShake2:ShakeOnce(30, 11.5, 0.1, 2, 15, 0.5) 
 
 		            entityRoot.DoorOpen1.Volume = 5
 					entityRoot.DoorOpen1:Play()	
