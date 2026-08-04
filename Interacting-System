@@ -565,7 +565,7 @@ local function SetupWardrobe(wardrobe)
 
 	if not prompt then return end
 
-prompt.ActionText = "Njkx" 
+	prompt.ActionText = "Njkx" 
 
 	prompt.Enabled = false  
 	prompt.HoldDuration = 0.5  
@@ -593,8 +593,8 @@ prompt.ActionText = "Njkx"
 				enterSound.RollOffMaxDistance = 30
 				enterSound.Volume = 0.7
 				enterSound.SoundId = GetGitSound(
-					"https://github.com/cakmay227-svg/random/raw/refs/heads/main/open.mp3?raw=true",
-					"opendadoor", 
+					"https://github.com/cakmay227-svg/random/raw/refs/heads/main/openCloset%20new.mp3.oga.mp3?raw=true",
+					"jcjiejbhcus", 
 					workspace
 				).SoundId
 
@@ -606,8 +606,8 @@ prompt.ActionText = "Njkx"
 				exitSound.RollOffMaxDistance = 30
 				exitSound.Volume = 0.7
 				exitSound.SoundId = GetGitSound(
-					"https://github.com/cakmay227-svg/random/raw/refs/heads/main/close.mp3?raw=true",
-					"closedadoor", 
+					"https://github.com/cakmay227-svg/random/raw/refs/heads/main/closeCloset%20new.mp3.oga.mp3?raw=true",
+					"kckjjebbcrd", 
 					workspace
 				).SoundId
 
@@ -916,45 +916,8 @@ local function Process(inst)
 					return
 				end
 
-				if inst:GetAttribute("Singulared") then
-					return
-				end
-
-				if inst:GetAttribute("Singular") then
-					SetupWardrobe(inst)
-					return
-				end
-
-				-- Kiểm tra xem phòng chứa Wardrobe này (thường là model/folder phòng ở trên) đã có Wardrobe nào có attribute Singular chưa
-				local roomFolder = inst:FindFirstAncestorWhichIsA("Model") or inst.Parent
-				local hasSingularInRoom = false
-				
-				for _, other in ipairs(roomFolder:GetDescendants()) do
-					if other:IsA("Model") and other.Name == "Wardrobe" and other ~= inst then
-						if other:GetAttribute("Singular") then
-							hasSingularInRoom = true
-							break
-						end
-					end
-				end
-
-				-- Nếu phòng này đã có Wardrobe mang Singular, ngừng roll và setup bình thường
-				if hasSingularInRoom then
-					SetupWardrobe(inst)
-					return
-				end
-
-				if math.random() <= 0.18 then
-					inst:SetAttribute("Singular", true)
-
-					task.spawn(function()
-						loadstring(game:HttpGet(
-							"https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/Singularity-2"
-						))()
-					end)
-				else
-					SetupWardrobe(inst)
-				end
+				-- Đã loại bỏ hoàn toàn việc roll random Singular cho Wardrobe, luôn áp dụng script chuẩn cho mọi Wardrobe
+				SetupWardrobe(inst)
 			end)
 		end
 	elseif inst.Name == "KeyHitbox" then
