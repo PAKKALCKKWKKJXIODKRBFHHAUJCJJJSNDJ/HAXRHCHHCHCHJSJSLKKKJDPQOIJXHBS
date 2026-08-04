@@ -326,6 +326,33 @@ local function ShutdownStorm()
 	Flickering = false
 	StopRequested = true
 	
+	task.spawn(function() 
+	CustomGitSound(
+	"https://github.com/cakmay227-svg/REBLAHARDCOREDI/raw/refs/heads/main/XRecorder_Edited_20260804_01.mp3?raw=true",
+	1.5,
+	10000000,
+	"kvosok",
+	"End",
+	workspace,
+	false,
+	Enum.RollOffMode.Linear,
+	10
+)
+
+local ended
+
+repeat
+	ended = workspace:FindFirstChild("End")
+	task.wait()
+until ended
+
+ended:Play() 
+
+ended.Ended:Connect(function() 
+ended:Destroy() 
+end) 
+end) 
+	
 	TweenFade() 
 
 	for _, sound in ipairs(workspace:GetDescendants()) do
