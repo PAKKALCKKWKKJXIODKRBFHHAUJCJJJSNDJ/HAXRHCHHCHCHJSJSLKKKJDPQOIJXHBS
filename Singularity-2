@@ -163,7 +163,7 @@ local cf = selectedWardrobe:GetBoundingBox()
 local look = selectedWardrobe:GetPivot().LookVector
 
 local spawnCFrame = CFrame.lookAt(
-	cf.Position - look * 1.5,
+	cf.Position - look * 1.4,
 	cf.Position + look
 )
 
