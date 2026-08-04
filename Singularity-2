@@ -1,6 +1,5 @@
 local testmode = true -- Bật chế độ test
 
-
 local function GetRoom()
 	local currentRooms = workspace:FindFirstChild("CurrentRooms")
 	if not currentRooms then return nil end
@@ -100,22 +99,16 @@ local function FindWardrobe()
 	
 	for _, obj in ipairs(room:GetDescendants()) do
 		if obj:IsA("Model") and obj.Name == "Wardrobe" then
-			if obj:GetAttribute("Singulared") then
-				continue
-			end
-			
-			if testmode then
-				if obj:GetAttribute("Singular") then
-					table.insert(validWardrobes, obj)
-				end
-			else
+			-- Chỉ lấy những tủ chưa được đánh dấu đã sử dụng
+			if not obj:GetAttribute("Singulared") then
 				table.insert(validWardrobes, obj)
 			end
 		end
 	end
 	
 	if #validWardrobes > 0 then
-		local chosen = validWardrobes[1]
+		local chosen = validWardrobes[math.random(1, #validWardrobes)]
+		-- Đánh dấu tủ này đã được dùng để tránh spawn trùng lặp
 		chosen:SetAttribute("Singulared", true)
 		return chosen
 	end
@@ -133,10 +126,6 @@ if not selectedWardrobe then
 		if obj:IsA("Model") 
 			and obj.Name == "Wardrobe"
 			and not obj:GetAttribute("Singulared") then
-
-			if testmode then
-				obj:SetAttribute("Singular", true)
-			end
 
 			obj:SetAttribute("Singulared", true)
 			selectedWardrobe = obj
@@ -527,7 +516,6 @@ local function StartEntity()
 
 		if selectedWardrobe and selectedWardrobe.Parent then
 			selectedWardrobe:Destroy()
-			selectedWardrobe:SetAttribute("Singulared", nil)
 		end
 
 		rangeTween:Cancel()
@@ -651,8 +639,14 @@ local function StartEntity()
 	end
 end
 
--- Phần gắn ProximityPrompt an toàn cho Wardrobe được chọn
+-- Vô hiệu hóa tất cả ProximityPrompt có sẵn trong model Wardrobe trước khi tạo prompt mới
 if selectedWardrobe then
+	for _, prompt in ipairs(selectedWardrobe:GetDescendants()) do
+		if prompt:IsA("ProximityPrompt") then
+			prompt.Enabled = false
+		end
+	end
+
 	local animController = selectedWardrobe:FindFirstChildOfClass("AnimationController")
 	local animator
 
@@ -664,43 +658,41 @@ if selectedWardrobe then
 		end
 	end
 
-	for _, v in ipairs(selectedWardrobe:GetDescendants()) do
-		if v:IsA("ProximityPrompt") then
-			local clone = v:Clone()
-			clone.Enabled = true
-			clone.Parent = v.Parent
-			clone.ActionText = "Ja"
-			clone.ObjectText = "hc"
-			clone.HoldDuration = 0.5
-			clone.MaxActivationDistance = 10
+	-- Lấy ProximityPrompt đầu tiên làm gốc để clone và tạo prompt mở mới của script
+	local basePrompt = selectedWardrobe:FindFirstChildWhichIsA("ProximityPrompt", true)
+	if basePrompt then
+		local clone = basePrompt:Clone()
+		clone.Enabled = true
+		clone.Parent = basePrompt.Parent
+		clone.ActionText = "Ja"
+		clone.ObjectText = "hc"
+		clone.HoldDuration = 0.5
+		clone.MaxActivationDistance = 10
+		
+		clone.Triggered:Connect(function(plr)
+			if plr ~= game.Players.LocalPlayer then
+				return
+			end
 			
-			v.Enabled = false
-			
-			clone.Triggered:Connect(function(plr)
-				if plr ~= game.Players.LocalPlayer then
-					return
-				end
-				
-				clone.Enabled = false
-				clone:Destroy()
+			clone.Enabled = false
+			clone:Destroy()
 
-				if animator then
-					local anim = Instance.new("Animation")
-					anim.AnimationId = "rbxassetid://9451146136"
+			if animator then
+				local anim = Instance.new("Animation")
+				anim.AnimationId = "rbxassetid://9451146136"
 
-					local track = animator:LoadAnimation(anim)
-					track:Play()
+				local track = animator:LoadAnimation(anim)
+				track:Play()
 
-					task.spawn(function() 
-						task.wait(track.Length / 2)
-						track:AdjustSpeed(0)
-					end) 
+				task.spawn(function() 
+					task.wait(track.Length / 2)
+					track:AdjustSpeed(0)
+				end) 
 
-					StartEntity()
-				else
-					StartEntity()
-				end
-			end)
-		end
+				StartEntity()
+			else
+				StartEntity()
+			end
+		end)
 	end
 end
