@@ -1,4 +1,4 @@
--- CéaeBLALA
+-- Cease
 --[[
     __      __          _            _       ______       _   _ _            _____                                       __      _____  
     \ \    / /         (_)          ( )     |  ____|     | | (_) |          / ____|                                      \ \    / /__ \ 
@@ -946,17 +946,19 @@ Module.Run = function(self, entity: any, copyEntity: boolean)
                     damage.Enabled
                     and damage.Range > 0
                     and Humanoid.Health > 0
-                    and (not Character:GetAttribute("Hiding") or damage.IgnoreHiding)
                     and model:GetAttribute("Damage")
                     and not model:GetAttribute("BeingBanished")
                     and (charOrigin - origin).Magnitude <= damage.Range
                     and inSight
                 then
                     if not checkedPlayer then
-                        checkedPlayer = true
-                        model:SetAttribute("Paused", true)
-                        task.spawn(entity.RunCallback, entity, "OnChecking")
-                    end
+    checkedPlayer = true
+
+    if math.random(1, 100) <= 30 then
+        model:SetAttribute("Paused", true)
+        task.spawn(entity.RunCallback, entity, "OnChecking")
+    end
+end
 
                     model:SetAttribute("Damage", false)
                     DamagePlayer(entity)
