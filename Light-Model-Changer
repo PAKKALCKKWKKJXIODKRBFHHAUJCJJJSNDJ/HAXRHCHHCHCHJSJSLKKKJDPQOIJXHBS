@@ -27,17 +27,6 @@ coroutine.wrap(function()
 		return
 	end
 
-	for _, v in ipairs(model:GetDescendants()) do
-		if v:IsA("BasePart") then
-			v.Transparency = 1
-			v.CanCollide = false
-		elseif v:IsA("PointLight")
-			or v:IsA("SpotLight")
-			or v:IsA("SurfaceLight")
-			or v:IsA("ParticleEmitter") then
-			v.Enabled = false
-		end
-	end
 
 	local torch = LightReplaceModel:Clone()
 	torch:PivotTo(model:GetPivot())
