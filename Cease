@@ -7,7 +7,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Remotes = ReplicatedStorage:WaitForChild("RemotesFolder")
 local raycastLoop = nil
 
-local Spawner = loadstring(game:HttpGet("https://raw.githubusercontent.com/RegularVynixu/DOORS-Entity-Spawner-V2/main/init.luau"))()
+local Spawner = loadstring(game:HttpGet("https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/Cease%20enttiy%20spawne"))()
 
 function GitAud(soundgit, filename)
 	local file = filename..".mp3"
@@ -62,7 +62,7 @@ end)
 local entity = Spawner:Create({
 	Entity = {
 		Name = "CeaseBla",
-		Asset = "122007073325431",
+		Asset = "https://raw.githubusercontent.com/lynguyen26031993-design/-u/refs/heads/main/Place_131351567799504_Model_CeaseMoving_1785826225.txt",
 		HeightOffset = 0
 	},
 	Lights = {
@@ -82,7 +82,7 @@ local entity = Spawner:Create({
 		Values = {3, 2, 0.1, 1} -- Magnitude, Roughness, FadeIn, FadeOut
 	},
 	Movement = {
-		Speed = 30,
+		Speed = 35,
 		Delay = 0,
 		Reversed = false
 	},
@@ -94,10 +94,10 @@ local entity = Spawner:Create({
 		Delay = 1
 	},
 	Damage = {
-		Enabled = false,
-		IgnoreHiding = true,
-		Range = 40,
-		Amount = 0.001
+		Enabled = true,
+		IgnoreHiding = false,
+		Range = math.random(25, 60),
+		Amount = 0
 	},
 	Crucifixion = {
 		Enabled = false,
@@ -283,6 +283,84 @@ entity:SetCallback("OnDespawning", function()
 		raycastLoop:Disconnect()
 		raycastLoop = nil
 	end
+end)
+
+entity:SetCallback("OnChecking", function()
+	print("Player vừa chạm hitbox lần đầu")
+
+	local function GetGitSound(GithubSnd, SoundName)
+		local url = GithubSnd
+		if not isfile(SoundName .. ".mp3") then
+			writefile(SoundName .. ".mp3", game:HttpGet(url))
+		end
+		local sound = Instance.new("Sound")
+		sound.SoundId = (getcustomasset or getsynasset)(SoundName .. ".mp3")
+		return sound
+	end
+	local Jumpscare = GetGitSound("https://github.com/cakmay227-svg/random/raw/refs/heads/main/XRecorder_Edited_20260804_03.mp3?raw=true","jcjjeidicicicu")
+	Jumpscare.Parent = workspace:FindFirstChild("CeaseBla").HSUR
+	Jumpscare.Volume = 3
+	Jumpscare.Name = "CSREAMMM" 
+	Jumpscare.PlaybackSpeed = 1
+	Jumpscare.RollOffMaxDistance = 300
+	Jumpscare:Play()
+	
+	local CameraShaker = require(game.ReplicatedStorage:WaitForChild("CameraShaker"))
+local camera = workspace.CurrentCamera
+
+local spawnShake = CameraShaker.new(Enum.RenderPriority.Camera.Value, function(shakeCf)
+	camera.CFrame = camera.CFrame * shakeCf
+end)
+
+spawnShake:Start()
+
+spawnShake:ShakeOnce(
+	5,   -- Magnitude (mạnh)
+	12,   -- Roughness
+	0.05, -- FadeIn
+	0.7, -- FadeOut
+	0,    -- PositionInfluence
+	0.8   -- RotationInfluence
+)
+	
+	local TweenService = game:GetService("TweenService")
+
+local model = entity.Model or workspace:FindFirstChild("CeaseBla")
+if model then
+	local lights = {}
+
+	for _, v in ipairs(model:GetDescendants()) do
+		if v:IsA("PointLight") then
+			lights[#lights + 1] = {
+				Light = v,
+				Range = v.Range
+			}
+
+			TweenService:Create(
+				v,
+				TweenInfo.new(2, Enum.EasingStyle.Sine, Enum.EasingDirection.Out),
+				{Range = v.Range * 3}
+			):Play()
+		end
+	end
+
+	task.delay(4, function()
+		for _, info in ipairs(lights) do
+			if info.Light and info.Light.Parent then
+				TweenService:Create(
+					info.Light,
+					TweenInfo.new(1, Enum.EasingStyle.Sine, Enum.EasingDirection.Out),
+					{Range = info.Range}
+				):Play()
+			end
+		end
+	end)
+end
+
+	task.wait(5)
+
+	-- Khi muốn entity đi tiếp
+	entity:Resume()
 end)
 
 entity:SetCallback("OnDespawned", function()
