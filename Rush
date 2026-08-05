@@ -163,7 +163,7 @@ local function setupUI()
 			while jumpscare.Parent do
 				if active then
 					showSingle(singles[math.random(1, #singles)])
-					task.wait(math.random(1, 1) / 100)
+					task.wait(5 / 100)
 				else
 					task.wait()
 				end
