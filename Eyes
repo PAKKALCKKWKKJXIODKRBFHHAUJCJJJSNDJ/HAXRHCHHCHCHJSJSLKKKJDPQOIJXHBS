@@ -1,0 +1,486 @@
+local gui
+local EyesActive = false
+local guiObjects = {}
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+
+local function loadGui(file, url)
+	if not isfile(file) then
+		writefile(file, game:HttpGet(url))
+	end
+
+	return game:GetObjects(getcustomasset(file))[1]
+end
+
+local plr = Players.LocalPlayer
+
+local mainFrame = plr:WaitForChild("PlayerGui")
+	:WaitForChild("MainUI")
+	:WaitForChild("MainFrame")
+
+local function createGui()
+	gui = loadGui(
+		"EyesHallucination.txt",
+		"https://raw.githubusercontent.com/lynguyen26031993-design/-u/refs/heads/main/Place_131351567799504_Frame_EyesHallucination_1785923030.txt"
+	)
+
+	gui.Parent = mainFrame
+
+	for _, v in ipairs(gui:GetDescendants()) do
+		if v:IsA("ImageLabel") then
+			v.ImageTransparency = 1
+		elseif v:IsA("Frame") then
+			v.BackgroundTransparency = 1
+		end
+	end
+	
+	local swirls = {}
+
+for _, v in ipairs(gui:GetDescendants()) do
+	if v:IsA("ImageLabel") and v.Name == "Swirl" then
+		table.insert(swirls, v)
+	end
+end
+
+local function spin(img, speed)
+	task.spawn(function()
+		local con
+		con = RunService.RenderStepped:Connect(function(dt)
+			if not img.Parent then
+				con:Disconnect()
+				return
+			end
+
+			img.Rotation = (img.Rotation + speed * dt) % 360
+		end)
+	end)
+end
+
+if swirls[1] then
+	spin(swirls[1], 180)
+end
+
+if swirls[2] then
+	spin(swirls[2], -120)
+end
+
+	local guiObjects = {}
+
+for _, v in ipairs(gui:GetDescendants()) do
+	if v:IsA("ImageLabel") then
+		table.insert(guiObjects, v)
+	end
+end
+
+gui:SetAttribute("Created", true)
+
+return gui, guiObjects
+end
+
+local Workspace = game:GetService("Workspace")
+
+local function loadModel(file, url)
+	if not isfile(file) then
+		writefile(file, game:HttpGet(url))
+	end
+
+	return game:GetObjects(getcustomasset(file))[1]
+end
+
+local EyesData = {}
+local DisableLook = false
+
+local SpawnModel = loadModel(
+	"EyesReplace.txt",
+	"https://raw.githubusercontent.com/lynguyen26031993-design/-u/refs/heads/main/Place_131351567799504_Model_Eyes_1785913608.txt"
+)
+
+local function processEyes(model)
+	if not model:IsA("Model") or model.Name ~= "Eyes" then
+		return
+	end
+
+	if model:GetAttribute("Processed") then
+		return
+	end
+	model:SetAttribute("Processed", true)
+
+	task.spawn(function()
+		local core = model:WaitForChild("Core", 3)
+		if not (core and core:IsA("BasePart")) then
+			return
+		end
+
+		for _, obj in ipairs(core:GetDescendants()) do
+if obj:IsA("Sound") and obj.Name ~= "Moving" then
+				obj.Volume = 0
+			elseif obj:IsA("ParticleEmitter") then
+				obj.Enabled = false
+			elseif obj:IsA("PointLight")
+				or obj:IsA("SpotLight")
+				or obj:IsA("SurfaceLight") then
+				obj.Enabled = false
+			end
+		end
+
+		if not SpawnModel then
+			return
+		end
+
+		local clone = SpawnModel:Clone()
+
+		local cloneCore = clone:FindFirstChild("Core", true)
+		if not (cloneCore and cloneCore:IsA("BasePart")) then
+			clone:Destroy()
+			return
+		end
+
+		cloneCore.CFrame = core.CFrame
+
+		for _, child in ipairs(clone:GetChildren()) do
+			child.Parent = model
+		end
+
+		clone:Destroy()
+		
+		local lights = {}
+
+for _, obj in ipairs(model:GetDescendants()) do
+	if obj:IsA("ParticleEmitter") and obj.Enabled then
+		obj.Enabled = false
+		task.defer(function()
+			if obj.Parent then
+				obj.Enabled = true
+			end
+		end)
+
+	elseif obj:IsA("PointLight") then
+		local brightness = obj.Brightness
+		table.insert(lights, {
+			Light = obj,
+			Value = brightness
+		})
+
+		obj.Brightness = 0
+	end
+end
+
+for _, data in ipairs(lights) do
+	task.spawn(function()
+		local tween = game:GetService("TweenService"):Create(
+			data.Light,
+			TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+			{
+				Brightness = data.Value
+			}
+		)
+
+		tween:Play()
+	end)
+end
+
+task.delay(1.5, function()
+	EyesActive = true
+end)
+
+		local newCore
+		for _, obj in ipairs(model:GetDescendants()) do
+			if obj:IsA("BasePart") and obj.Name == "Core" and obj ~= core then
+				newCore = obj
+				break
+			end
+		end
+
+		if not newCore then
+			return
+		end
+		
+		newCore.AncestryChanged:Connect(function(_, parent)
+	if not parent then
+		EyesData[newCore] = nil
+
+		if gui then
+			gui:Destroy()
+			gui = nil
+			guiObjects = {}
+		end
+	end
+end)
+
+		newCore.Anchored = false
+		newCore.CFrame = core.CFrame
+		
+		local angry, attack
+
+for _, obj in ipairs(newCore:GetDescendants()) do
+	if obj:IsA("ParticleEmitter") and obj.Name == "Angry" then
+		angry = obj
+		angry.Enabled = false
+
+	elseif obj:IsA("Sound") and obj.Name == "Attack" then
+		attack = obj
+	end
+end
+
+EyesData[newCore] = {
+	Looking = false,
+	LastDamage = 0,
+	Angry = angry,
+	Attack = attack
+} 
+
+gui, guiObjects = createGui()
+
+		local weld = Instance.new("WeldConstraint")
+		weld.Part0 = core
+		weld.Part1 = newCore
+		weld.Parent = core
+	end)
+end
+
+local CameraShaker = require(game.ReplicatedStorage:WaitForChild("CameraShaker"))
+local camera = workspace.CurrentCamera
+
+local spawnShake = CameraShaker.new(Enum.RenderPriority.Camera.Value, function(shakeCf)
+	camera.CFrame = camera.CFrame * shakeCf
+end)
+
+spawnShake:Start()
+
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+task.spawn(function()
+	while true do
+		task.wait(math.random(5, 7))
+
+		local char = LocalPlayer.Character
+		local hrp = char and char:FindFirstChild("HumanoidRootPart")
+		if not hrp then
+			continue
+		end
+
+		if not EyesActive then
+	continue
+end
+
+for core in pairs(EyesData) do
+			if core and core.Parent then
+				local eyes = core:FindFirstAncestorOfClass("Model")
+local bye, moving
+
+if eyes then
+	for _, v in ipairs(eyes:GetDescendants()) do
+		if v:IsA("Sound") then
+			if v.Name == "bye'" then
+				bye = v
+			elseif v.Name == "Moving" then
+				moving = v
+			end
+		end
+	end
+end
+
+				if bye then
+					bye:Play()
+
+					local remain = bye.TimeLength - 0.7
+					if remain > 0 then
+						task.wait(remain)
+					end
+				end
+
+				local pos = hrp.Position + hrp.CFrame.LookVector * 5
+
+				core.Parent:PivotTo(
+	CFrame.lookAt(
+		pos,
+		hrp.Position
+	)
+)
+
+DisableLook = true
+
+task.delay(0.5, function()
+	DisableLook = false
+end)
+
+if moving then
+	moving:Play()
+end
+
+				if moving then
+					moving:Play()
+				end
+			end
+		end
+	end
+end)
+
+local TweenService = game:GetService("TweenService")
+local Camera = workspace.CurrentCamera
+
+local function setGuiTransparency(value, speed)
+	for _, v in ipairs(guiObjects) do
+		TweenService:Create(
+			v,
+			TweenInfo.new(speed, Enum.EasingStyle.Linear),
+			{
+				ImageTransparency = v:IsA("ImageLabel") and value or v.ImageTransparency
+			}
+		):Play()
+	end
+end
+
+local function getCore()
+	for core in pairs(EyesData) do
+		if core and core.Parent then
+			return core
+		end
+	end
+end
+
+local function isLooking(core)
+	local dir = core.Position - Camera.CFrame.Position
+	local dot = Camera.CFrame.LookVector:Dot(dir.Unit)
+
+	if dot < 0.9 then
+		return false
+	end
+
+	local result = workspace:Raycast(
+		Camera.CFrame.Position,
+		dir
+	)
+
+	return result and result.Instance and result.Instance:IsDescendantOf(core.Parent)
+end
+
+
+task.spawn(function()
+	while true do
+		task.wait()
+
+		if not gui or not gui.Parent then
+			continue
+		end
+
+		local core = getCore()
+		if not core then
+			continue
+		end
+
+		local char = Players.LocalPlayer.Character
+		local hrp = char and char:FindFirstChild("HumanoidRootPart")
+
+		if hrp then
+			local dist = (hrp.Position - core.Position).Magnitude
+
+			setGuiTransparency(math.clamp(dist / 100,0,1),0.5)
+
+			if isLooking(core) then
+				setGuiTransparency(0,0.5)
+			end
+		end
+	end
+end)
+
+local RunService = game:GetService("RunService")
+local Players = game:GetService("Players")
+
+local LocalPlayer = Players.LocalPlayer
+local Camera = workspace.CurrentCamera
+
+RunService.RenderStepped:Connect(function()
+	if DisableLook then
+		for _, data in pairs(EyesData) do
+			data.Looking = false
+			if data.Angry then
+				data.Angry.Enabled = false
+			end
+		end
+		return
+	end
+
+	local char = LocalPlayer.Character
+	if not char then
+		return
+	end
+
+	local hum = char:FindFirstChildOfClass("Humanoid")
+	if not hum then
+		return
+	end
+
+	local params = RaycastParams.new()
+	params.FilterType = Enum.RaycastFilterType.Exclude
+	params.FilterDescendantsInstances = {char}
+
+	for core, data in pairs(EyesData) do
+		local looking = false
+
+		if core.Parent then
+			local dir = core.Position - Camera.CFrame.Position
+			local dist = dir.Magnitude
+
+			if dist <= 1000 then
+				local dot = Camera.CFrame.LookVector:Dot(dir.Unit)
+
+				if dot >= 0.9 then -- giảm xuống 0.85 hoặc 0.8 nếu muốn góc nhìn rộng hơn
+					local result = workspace:Raycast(
+						Camera.CFrame.Position,
+						dir,
+						params
+					)
+
+					looking = result
+						and result.Instance
+						and result.Instance:IsDescendantOf(core.Parent)
+				end
+			end
+		end
+
+		if looking and EyesActive then
+			if not data.Looking then
+				data.Looking = true
+
+				if data.Attack then
+					data.Attack:Play()
+				end
+			end
+
+			if data.Angry then
+				data.Angry.Enabled = true
+			end
+
+			if tick() - data.LastDamage >= 0.2 then
+				data.LastDamage = tick()
+
+				hum:TakeDamage(5)
+				
+				game.ReplicatedStorage.GameStats['Player_' .. game.Players.LocalPlayer.Name].Total.DeathCause.Value = 'Eyes'
+
+				spawnShake:ShakeOnce(
+					4,
+					12,
+					0.05,
+					0.45,
+					0,
+					0.8
+				)
+			end
+		else
+			data.Looking = false
+
+			if data.Angry then
+				data.Angry.Enabled = false
+			end
+		end
+	end
+end)
+
+for _, v in ipairs(Workspace:GetChildren()) do
+	processEyes(v)
+end
+
+Workspace.ChildAdded:Connect(processEyes)
