@@ -29,14 +29,20 @@ local function SetupDoorNormal(obj)
 
 	-- Đợi các bộ phận bên trong DoorNormal load xong hoàn tất (tránh quá sớm hay quá muộn)
 	task.spawn(function()
-		local door, knob
-		while obj.Parent and (not door or not knob) do
-			door = obj:FindFirstChild("Door")
-			knob = obj:FindFirstChild("Knob", true)
-			if not door or not knob then
-				task.wait(0.05)
-			end
-		end
+		local start = tick()
+
+while obj.Parent and (not door or not knob) do
+	door = obj:FindFirstChild("Door")
+	knob = obj:FindFirstChild("Knob", true)
+
+	if not door or not knob then
+		task.wait(0.05)
+	end
+
+	if tick() - start > 5 then
+		return
+	end
+end
 
 		if not obj.Parent or not door or not door:IsA("MeshPart") then return end
 
@@ -46,6 +52,18 @@ local function SetupDoorNormal(obj)
 				v.Transparency = 1  
 			end  
 		end  
+		
+		local count = 0
+
+for _, v in ipairs(obj:GetDescendants()) do
+	if v:IsA("BasePart") then
+		count += 1
+	end
+end
+
+if count < 3 then
+	return
+end
 
 		local cloneModel = obj:Clone()  
 		cloneModel.Name = "DoorClone"  
@@ -54,7 +72,14 @@ local function SetupDoorNormal(obj)
 		local cloneDoor = cloneModel:FindFirstChild("Door")  
 		local cloneKnob = cloneModel:FindFirstChild("Knob", true)  
 		local hidden = cloneModel:FindFirstChild("Hidden", true)  
-		local hinge = cloneModel:FindFirstChild("Hinge", true)  
+		local hinge
+
+for _,v in ipairs(cloneModel:GetDescendants()) do
+	if v:IsA("BasePart") and v.Name == "Hinge" then
+		hinge = v
+		break
+	end
+end
 
 		local openSound = cloneDoor and cloneDoor:FindFirstChild("Open")  
 		local hitSound = cloneDoor and cloneDoor:FindFirstChild("Hit")  
@@ -172,7 +197,10 @@ end
 				openPrompt.Enabled = true  
 			end)  
 
-			door:Destroy()  
+			if not cloneDoor or not cloneKnob then
+	cloneModel:Destroy()
+	return
+end
 		end
 	end)
 end
