@@ -38,10 +38,57 @@ local jumpscare = plr:WaitForChild("PlayerGui")
 	:WaitForChild("Jumpscare")
 	:WaitForChild("Jumpscare_Rush")
 	local imageBig = jumpscare:WaitForChild("ImageLabelBig")
+	
+	local fixedColor = Color3.fromRGB(102,82,255)
+
+local function keepBrightness(color)
+	local brightness = (color.R * 0.299) + (color.G * 0.587) + (color.B * 0.114)
+
+	local baseBrightness = (fixedColor.R * 0.299) + (fixedColor.G * 0.587) + (fixedColor.B * 0.114)
+
+	local scale = brightness / baseBrightness
+
+	return Color3.new(
+		math.clamp(fixedColor.R * scale, 0, 1),
+		math.clamp(fixedColor.G * scale, 0, 1),
+		math.clamp(fixedColor.B * scale, 0, 1)
+	)
+end
+
+local updating = false
+
+jumpscare:GetPropertyChangedSignal("BackgroundColor3"):Connect(function()
+	if updating then return end
+
+	updating = true
+
+	local gameColor = jumpscare.BackgroundColor3
+	jumpscare.BackgroundColor3 = keepBrightness(gameColor)
+
+	updating = false
+end)
+
+jumpscare.BackgroundColor3 = keepBrightness(jumpscare.BackgroundColor3)
 
 local image = jumpscare:WaitForChild("ImageLabel")
 image.Image = "rbxassetid://15518965649"
 image.Visible =false
+
+local function colorImages(root)
+	for _, obj in ipairs(root:GetDescendants()) do
+		if obj:IsA("ImageLabel") then
+			obj.ImageColor3 = Color3.fromRGB(71,44,138)
+		end
+	end
+end
+
+colorImages(jumpscare)
+
+jumpscare.DescendantAdded:Connect(function(obj)
+	if obj:IsA("ImageLabel") then
+		obj.ImageColor3 = Color3.fromRGB(71,44,138)
+	end
+end)
 
 local ids = {
 	16444302226,
