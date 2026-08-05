@@ -20,7 +20,7 @@ local u9 = u7:WaitForChild('HORROR SCREAM 15')
 u9.Parent = workspace
 u9.Looped = false
 
-local u10 = 1
+local u10 = 2
 local u11 = 0
 local u12 = tick()
 local u13 = tick()
