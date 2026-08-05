@@ -256,7 +256,7 @@ task.spawn(function()
 	end
 end)
 
-task.wait(0.8)
+task.wait(1)
 
 if hum and hrp then
 	local entityPos = entity:IsA("Model") and entity:GetPivot().Position or entity.Position
