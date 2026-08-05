@@ -28,289 +28,281 @@ local function setupUI()
 
 	local jumpscareRush = mainUI:FindFirstChild("Jumpscare") and mainUI.Jumpscare:FindFirstChild("Jumpscare_Rush")
 	if jumpscareRush then
-local Players = game:GetService("Players")
+		local active = false
 
-local active = false
+		local jumpscare = jumpscareRush
+		local imageBig = jumpscare:WaitForChild("ImageLabelBig")
+		
+		local fixedColor = Color3.fromRGB(102, 82, 255)
 
-local plr = Players.LocalPlayer
-local jumpscare = plr:WaitForChild("PlayerGui")
-	:WaitForChild("MainUI")
-	:WaitForChild("Jumpscare")
-	:WaitForChild("Jumpscare_Rush")
-	local imageBig = jumpscare:WaitForChild("ImageLabelBig")
-	
-	local fixedColor = Color3.fromRGB(102,82,255)
+		local function keepBrightness(color)
+			local brightness = (color.R * 0.299) + (color.G * 0.587) + (color.B * 0.114)
+			local baseBrightness = (fixedColor.R * 0.299) + (fixedColor.G * 0.587) + (fixedColor.B * 0.114)
+			local scale = brightness / baseBrightness
 
-local function keepBrightness(color)
-	local brightness = (color.R * 0.299) + (color.G * 0.587) + (color.B * 0.114)
-
-	local baseBrightness = (fixedColor.R * 0.299) + (fixedColor.G * 0.587) + (fixedColor.B * 0.114)
-
-	local scale = brightness / baseBrightness
-
-	return Color3.new(
-		math.clamp(fixedColor.R * scale, 0, 1),
-		math.clamp(fixedColor.G * scale, 0, 1),
-		math.clamp(fixedColor.B * scale, 0, 1)
-	)
-end
-
-local updating = false
-
-jumpscare:GetPropertyChangedSignal("BackgroundColor3"):Connect(function()
-	if updating then return end
-
-	updating = true
-
-	local gameColor = jumpscare.BackgroundColor3
-	jumpscare.BackgroundColor3 = keepBrightness(gameColor)
-
-	updating = false
-end)
-
-jumpscare.BackgroundColor3 = keepBrightness(jumpscare.BackgroundColor3)
-
-local image = jumpscare:WaitForChild("ImageLabel")
-image.Image = "rbxassetid://15518965649"
-image.Visible =false
-
-local function colorImages(root)
-	for _, obj in ipairs(root:GetDescendants()) do
-		if obj:IsA("ImageLabel") then
-			obj.ImageColor3 = Color3.fromRGB(71,44,138)
-		end
-	end
-end
-
-colorImages(jumpscare)
-
-jumpscare.DescendantAdded:Connect(function(obj)
-	if obj:IsA("ImageLabel") then
-		obj.ImageColor3 = Color3.fromRGB(71,44,138)
-	end
-end)
-
-local ids = {
-	16444302226,
-	16444310736,
-	16444316349,
-	16447907727
-}
-
-local images = {}
-
-for _, id in ipairs(ids) do
-	local clone = image:Clone()
-	clone.Image = "rbxassetid://" .. id
-	clone.Visible = false
-	clone.Parent = jumpscare
-	table.insert(images, clone)
-end
-
-for _, img in ipairs(images) do
-	img.Size = UDim2.new(
-		img.Size.X.Scale * 1.3,
-		math.floor(img.Size.X.Offset * 1.3),
-		img.Size.Y.Scale * 1.3,
-		math.floor(img.Size.Y.Offset * 1.3)
-	)
-end
-
-local ghosts = {}
-
-for _, img in ipairs(images) do
-	local ghost = img:Clone()
-	ghost.Visible = false
-	ghost.ImageTransparency = 0.6
-	ghost.ZIndex = img.ZIndex - 1
-	ghost.Size = UDim2.new(
-		img.Size.X.Scale * 1.3,
-		math.floor(img.Size.X.Offset * 1.3),
-		img.Size.Y.Scale * 1.3,
-		math.floor(img.Size.Y.Offset * 1.3)
-	)
-	ghost.Parent = jumpscare
-
-	ghosts[img] = ghost
-end
-
-local singles = images
-
-local shaking = {}
-
-local function stopShake()
-	shaking = {}
-
-	for _, img in ipairs(images) do
-		img.Visible = false
-		img.Rotation = 0
-		img.Position = UDim2.new(0.5, 0, 0.5, 0)
-		img.AnchorPoint = Vector2.new(0.5, 0.5)
-	end
-end
-
-local function shake(img)
-	local basePos = img.Position
-
-	task.spawn(function()
-		while shaking[img] do
-			img.Rotation = math.random(-8, 8)
-			img.Position = basePos + UDim2.fromOffset(math.random(-4, 4), math.random(-4, 4))
-			task.wait(0.02)
+			return Color3.new(
+				math.clamp(fixedColor.R * scale, 0, 1),
+				math.clamp(fixedColor.G * scale, 0, 1),
+				math.clamp(fixedColor.B * scale, 0, 1)
+			)
 		end
 
-		img.Rotation = 0
-		img.Position = basePos
-	end)
-end
+		local updating = false
 
-local function showSingle(img)
-	stopShake()
+		jumpscare:GetPropertyChangedSignal("BackgroundColor3"):Connect(function()
+			if updating then return end
+			updating = true
+			local gameColor = jumpscare.BackgroundColor3
+			jumpscare.BackgroundColor3 = keepBrightness(gameColor)
+			updating = false
+		end)
 
-	img.Visible = true
-	shaking[img] = true
+		jumpscare.BackgroundColor3 = keepBrightness(jumpscare.BackgroundColor3)
 
-	shake(img)
-end
+		local image = jumpscare:WaitForChild("ImageLabel")
+		image.Image = "rbxassetid://15518965649"
+		image.Visible = false
 
-task.spawn(function()
-	while jumpscare.Parent do
-		if active then
-			showSingle(singles[math.random(1, #singles)])
-			task.wait(math.random(1,1) / 100)
-		else
-			task.wait()
-		end
-	end
-end)
-
-task.spawn(function()
-	while jumpscare.Parent do
-		if active then
-			task.wait(0.3)
-
-			local current = {}
-
-			for img in pairs(shaking) do
-				table.insert(current, img)
+		local function colorImages(root)
+			for _, obj in ipairs(root:GetDescendants()) do
+				if obj:IsA("ImageLabel") then
+					obj.ImageColor3 = Color3.fromRGB(71, 44, 138)
+				end
 			end
+		end
 
-			if #current > 0 then
-				local choices = {}
+		colorImages(jumpscare)
 
-				for _, img in ipairs(images) do
-					local ok = true
+		jumpscare.DescendantAdded:Connect(function(obj)
+			if obj:IsA("ImageLabel") then
+				obj.ImageColor3 = Color3.fromRGB(71, 44, 138)
+			end
+		end)
 
-					for _, cur in ipairs(current) do
-						if img == cur then
-							ok = false
-							break
-						end
-					end
+		local ids = {
+			16444302226,
+			16444310736,
+			16444316349,
+			16447907727
+		}
 
-					if ok then
-						table.insert(choices, img)
-					end
+		local images = {}
+
+		for _, id in ipairs(ids) do
+			local clone = image:Clone()
+			clone.Image = "rbxassetid://" .. id
+			clone.Visible = false
+			clone.Parent = jumpscare
+			table.insert(images, clone)
+		end
+
+		for _, img in ipairs(images) do
+			img.Size = UDim2.new(
+				img.Size.X.Scale * 1.3,
+				math.floor(img.Size.X.Offset * 1.3),
+				img.Size.Y.Scale * 1.3,
+				math.floor(img.Size.Y.Offset * 1.3)
+			)
+		end
+
+		local ghosts = {}
+
+		for _, img in ipairs(images) do
+			local ghost = img:Clone()
+			ghost.Visible = false
+			ghost.ImageTransparency = 0.6
+			ghost.ZIndex = img.ZIndex - 1
+			ghost.Size = UDim2.new(
+				img.Size.X.Scale * 1.3,
+				math.floor(img.Size.X.Offset * 1.3),
+				img.Size.Y.Scale * 1.3,
+				math.floor(img.Size.Y.Offset * 1.3)
+			)
+			ghost.Parent = jumpscare
+
+			ghosts[img] = ghost
+		end
+
+		local singles = images
+		local shaking = {}
+
+		local function stopShake()
+			shaking = {}
+
+			for _, img in ipairs(images) do
+				img.Visible = false
+				img.Rotation = 0
+				img.Position = UDim2.new(0.5, 0, 0.5, 0)
+				img.AnchorPoint = Vector2.new(0.5, 0.5)
+			end
+		end
+
+		local function shake(img)
+			local basePos = img.Position
+
+			task.spawn(function()
+				while shaking[img] do
+					img.Rotation = math.random(-8, 8)
+					img.Position = basePos + UDim2.fromOffset(math.random(-4, 4), math.random(-4, 4))
+					task.wait(0.02)
 				end
 
-				if #choices > 0 then
-					local source = choices[math.random(#choices)]
-					local ghost = ghosts[source]
+				img.Rotation = 0
+				img.Position = basePos
+			end)
+		end
 
-					ghost.Position = source.Position
-					ghost.Rotation = 0
-					ghost.Visible = true
+		local function showSingle(img)
+			stopShake()
+			img.Visible = true
+			shaking[img] = true
+			shake(img)
+		end
 
-					local basePos = ghost.Position
-					local alive = true
+		task.spawn(function()
+			while jumpscare.Parent do
+				if active then
+					showSingle(singles[math.random(1, #singles)])
+					task.wait(math.random(1, 1) / 100)
+				else
+					task.wait()
+				end
+			end
+		end)
 
-					task.spawn(function()
-						while alive do
-							ghost.Rotation = math.random(-8, 8)
-							ghost.Position = basePos + UDim2.fromOffset(math.random(-4, 4), math.random(-4, 4))
-							task.wait(0.02)
+		task.spawn(function()
+			while jumpscare.Parent do
+				if active then
+					task.wait(0.3)
+
+					local current = {}
+
+					for img in pairs(shaking) do
+						table.insert(current, img)
+					end
+
+					if #current > 0 then
+						local choices = {}
+
+						for _, img in ipairs(images) do
+							local ok = true
+
+							for _, cur in ipairs(current) do
+								if img == cur then
+									ok = false
+									break
+								end
+							end
+
+							if ok then
+								table.insert(choices, img)
+							end
 						end
 
-						ghost.Rotation = 0
-						ghost.Position = basePos
-					end)
+						if #choices > 0 then
+							local source = choices[math.random(#choices)]
+							local ghost = ghosts[source]
 
-					task.wait(0.5)
+							ghost.Position = source.Position
+							ghost.Rotation = 0
+							ghost.Visible = true
 
-					alive = false
+							local basePos = ghost.Position
+							local alive = true
+
+							task.spawn(function()
+								while alive do
+									ghost.Rotation = math.random(-8, 8)
+									ghost.Position = basePos + UDim2.fromOffset(math.random(-4, 4), math.random(-4, 4))
+									task.wait(0.02)
+								end
+
+								ghost.Rotation = 0
+								ghost.Position = basePos
+							end)
+
+							task.wait(0.5)
+
+							alive = false
+							ghost.Visible = false
+						end
+					end
+				else
+					task.wait()
+				end
+			end
+		end)
+
+		local function update()
+			active = jumpscare.Visible
+
+			if not active then
+				stopShake()
+
+				for _, ghost in pairs(ghosts) do
 					ghost.Visible = false
 				end
 			end
-		else
-			task.wait()
 		end
-	end
-end)
 
-local function update()
-	active = jumpscare.Visible
+		update()
 
-	if not active then
-		stopShake()
+		jumpscare:GetPropertyChangedSignal("Visible"):Connect(update)
 
-		for _, ghost in pairs(ghosts) do
-			ghost.Visible = false
+		local function onImageBig()
+			if imageBig.Visible then
+				imageBig.Image = "rbxassetid://16444316349"
+
+				for _, img in ipairs(images) do
+					img:Destroy()
+				end
+
+				for _, ghost in pairs(ghosts) do
+					ghost:Destroy()
+				end
+
+				table.clear(images)
+				table.clear(ghosts)
+
+				shaking = {}
+				active = false
+			else
+				active = jumpscare.Visible
+			end
 		end
-	end
-end
 
-update()
-
-jumpscare:GetPropertyChangedSignal("Visible"):Connect(update)
-
-local function onImageBig()
-	if imageBig.Visible then
-		imageBig.Image = "rbxassetid://16444316349"
-
-		for _, img in ipairs(images) do
-	img:Destroy()
-end
-
-for _, ghost in pairs(ghosts) do
-	ghost:Destroy()
-end
-
-table.clear(images)
-table.clear(ghosts)
-
-		shaking = {}
-		active = false
-	else
-		active = jumpscare.Visible
-	end
-end
-
-imageBig:GetPropertyChangedSignal("Visible"):Connect(onImageBig)
+		imageBig:GetPropertyChangedSignal("Visible"):Connect(onImageBig)
 	end
 end
 
 local function processEntity(child)
 	task.spawn(function()
-		if child.Name ~= "RushMoving" then
-			return
-		end
+		if child.Name == "AmbushMoving" then
+			local rushNew = child:WaitForChild("RushNew", 3)
+			local attachment = rushNew and rushNew:WaitForChild("Attachment", 3)
+			local particle = attachment and attachment:WaitForChild("ParticleEmitter", 3)
 
-		local rushNew = child:WaitForChild("RushNew", 3)
-		if not rushNew then
-			return
-		end
-
-		for _, obj in ipairs(rushNew:GetDescendants()) do
-			if obj:IsA("ParticleEmitter") then
-				obj.Enabled = false
-			elseif obj:IsA("Sound") then
-				obj.PlaybackSpeed = 0.19
+			if particle then
+				particle.Texture = "rbxassetid://122475073711766"
 			end
-		end
+		elseif child.Name == "RushMoving" then
+			local rushNew = child:WaitForChild("RushNew", 3)
+			if not rushNew then
+				return
+			end
 
-		if FaceModel then
-			local clone = FaceModel:Clone()
-			clone.Parent = rushNew
+			for _, obj in ipairs(rushNew:GetDescendants()) do
+				if obj:IsA("ParticleEmitter") then
+					obj.Enabled = false
+				elseif obj:IsA("Sound") then
+					obj.PlaybackSpeed = 0.19
+				end
+			end
+
+			if FaceModel then
+				local clone = FaceModel:Clone()
+				clone.Parent = rushNew
+			end
 		end
 	end)
 end
