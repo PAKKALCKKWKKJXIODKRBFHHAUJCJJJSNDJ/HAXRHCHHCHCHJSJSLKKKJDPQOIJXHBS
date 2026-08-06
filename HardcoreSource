@@ -366,7 +366,7 @@ local CurrentRooms = workspace:WaitForChild("CurrentRooms")
 
 local conn
 conn = CurrentRooms.DescendantAdded:Connect(function(obj)
-	if obj:IsA("Model") and obj.Name == "4" then
+	if obj:IsA("Model") and obj.Name == "61" then
 		conn:Disconnect()
 
 		for _, entity in ipairs(RoomEntities) do
