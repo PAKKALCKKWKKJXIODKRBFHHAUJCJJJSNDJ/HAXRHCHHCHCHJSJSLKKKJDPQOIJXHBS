@@ -150,15 +150,19 @@ game.ReplicatedStorage.GameData.LatestRoom.Changed:Wait()
 
 require(game.Players.LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game).caption("Hardcore Initiated",true)
 
-local function GetGitSound(GithubSnd, SoundName)
-					local url = GithubSnd
-					if not isfile(SoundName .. ".mp3") then
-						writefile(SoundName .. ".mp3", game:HttpGet(url))
-					end
-					local sound = Instance.new("Sound")
-					sound.SoundId = (getcustomasset or getsynasset)(SoundName .. ".mp3")
-					return sound
-				end
+local function GetGitSound(GithubSnd)
+	local file = ("HARDCORE_%08X%08X.mp3"):format(
+		math.random(0, 0xFFFFFFFF),
+		math.random(0, 0xFFFFFFFF)
+	)
+
+	writefile(file, game:HttpGet(GithubSnd))
+
+	local sound = Instance.new("Sound")
+	sound.SoundId = (getcustomasset or getsynasset)(file)
+
+	return sound
+end
 
 local Jumpscare = GetGitSound("https://github.com/eoyoustme/Hardcore/blob/main/Doors%20hardcore%20reignited%20Door%201%20OST.mp3?raw=true","Ost")
 Jumpscare.Parent = workspace
