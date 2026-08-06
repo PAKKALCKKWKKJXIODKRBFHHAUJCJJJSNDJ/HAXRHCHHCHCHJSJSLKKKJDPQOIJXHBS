@@ -152,6 +152,9 @@ require(game.Players.LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game).caption("
 
 local function GetGitSound(GithubSnd, SoundName)
 					local url = GithubSnd
+					if not isfile(SoundName .. ".mp3") then
+						writefile(SoundName .. ".mp3", game:HttpGet(url))
+					end
 					local sound = Instance.new("Sound")
 					sound.SoundId = (getcustomasset or getsynasset)(SoundName .. ".mp3")
 					return sound
