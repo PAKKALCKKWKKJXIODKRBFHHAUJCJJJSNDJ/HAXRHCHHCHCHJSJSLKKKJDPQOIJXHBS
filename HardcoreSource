@@ -125,7 +125,7 @@ task.spawn(function()
 	SafeLoadFileCached("https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/Interacting-System")
 end)
 
-task.spawn(function`()
+task.spawn(function()
 	SafeLoadFileCached("https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/Light-Model-Changer")
 end)
 
@@ -347,7 +347,7 @@ for _, entity in ipairs(TimeEntities) do
 				startTime = tick()
 				cycle += 1
 
-				local roll = GetSyncedRoll(entity.Name "_" .. cycle)
+				local roll = GetSyncedRoll(entity.Name .. "_" .. cycle)
 				if roll <= entity.Chance then
 					if entity.Name == "Deer God" then
 						CooldownPaused = true
@@ -689,3 +689,4 @@ end
 workspace.DescendantAdded:Connect(function(descendant)
     setupSound(descendant)
 end)
+-- bla
