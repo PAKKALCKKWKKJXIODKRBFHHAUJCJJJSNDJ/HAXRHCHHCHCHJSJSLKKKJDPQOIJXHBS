@@ -99,6 +99,24 @@ local Disabled = false
 local MaxStamina = 115
 local RecoverDelay = false
 local Stamina = MaxStamina
+getgenv().Stamina = 100
+
+getgenv().HalfStamina = function(time)
+	time = time or 0.4
+
+	local start = Stamina
+	local target = start * 0.5
+
+	local t = 0
+
+	while t < time do
+		t += task.wait()
+		local alpha = math.clamp(t / time, 0, 1)
+		Stamina = start + (target - start) * alpha
+	end
+
+	Stamina = target
+end
 
 local function SetSprint(state)
 	Sprinting = state
@@ -187,6 +205,7 @@ elseif not RecoverDelay and Stamina < MaxStamina then
 end
 
 	local percent = Stamina / MaxStamina
+	getgenv().Stamina = percent * 100
 
 	Bar.AnchorPoint = Vector2.new(0, 0.5)
 Bar.Position = UDim2.new(0, 0, 0.5, 0)
