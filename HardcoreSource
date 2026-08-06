@@ -172,7 +172,7 @@ local sound = Instance.new("Sound")
 sound.Name = "CourtSound"
 sound.SoundId = (getcustomasset or getsynasset)(file)
 sound.Volume = 1.5
-sound.RollOffMaxDistance = 40
+sound.RollOffMaxDistance = 50
 sound.Parent = part
 
 sound:Play()
