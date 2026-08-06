@@ -259,6 +259,23 @@ return
 end
 door:SetAttribute("LockedDoorScanned", true)
 
+-- Check điều kiện: Đã có file "LazyGot" VÀ charm "Pure Lazyness" đang được bật (true)
+if isfile("LazyGot") and getgenv().Lazyness == true then
+	task.spawn(function()
+		for _, v in ipairs(door:GetDescendants()) do
+			if v:IsA("ProximityPrompt") then
+				v.HoldDuration = v.HoldDuration * 2
+			end
+		end
+		-- Auto update hỗ trợ các ProximityPrompt được thêm vào sau
+		door.DescendantAdded:Connect(function(child)
+			if child:IsA("ProximityPrompt") and getgenv().Lazyness == true then
+				child.HoldDuration = child.HoldDuration * 2
+			end
+		end)
+	end)
+end
+
 local clone = door:Clone()  
 clone.Name = "DoorClone"  
 clone.Parent = door.Parent  
