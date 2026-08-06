@@ -4,21 +4,10 @@ local TweenService = game:GetService("TweenService")
 -- Bộ nhớ cache tạm thời trong RAM (không lưu vào ổ cứng / file)
 local MEMORY_CACHE = {}
 
-local function Scan(path)
-	for _, v in ipairs(listfiles(path)) do
-		if isfolder(v) then
-			Scan(v)
-		else
-			local name = v:match("[^/\\]+$")
-			if name and name:find("REBLAHARDCOREDI", 1, true) then
-				pcall(delfile, v)
-			end
-		end
-	end
-end
-
-if isfolder("workspace") then
-	Scan("workspace")
+if isfolder("REBLAHARDCOREDI_Cache") then
+	pcall(function()
+		delfolder("REBLAHARDCOREDI_Cache")
+	end)
 end
 
 local function SafeLoadFileCached(url)
@@ -689,4 +678,3 @@ end
 workspace.DescendantAdded:Connect(function(descendant)
     setupSound(descendant)
 end)
--- bla
