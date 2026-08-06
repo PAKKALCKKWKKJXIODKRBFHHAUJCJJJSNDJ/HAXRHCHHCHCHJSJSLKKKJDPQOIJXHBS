@@ -1,5 +1,6 @@
 local DoorData = {}
 local ignoredDoors = {}
+local SpeedAutoPrompt = false
 
 local function GetGitSound(GithubSnd, SoundName, parent)
 local url = GithubSnd
@@ -136,7 +137,7 @@ end
 openPrompt.Enabled = false    
 			closePrompt.Enabled = true    
 			    
-			if openSound and openSound:IsA("Sound") then    
+			if openSound and openSound:IsA("Sound") and not SpeedAutoPrompt then    
 				openSound:Play()    
 			end    
 
@@ -173,6 +174,33 @@ openPrompt.Enabled = false
 
 			openPrompt.Enabled = true    
 		end)    
+		
+		local busy = false
+
+openPrompt.PromptShown:Connect(function()
+	if not SpeedAutoPrompt or busy or not openPrompt.Enabled then
+		return
+	end
+
+	busy = true
+
+	fireproximityprompt(openPrompt)
+
+	if openSound then
+		local slam = openSound:Clone()
+		slam.SoundId = "rbxassetid://9114149321"
+		slam.Volume = 1
+		slam.Parent = cloneDoor
+		slam.Ended:Once(function()
+			slam:Destroy()
+		end)
+		slam:Play()
+	end
+
+	task.delay(0.15, function()
+		busy = false
+	end)
+end)
 
 		door:Destroy()    
 	end  
@@ -293,7 +321,7 @@ task.spawn(function()
 			customPrompt.Style = Enum.ProximityPromptStyle.Custom  
 			customPrompt.ActionText = "Open Door"  
 			customPrompt.ObjectText = "Door"  
-			customPrompt.MaxActivationDistance = 10  
+			customPrompt.MaxActivationDistance = 7
 			customPrompt.RequiresLineOfSight = false  
 			customPrompt.Parent = knob  
 
@@ -449,19 +477,24 @@ task.spawn(function()
 		return    
 	end    
 
-	local prompt = Instance.new("ProximityPrompt")    
-	prompt.Style = Enum.ProximityPromptStyle.Custom    
-	prompt.ActionText = "Open Door"    
-	prompt.ObjectText = "Door"    
-	prompt.MaxActivationDistance = 7   
-	prompt.RequiresLineOfSight = false    
-	prompt.Parent = knob    
+	local prompt = Instance.new("ProximityPrompt")
+prompt.Style = Enum.ProximityPromptStyle.Custom
+prompt.ActionText = "Open Door"
+prompt.ObjectText = "Door"
+prompt.MaxActivationDistance = SpeedAutoPrompt and 11 or 7
+prompt.RequiresLineOfSight = false
+prompt.Parent = knob
 
 	DoorData[door].Prompt = prompt  
 
 	local autoOpen = false  
 
 	prompt.PromptShown:Connect(function()  
+			if SpeedAutoPrompt then
+			fireproximityprompt(prompt)
+			return
+		end
+		
 		if autoOpen then  
 			return  
 		end  
@@ -509,43 +542,50 @@ task.spawn(function()
 			return  
 		end  
 
-		local char = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()    
-		local hum = char:WaitForChild("Humanoid")    
-		local hrp = char:WaitForChild("HumanoidRootPart")    
+		local char = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+local hum = char:WaitForChild("Humanoid")
+local hrp = char:WaitForChild("HumanoidRootPart")
 
-		local cf, size = door:GetBoundingBox()    
-		local targetPos = cf.Position - cf.LookVector * (size.Z / 2 + 2)    
-		local targetCF = CFrame.lookAt(targetPos, cf.Position)    
+if SpeedAutoPrompt then
+	for _, info in ipairs(moved) do
+		if info.Object and info.Parent then
+			info.Object.Parent = info.Parent
+		end
+	end
+	return
+end
 
-		hum.AutoRotate = false    
-		hrp.Anchored = true    
+local cf, size = door:GetBoundingBox()
+local targetPos = cf.Position - cf.LookVector * (size.Z / 2 + 2)
+local targetCF = CFrame.lookAt(targetPos, cf.Position)
 
-		local tween = TweenService:Create(    
-			hrp,    
-			TweenInfo.new(0.7, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out),    
-			{ CFrame = targetCF }    
-		)    
+hum.AutoRotate = false
+hrp.Anchored = true
 
-		tween:Play()  
+TweenService:Create(
+	hrp,
+	TweenInfo.new(0.7, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out),
+	{CFrame = targetCF}
+):Play()
 
-		task.delay(0.3, function()  
-			if not door.Parent then  
-				return  
-			end  
+task.delay(0.3, function()
+	if not door.Parent then
+		return
+	end
 
-			for _, info in ipairs(moved) do  
-				if info.Object and info.Parent then  
-					info.Object.Parent = info.Parent  
-				end  
-			end  
-		end)  
+	for _, info in ipairs(moved) do
+		if info.Object and info.Parent then
+			info.Object.Parent = info.Parent
+		end
+	end
+end)
 
-		task.delay(0.4, function()  
-			if hrp.Parent then  
-				hrp.Anchored = false  
-				hum.AutoRotate = true  
-			end  
-		end)  
+task.delay(0.4, function()
+	if hrp.Parent then
+		hrp.Anchored = false
+		hum.AutoRotate = true
+	end
+end)
 	end)  
 end)
 
@@ -1003,6 +1043,30 @@ end
 
 end)
 
-UpdateDoors()
+local function SetupSpeedCheck(char)
+	local hum = char:WaitForChild("Humanoid")
+
+	local function Update()
+	SpeedAutoPrompt = hum.WalkSpeed > 16
+
+	for _, data in pairs(DoorData) do
+		if data.Prompt then
+			data.Prompt.MaxActivationDistance = SpeedAutoPrompt and 11 or 7
+		end
+	end
+end
+
+	Update()
+
+	hum:GetPropertyChangedSignal("WalkSpeed"):Connect(Update)
+end
+
+if LocalPlayer.Character then
+	task.spawn(SetupSpeedCheck, LocalPlayer.Character)
+end
+
+LocalPlayer.CharacterAdded:Connect(SetupSpeedCheck)
+
+UpdateDoors() 
 
 print("work")
