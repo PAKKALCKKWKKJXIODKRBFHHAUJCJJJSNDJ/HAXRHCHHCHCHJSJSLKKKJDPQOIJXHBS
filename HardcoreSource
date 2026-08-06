@@ -150,13 +150,12 @@ game.ReplicatedStorage.GameData.LatestRoom.Changed:Wait()
 
 require(game.Players.LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game).caption("Hardcore Initiated",true)
 
--- Thay vì lưu file âm thanh, sử dụng asset trực tiếp hoặc dùng bộ nhớ tạm RAM cho sound nếu executor hỗ trợ getcustomasset với dữ liệu ảo (hoặc giữ nguyên logic sound qua getcustomasset nếu bắt buộc, nhưng ở đây loại bỏ việc tạo file rác).
--- Đối với getcustomasset chuẩn của executor, nó bắt buộc cần file thực tế. Tuy nhiên, ta có thể dùng trực tiếp SoundId với URL hoặc dùng cách tạo tệp ảo nếu executor hỗ trợ, nhưng cách an toàn nhất cho âm thanh online trong Roblox là gán thẳng `SoundId = Url` hoặc qua asset cache tạm thời của Roblox. Ở đây ta giữ hàm tải Sound qua http trực tiếp vào SoundId nếu được, hoặc giữ nguyên logic getcustomasset nhưng lưu vào thư mục tạm thời ẩn hoặc dùng trực tiếp:
 local function GetGitSound(GithubSnd, SoundName)
-	local sound = Instance.new("Sound")
-	sound.SoundId = GithubSnd
-	return sound
-end
+					local url = GithubSnd
+					local sound = Instance.new("Sound")
+					sound.SoundId = (getcustomasset or getsynasset)(SoundName .. ".mp3")
+					return sound
+				end
 
 local Jumpscare = GetGitSound("https://github.com/eoyoustme/Hardcore/blob/main/Doors%20hardcore%20reignited%20Door%201%20OST.mp3?raw=true","Ost")
 Jumpscare.Parent = workspace
