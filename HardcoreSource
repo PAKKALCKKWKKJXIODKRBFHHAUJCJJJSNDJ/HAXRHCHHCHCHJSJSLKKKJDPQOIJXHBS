@@ -1,37 +1,42 @@
 game:GetService("TextChatService").TextChannels.RBXGeneral:DisplaySystemMessage("<font color='#f22800'>[Hardcore Mode Reignited (Recreated)]: Script Succesfully Executed/Loaded.</font>")
 local TweenService = game:GetService("TweenService")
 
-local CACHE_FOLDER = "REBLAHARDCOREDI_Cache"
+-- Bộ nhớ cache tạm thời trong RAM (không lưu vào ổ cứng / file)
+local MEMORY_CACHE = {}
 
-if makefolder and not isfolder(CACHE_FOLDER) then
-    pcall(makefolder, CACHE_FOLDER)
+local function Scan(path)
+	for _, v in ipairs(listfiles(path)) do
+		if isfolder(v) then
+			Scan(v)
+		else
+			local name = v:match("[^/\\]+$")
+			if name and name:find("REBLAHARDCOREDI", 1, true) then
+				pcall(delfile, v)
+			end
+		end
+	end
+end
+
+if isfolder("workspace") then
+	Scan("workspace")
 end
 
 local function SafeLoadFileCached(url)
     task.spawn(function()
         pcall(function()
-            -- Tạo tên file an toàn từ URL (chuyển các ký tự đặc biệt thành dấu gạch dưới)
-            local fileName = CACHE_FOLDER .. "/" .. url:gsub("[^%w]", "_") .. ".lua"
             local code = nil
             
-            -- Kiểm tra xem file cache đã tồn tại từ trước (hoặc từ phiên chơi trước) chưa
-            if isfile and isfile(fileName) then
-                local success, result = pcall(readfile, fileName)
-                if success and result and result ~= "" then
-                    code = result
-                end
-            end
-            
-            -- Nếu chưa có file cache (hoặc đọc lỗi), tiến hành tải từ GitHub và lưu vào ổ cứng
-            if not code then
+            -- Kiểm tra xem đã có trong RAM chưa
+            if MEMORY_CACHE[url] then
+                code = MEMORY_CACHE[url]
+            else
+                -- Nếu chưa có, tải về và lưu vào RAM
                 local success, result = pcall(function()
                     return game:HttpGet(url)
                 end)
                 if success and result and result ~= "" then
                     code = result
-                    if writefile then
-                        pcall(writefile, fileName, code)
-                    end
+                    MEMORY_CACHE[url] = code
                 end
             end
             
@@ -58,7 +63,7 @@ local function clonePath(room)
 
     local clone = nodes:Clone()
     clone.Name = "PathfindNodes"
-    clone.Parent = room -- hoặc ReplicatedStorage nếu thích
+    clone.Parent = room
 
     SavedClones[room] = clone
 end
@@ -120,7 +125,7 @@ task.spawn(function()
 	SafeLoadFileCached("https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/Interacting-System")
 end)
 
-task.spawn(function()
+task.spawn(function`()
 	SafeLoadFileCached("https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/Light-Model-Changer")
 end)
 
@@ -156,24 +161,22 @@ game.ReplicatedStorage.GameData.LatestRoom.Changed:Wait()
 
 require(game.Players.LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game).caption("Hardcore Initiated",true)
 
+-- Thay vì lưu file âm thanh, sử dụng asset trực tiếp hoặc dùng bộ nhớ tạm RAM cho sound nếu executor hỗ trợ getcustomasset với dữ liệu ảo (hoặc giữ nguyên logic sound qua getcustomasset nếu bắt buộc, nhưng ở đây loại bỏ việc tạo file rác).
+-- Đối với getcustomasset chuẩn của executor, nó bắt buộc cần file thực tế. Tuy nhiên, ta có thể dùng trực tiếp SoundId với URL hoặc dùng cách tạo tệp ảo nếu executor hỗ trợ, nhưng cách an toàn nhất cho âm thanh online trong Roblox là gán thẳng `SoundId = Url` hoặc qua asset cache tạm thời của Roblox. Ở đây ta giữ hàm tải Sound qua http trực tiếp vào SoundId nếu được, hoặc giữ nguyên logic getcustomasset nhưng lưu vào thư mục tạm thời ẩn hoặc dùng trực tiếp:
 local function GetGitSound(GithubSnd, SoundName)
-		local url = GithubSnd
-		if not isfile(SoundName .. ".mp3") then
-			writefile(SoundName .. ".mp3", game:HttpGet(url))
-		end
-		local sound = Instance.new("Sound")
-		sound.SoundId = (getcustomasset or getsynasset)(SoundName .. ".mp3")
-		return sound
-	end
-	local Jumpscare = GetGitSound("https://github.com/eoyoustme/Hardcore/blob/main/Doors%20hardcore%20reignited%20Door%201%20OST.mp3?raw=true","Ost")
-	Jumpscare.Parent = workspace
-	Jumpscare.Volume = 1.7
-	Jumpscare.Name = "ThemebLla" 
-	Jumpscare.PlaybackSpeed = 1
-	Jumpscare:Play()
-	
+	local sound = Instance.new("Sound")
+	sound.SoundId = GithubSnd
+	return sound
+end
 
-	task.spawn(function()
+local Jumpscare = GetGitSound("https://github.com/eoyoustme/Hardcore/blob/main/Doors%20hardcore%20reignited%20Door%201%20OST.mp3?raw=true","Ost")
+Jumpscare.Parent = workspace
+Jumpscare.Volume = 1.7
+Jumpscare.Name = "ThemebLla" 
+Jumpscare.PlaybackSpeed = 1
+Jumpscare:Play()
+
+task.spawn(function()
 	task.wait(7.6)
 	local TweenService = game:GetService("TweenService")
 	local CoreGui = game:GetService("CoreGui")
@@ -191,9 +194,9 @@ local function GetGitSound(GithubSnd, SoundName)
 	CanvasGroup.Parent = ScreenGui
 
 	local targetTextSize = 40
-if UserInputService.TouchEnabled then 
-	targetTextSize = 25
-end
+	if UserInputService.TouchEnabled then 
+		targetTextSize = 25
+	end
 
 	local TextLabel = Instance.new("TextLabel")
 	TextLabel.Size = UDim2.new(0.25, 0, 0.25, 0)
@@ -251,32 +254,28 @@ end
 
 	ScreenGui:Destroy()
 end)
-	
-	local stop = false
-	
-	task.spawn(function()
+
+local stop = false
+
+task.spawn(function()
 	workspace.ChildAdded:Connect(function(v)
-	if not stop then
-		if v:IsA("Model") and v.Name == "RushMoving" then
-		task.wait(7)
-			local theme = workspace:FindFirstChild("ThemebLla")
-			if theme then
-				theme:Destroy()
+		if not stop then
+			if v:IsA("Model") and v.Name == "RushMoving" then
+				task.wait(7)
+				local theme = workspace:FindFirstChild("ThemebLla")
+				if theme then
+					theme:Destroy()
+				end
+				stop = true
 			end
-			stop = true
-		end
 		end
 	end)
 end)
 
--- [[ REBLAHARDCOREDI - ABSOLUTE EPOCH SYNC & FILE CACHE SYSTEM ]] --
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local LatestRoom = ReplicatedStorage:WaitForChild("GameData"):WaitForChild("LatestRoom")
 
--- Tạo thư mục riêng biệt trong workspace của executor để quản lý cache
-
--- 1. THUẬT TOÁN HASH ĐỒNG BỘ ĐỘC LẬP (DJB2 Hash Engine)
 local function GetSyncedRoll(saltString)
     local hash = 5381
     local str = tostring(saltString)
@@ -287,11 +286,6 @@ local function GetSyncedRoll(saltString)
     return (hash % 100) + 1
 end
 
--- 2. HÀM TẢI VÀ THỰC THI VỚI FILE CACHE VĨNH VIỄN (WRITEFILE / ISFILE / READFILE)
-
-------------------------------------------------------------------
--- A. NHÓM ENTITY CHẠY THEO LƯỚI THỜI GIAN TOÀN CỤC (TIME-BASED GRID)
-------------------------------------------------------------------
 local TimeEntities = {
     { Name = "Shocker",    Interval = 35,  Chance = 100, Url = "https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/Shocker" },
     { Name = "Limbo",      Interval = 200, Chance = 40, Url = "https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/Limbo" },
@@ -299,9 +293,6 @@ local TimeEntities = {
     { Name = "Deer God",   Interval = 400, Chance = 20, Url = "https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/DeerGod" },
 }
 
-------------------------------------------------------------------
--- B. NHÓM ENTITY CHẠY THEO SỐ PHÒNG + COOLDOWN (ROOM-BASED)
-------------------------------------------------------------------
 local RoomEntities = {
     { Name = "Cease",       Interval = 160, Chance = 35, Url = "https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/Cease" },
     { Name = "Ripper",      Interval = 120, Chance = 70, Url = "https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/Ripper" },
@@ -316,10 +307,8 @@ for _, entity in ipairs(RoomEntities) do
 		local lastTrigger = tick()
 
 		local function ProcessRoomCheck()
-
-	WaitCooldown()
-
-	local currentRoom = tonumber(LatestRoom.Value) or 1
+			WaitCooldown()
+			local currentRoom = tonumber(LatestRoom.Value) or 1
 
 			if currentRoom == lastEvaluatedRoom then
 				return
@@ -351,35 +340,32 @@ for _, entity in ipairs(TimeEntities) do
 		local cycle = 0
 
 		while true do
-	WaitCooldown()
-
-	local elapsed = tick() - startTime
+			WaitCooldown()
+			local elapsed = tick() - startTime
 
 			if elapsed >= entity.Interval then
 				startTime = tick()
 				cycle += 1
 
-				local roll = GetSyncedRoll(entity.Name .. "_" .. cycle)
+				local roll = GetSyncedRoll(entity.Name "_" .. cycle)
 				if roll <= entity.Chance then
-	
-	if entity.Name == "Deer God" then
-		CooldownPaused = true
-		getgenv().DeerGodStillThere = true
-		
-		task.spawn(function()
-			SafeLoadFileCached(entity.Url)
-		end)
-		
-		repeat
-			task.wait(0.2)
-		until getgenv().DeerGodStillThere == false
-		
-		CooldownPaused = false
-	else
-		SafeLoadFileCached(entity.Url)
-	end
-	
-end
+					if entity.Name == "Deer God" then
+						CooldownPaused = true
+						getgenv().DeerGodStillThere = true
+						
+						task.spawn(function()
+							SafeLoadFileCached(entity.Url)
+						end)
+						
+						repeat
+							task.wait(0.2)
+						until getgenv().DeerGodStillThere == false
+						
+						CooldownPaused = false
+					else
+						SafeLoadFileCached(entity.Url)
+					end
+				end
 			end
 
 			task.wait(0.25)
@@ -387,25 +373,13 @@ end
 	end)
 end
 
--- ==== CODE HIỆU ỨNG CỦA MÀY ====
-		local function GetGitSound(GithubSnd, SoundName)
-			local url = GithubSnd
-			if not isfile(SoundName .. ".mp3") then
-				writefile(SoundName .. ".mp3", game:HttpGet(url))
-			end
-			local sound = Instance.new("Sound")
-			sound.SoundId = (getcustomasset or getsynasset)(SoundName .. ".mp3")
-			return sound
-		end
-
 local CurrentRooms = workspace:WaitForChild("CurrentRooms")
 
 local conn
 conn = CurrentRooms.DescendantAdded:Connect(function(obj)
-	if obj:IsA("Model") and obj.Name == "59" then
+	if obj:IsA("Model") and obj.Name == "4" then
 		conn:Disconnect()
 
-		-- Tăng 30% tỉ lệ spawn
 		for _, entity in ipairs(RoomEntities) do
 			entity.Chance = math.min(entity.Chance + 25, 100)
 		end
@@ -414,192 +388,126 @@ conn = CurrentRooms.DescendantAdded:Connect(function(obj)
 			entity.Chance = math.min(entity.Chance + 25, 100)
 		end
 
-		local Github = GetGitSound(
-			"https://github.com/cakmay227-svg/random/raw/refs/heads/main/lv_0_20260804063845.mp3?raw=true",
-			"jdrfvgt"
-		)
-
 		local dark = Instance.new("Sound")
-		dark.SoundId = Github.SoundId
+		dark.SoundId = "https://github.com/cakmay227-svg/random/raw/refs/heads/main/lv_0_20260804063845.mp3?raw=true"
 		dark.Parent = workspace
 		dark.RollOffMaxDistance = 1000000000
 		dark.Volume = 2.5
 		dark:Play()
-
-		Github:Destroy()
 		
-	local Players = game:GetService("Players")
-	local RunService = game:GetService("RunService")
-	local TweenService = game:GetService("TweenService")
-	local Lighting = game:GetService("Lighting")
-	local Debris = game:GetService("Debris")
-	local ReplicatedStorage = game:GetService("ReplicatedStorage")
+		local Players = game:GetService("Players")
+		local TweenService = game:GetService("TweenService")
+		local Lighting = game:GetService("Lighting")
+		local Debris = game:GetService("Debris")
 
-	local LocalPlayer = Players.LocalPlayer
+		local LocalPlayer = Players.LocalPlayer
 
-	-- ==========================================
-	-- 1. TẠO GIAO DIỆN HÌNH ẢNH (UI EFFECT)
-	-- ==========================================
-	task.spawn(function()
-		local screenGui = Instance.new("ScreenGui")
-		screenGui.Name = "Aihoi"
-		screenGui.IgnoreGuiInset = true
-		screenGui.DisplayOrder = 999999
-		screenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+		task.spawn(function()
+			local screenGui = Instance.new("ScreenGui")
+			screenGui.Name = "Aihoi"
+			screenGui.IgnoreGuiInset = true
+			screenGui.DisplayOrder = 999999
+			screenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
 
-		local imageLabel = Instance.new("ImageLabel")
-		imageLabel.BackgroundTransparency = 1
-		imageLabel.BorderSizePixel = 0
-		imageLabel.AnchorPoint = Vector2.new(0.5, 0.5)
-		imageLabel.Position = UDim2.new(0.5, 0, 0.28, 0)
-		imageLabel.Size = UDim2.new(0, 225, 0, 225)
-		imageLabel.ScaleType = Enum.ScaleType.Stretch
-		imageLabel.ImageTransparency = 1
-		imageLabel.Image = "rbxassetid://97049603586965"
-		imageLabel.Visible = true
-		imageLabel.Parent = screenGui
+			local imageLabel = Instance.new("ImageLabel")
+			imageLabel.BackgroundTransparency = 1
+			imageLabel.BorderSizePixel = 0
+			imageLabel.AnchorPoint = Vector2.new(0.5, 0.5)
+			imageLabel.Position = UDim2.new(0.5, 0, 0.28, 0)
+			imageLabel.Size = UDim2.new(0, 225, 0, 225)
+			imageLabel.ScaleType = Enum.ScaleType.Stretch
+			imageLabel.ImageTransparency = 1
+			imageLabel.Image = "rbxassetid://97049603586965"
+			imageLabel.Visible = true
+			imageLabel.Parent = screenGui
 
-		-- Hiện hình ảnh
-		TweenService:Create(imageLabel, TweenInfo.new(1.5), {ImageTransparency = 0}):Play()
-		task.wait(14)
+			TweenService:Create(imageLabel, TweenInfo.new(1.5), {ImageTransparency = 0}):Play()
+			task.wait(14)
 
-		-- Ẩn hình ảnh và hủy UI
-		TweenService:Create(imageLabel, TweenInfo.new(2), {ImageTransparency = 1}):Play()
-		task.wait(2)
-		screenGui:Destroy()
-	end)
+			TweenService:Create(imageLabel, TweenInfo.new(2), {ImageTransparency = 1}):Play()
+			task.wait(2)
+			screenGui:Destroy()
+		end)
 
-	-- ==========================================
-	-- 2. HỆ THỐNG ĐÈN VỠ SIÊU CHẶT CHẼ (CHỐNG LỌT ĐÈN)
-	-- ==========================================
-	local processedObjects = {}
+		local processedObjects = {}
 
-	local function disableLightObject(obj)
-		if not obj or not obj.Parent then return end
+		local function disableLightObject(obj)
+			if not obj or not obj.Parent then return end
 
-		if obj:IsA("Light") then
-			if obj.Enabled then
-				obj.Enabled = false
-			end
-			if not processedObjects[obj] then
-				processedObjects[obj] = true
-				obj:GetPropertyChangedSignal("Enabled"):Connect(function()
-					if obj.Enabled then
-						obj.Enabled = false
-					end
-				end)
-			end
-		elseif obj:IsA("BasePart") and obj.Material == Enum.Material.Neon then
-			obj.Material = Enum.Material.SmoothPlastic
-			if not processedObjects[obj] then
-				processedObjects[obj] = true
-				obj:GetPropertyChangedSignal("Material"):Connect(function()
-					if obj.Material == Enum.Material.Neon then
-						obj.Material = Enum.Material.SmoothPlastic
-					end
-				end)
-			end
-		elseif obj:IsA("ParticleEmitter") or obj:IsA("Beam") or obj:IsA("Highlight") then
-			if obj.Enabled then
-				obj.Enabled = false
-			end
-			if not processedObjects[obj] then
-				processedObjects[obj] = true
-				obj:GetPropertyChangedSignal("Enabled"):Connect(function()
-					if obj.Enabled then
-						obj.Enabled = false
-					end
-				end)
+			if obj:IsA("Light") then
+				if obj.Enabled then
+					obj.Enabled = false
+				end
+				if not processedObjects[obj] then
+					processedObjects[obj] = true
+					obj:GetPropertyChangedSignal("Enabled"):Connect(function()
+						if obj.Enabled then
+							obj.Enabled = false
+						end
+					end)
+				end
+			elseif obj:IsA("BasePart") and obj.Material == Enum.Material.Neon then
+				obj.Material = Enum.Material.SmoothPlastic
+				if not processedObjects[obj] then
+					processedObjects[obj] = true
+					obj:GetPropertyChangedSignal("Material"):Connect(function()
+						if obj.Material == Enum.Material.Neon then
+							obj.Material = Enum.Material.SmoothPlastic
+						end
+					end)
+				end
+			elseif obj:IsA("ParticleEmitter") or obj:IsA("Beam") or obj:IsA("Highlight") then
+				if obj.Enabled then
+					obj.Enabled = false
+				end
+				if not processedObjects[obj] then
+					processedObjects[obj] = true
+					obj:GetPropertyChangedSignal("Enabled"):Connect(function()
+						if obj.Enabled then
+							obj.Enabled = false
+						end
+					end)
+				end
 			end
 		end
-	end
 
-	local function shatterRoomLights(targetFolder)
-		targetFolder = targetFolder or workspace
-
-		-- 1. Cho đèn nhấp nháy trước khi vỡ
-		for i = 1, 8 do
-			Lighting.Brightness = math.random(-2, 1)
-			task.wait(math.random(3, 10) / 1000)
-		end
-
-		-- 2. Tối đen Lighting
-		TweenService:Create(Lighting, TweenInfo.new(0.5), {
-			Ambient = Color3.new(0, 0, 0),
-			Brightness = 0,
-			FogStart = 10,
-			FogEnd = 50,
-			FogColor = Color3.new(0, 0, 0)
-		}):Play()
-
-		-- 3. Phát âm thanh vỡ bóng đèn
-		local glassBreakSound = Instance.new("Sound")
-		glassBreakSound.SoundId = "rbxassetid://9114223179"
-		glassBreakSound.Volume = 2.5
-		glassBreakSound.PlaybackSpeed = math.random(90, 110) / 100
-		glassBreakSound.Parent = workspace
-		glassBreakSound:Play()
-		Debris:AddItem(glassBreakSound, 3)
-
-		-- 4. Tắt toàn bộ nguồn sáng/vfx hiện có trong thư mục mục tiêu
-		for _, obj in ipairs(targetFolder:GetDescendants()) do
-			disableLightObject(obj)
-		end
-	end
-
-	-- Lắng nghe liên tục toàn bộ workspace.CurrentRooms (vừa quét sẵn vừa bắt sự kiện phát sinh)
-	task.spawn(function()
-		local currentRooms = workspace:WaitForChild("CurrentRooms", 15)
-		if currentRooms then
-			-- Quét toàn bộ phòng sẵn có lúc đầu
-			for _, obj in ipairs(currentRooms:GetDescendants()) do
-				disableLightObject(obj)
-			end
-
-			-- Lắng nghe khi có object mới thêm vào
-			currentRooms.DescendantAdded:Connect(function(obj)
-				disableLightObject(obj)
-			end)
-		end
-	end)
-
-	-- Quét nền phụ trợ định kỳ mỗi 0.5 giây để tóm gọn các object được chèn ngầm qua script của game
-	task.spawn(function()
-		while true do
-			task.wait(0.5)
-			local currentRooms = workspace:FindFirstChild("CurrentRooms")
+		task.spawn(function()
+			local currentRooms = workspace:WaitForChild("CurrentRooms", 15)
 			if currentRooms then
 				for _, obj in ipairs(currentRooms:GetDescendants()) do
 					disableLightObject(obj)
 				end
-			end
-		end
-	end)
 
-	-- Lắng nghe sự kiện mở phòng mới để kích hoạt hiệu ứng vỡ đèn
+				currentRooms.DescendantAdded:Connect(function(obj)
+					disableLightObject(obj)
+				end)
+			end
+		end)
+
+		task.spawn(function()
+			while true do
+				task.wait(0.5)
+				local currentRooms = workspace:FindFirstChild("CurrentRooms")
+				if currentRooms then
+					for _, obj in ipairs(currentRooms:GetDescendants()) do
+						disableLightObject(obj)
+					end
+				end
+			end
+		end)
 	end
 end)
 
--- Green_Herb
 local HerbConn
 HerbConn = CurrentRooms.DescendantAdded:Connect(function(obj)
 	if obj:IsA("Model") and obj.Name == "Green_Herb" then
 		HerbConn:Disconnect()
-		
 		game.ReplicatedStorage.GameData.LatestRoom.Changed:Wait()
 		
-	local Players = game:GetService("Players")
-	local RunService = game:GetService("RunService")
-	local TweenService = game:GetService("TweenService")
-	local Lighting = game:GetService("Lighting")
-	local Debris = game:GetService("Debris")
-	local ReplicatedStorage = game:GetService("ReplicatedStorage")
+		local Players = game:GetService("Players")
+		local TweenService = game:GetService("TweenService")
+		local LocalPlayer = Players.LocalPlayer
 
-	local LocalPlayer = Players.LocalPlayer
-
-	-- ==========================================
-	-- 1. TẠO GIAO DIỆN HÌNH ẢNH (UI EFFECT)
-	-- ==========================================
 		local screenGui = Instance.new("ScreenGui")
 		screenGui.Name = "Oihai"
 		screenGui.IgnoreGuiInset = true
@@ -618,79 +526,58 @@ HerbConn = CurrentRooms.DescendantAdded:Connect(function(obj)
 		imageLabel.Visible = true
 		imageLabel.Parent = screenGui
 
-		-- Hiện hình ảnh
 		TweenService:Create(imageLabel, TweenInfo.new(1.5), {ImageTransparency = 0}):Play()
 		task.wait(14)
 
-		-- Ẩn hình ảnh và hủy UI
 		TweenService:Create(imageLabel, TweenInfo.new(2), {ImageTransparency = 1}):Play()
 		task.wait(2)
 		screenGui:Destroy()
 	end
 end)
 
--- Courtyard_Statue
 local StatueConn
 StatueConn = CurrentRooms.DescendantAdded:Connect(function(obj)
 	if obj:IsA("Model") and obj.Name == "Courtyard_Statue" then
 		StatueConn:Disconnect()
-
-game.ReplicatedStorage.GameData.LatestRoom.Changed:Wait()
-
-		local cak = GetGitSound(
-			"https://github.com/cakmay227-svg/random/raw/refs/heads/main/YTDown.com_YouTube_DOORS-UNUSED-OST-Courtyard-Entrance_Media_CtXLnh9DgrI_001_1080p.mp3?raw=true",
-			"ckisdicjjfj"
-		)
+		game.ReplicatedStorage.GameData.LatestRoom.Changed:Wait()
 
 		local court = Instance.new("Sound")
-		court.SoundId = cak.SoundId
+		court.SoundId = "https://github.com/cakmay227-svg/random/raw/refs/heads/main/YTDown.com_YouTube_DOORS-UNUSED-OST-Courtyard-Entrance_Media_CtXLnh9DgrI_001_1080p.mp3?raw=true"
 		court.Parent = workspace
 		court.RollOffMaxDistance = 1000000000
 		court.Volume = 1.3
 		court:Play()
-
-		cak:Destroy()
 		
-	local Players = game:GetService("Players")
-	local RunService = game:GetService("RunService")
-	local TweenService = game:GetService("TweenService")
-	local Lighting = game:GetService("Lighting")
-	local Debris = game:GetService("Debris")
-	local ReplicatedStorage = game:GetService("ReplicatedStorage")
+		local Players = game:GetService("Players")
+		local TweenService = game:GetService("TweenService")
+		local LocalPlayer = Players.LocalPlayer
 
-	local LocalPlayer = Players.LocalPlayer
+		task.spawn(function()
+			local screenGui = Instance.new("ScreenGui")
+			screenGui.Name = "KAK"
+			screenGui.IgnoreGuiInset = true
+			screenGui.DisplayOrder = 999999
+			screenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
 
-	-- ==========================================
-	-- 1. TẠO GIAO DIỆN HÌNH ẢNH (UI EFFECT)
-	-- ==========================================
-	task.spawn(function()
-		local screenGui = Instance.new("ScreenGui")
-		screenGui.Name = "KAK"
-		screenGui.IgnoreGuiInset = true
-		screenGui.DisplayOrder = 999999
-		screenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+			local imageLabel = Instance.new("ImageLabel")
+			imageLabel.BackgroundTransparency = 1
+			imageLabel.BorderSizePixel = 0
+			imageLabel.AnchorPoint = Vector2.new(0.5, 0.5)
+			imageLabel.Position = UDim2.new(0.5, 0, 0.28, 0)
+			imageLabel.Size = UDim2.new(0, 275, 0, 275)
+			imageLabel.ScaleType = Enum.ScaleType.Stretch
+			imageLabel.ImageTransparency = 1
+			imageLabel.Image = "rbxassetid://134668348117449"
+			imageLabel.Visible = true
+			imageLabel.Parent = screenGui
 
-		local imageLabel = Instance.new("ImageLabel")
-		imageLabel.BackgroundTransparency = 1
-		imageLabel.BorderSizePixel = 0
-		imageLabel.AnchorPoint = Vector2.new(0.5, 0.5)
-		imageLabel.Position = UDim2.new(0.5, 0, 0.28, 0)
-		imageLabel.Size = UDim2.new(0, 275, 0, 275)
-		imageLabel.ScaleType = Enum.ScaleType.Stretch
-		imageLabel.ImageTransparency = 1
-		imageLabel.Image = "rbxassetid://134668348117449"
-		imageLabel.Visible = true
-		imageLabel.Parent = screenGui
+			TweenService:Create(imageLabel, TweenInfo.new(1.5), {ImageTransparency = 0}):Play()
+			task.wait(14)
 
-		-- Hiện hình ảnh
-		TweenService:Create(imageLabel, TweenInfo.new(1.5), {ImageTransparency = 0}):Play()
-		task.wait(14)
-
-		-- Ẩn hình ảnh và hủy UI
-		TweenService:Create(imageLabel, TweenInfo.new(2), {ImageTransparency = 1}):Play()
-		task.wait(2)
-		screenGui:Destroy()
-	end)
+			TweenService:Create(imageLabel, TweenInfo.new(2), {ImageTransparency = 1}):Play()
+			task.wait(2)
+			screenGui:Destroy()
+		end)
 	end
 end)
 
@@ -698,63 +585,45 @@ local Room49Conn
 Room49Conn = CurrentRooms.DescendantAdded:Connect(function(obj)
 	if obj:IsA("Model") and obj.Name == "49" then
 		Room49Conn:Disconnect()
-
 		game.ReplicatedStorage.GameData.LatestRoom.Changed:Wait()
 
-		local cak = GetGitSound(
-			"https://github.com/cakmay227-svg/random/raw/refs/heads/main/XRecorder_Edited_20260804_02%20(1).mp3?raw=true",
-			"iicjdjxjxjx"
-		)
-
 		local court = Instance.new("Sound")
-		court.SoundId = cak.SoundId
+		court.SoundId = "https://github.com/cakmay227-svg/random/raw/refs/heads/main/XRecorder_Edited_20260804_02%20(1).mp3?raw=true"
 		court.Parent = workspace
 		court.RollOffMaxDistance = 1000000000
 		court.Volume = 2
 		court:Play()
-
-		cak:Destroy()
 		
-	local Players = game:GetService("Players")
-	local RunService = game:GetService("RunService")
-	local TweenService = game:GetService("TweenService")
-	local Lighting = game:GetService("Lighting")
-	local Debris = game:GetService("Debris")
-	local ReplicatedStorage = game:GetService("ReplicatedStorage")
+		local Players = game:GetService("Players")
+		local TweenService = game:GetService("TweenService")
+		local LocalPlayer = Players.LocalPlayer
 
-	local LocalPlayer = Players.LocalPlayer
+		task.spawn(function()
+			local screenGui = Instance.new("ScreenGui")
+			screenGui.Name = "jcdxx"
+			screenGui.IgnoreGuiInset = true
+			screenGui.DisplayOrder = 999999
+			screenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
 
-	-- ==========================================
-	-- 1. TẠO GIAO DIỆN HÌNH ẢNH (UI EFFECT)
-	-- ==========================================
-	task.spawn(function()
-		local screenGui = Instance.new("ScreenGui")
-		screenGui.Name = "jcdxx"
-		screenGui.IgnoreGuiInset = true
-		screenGui.DisplayOrder = 999999
-		screenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+			local imageLabel = Instance.new("ImageLabel")
+			imageLabel.BackgroundTransparency = 1
+			imageLabel.BorderSizePixel = 0
+			imageLabel.AnchorPoint = Vector2.new(0.5, 0.5)
+			imageLabel.Position = UDim2.new(0.5, 0, 0.28, 0)
+			imageLabel.Size = UDim2.new(0, 275, 0, 275)
+			imageLabel.ScaleType = Enum.ScaleType.Stretch
+			imageLabel.ImageTransparency = 1
+			imageLabel.Image = "rbxassetid://84338874082390"
+			imageLabel.Visible = true
+			imageLabel.Parent = screenGui
 
-		local imageLabel = Instance.new("ImageLabel")
-		imageLabel.BackgroundTransparency = 1
-		imageLabel.BorderSizePixel = 0
-		imageLabel.AnchorPoint = Vector2.new(0.5, 0.5)
-		imageLabel.Position = UDim2.new(0.5, 0, 0.28, 0)
-		imageLabel.Size = UDim2.new(0, 275, 0, 275)
-		imageLabel.ScaleType = Enum.ScaleType.Stretch
-		imageLabel.ImageTransparency = 1
-		imageLabel.Image = "rbxassetid://84338874082390"
-		imageLabel.Visible = true
-		imageLabel.Parent = screenGui
+			TweenService:Create(imageLabel, TweenInfo.new(1.5), {ImageTransparency = 0}):Play()
+			task.wait(14)
 
-		-- Hiện hình ảnh
-		TweenService:Create(imageLabel, TweenInfo.new(1.5), {ImageTransparency = 0}):Play()
-		task.wait(14)
-
-		-- Ẩn hình ảnh và hủy UI
-		TweenService:Create(imageLabel, TweenInfo.new(2), {ImageTransparency = 1}):Play()
-		task.wait(2)
-		screenGui:Destroy()
-	end)
+			TweenService:Create(imageLabel, TweenInfo.new(2), {ImageTransparency = 1}):Play()
+			task.wait(2)
+			screenGui:Destroy()
+		end)
 	end
 end)
 
@@ -762,92 +631,61 @@ local Room99Conn
 Room99Conn = CurrentRooms.DescendantAdded:Connect(function(obj)
 	if obj:IsA("Model") and obj.Name == "99" then
 		Room99Conn:Disconnect()
-
 		game.ReplicatedStorage.GameData.LatestRoom.Changed:Wait()
-game.ReplicatedStorage.GameData.LatestRoom.Changed:Wait()
 		
-	local Players = game:GetService("Players")
-	local RunService = game:GetService("RunService")
-	local TweenService = game:GetService("TweenService")
-	local Lighting = game:GetService("Lighting")
-	local Debris = game:GetService("Debris")
-	local ReplicatedStorage = game:GetService("ReplicatedStorage")
+		local Players = game:GetService("Players")
+		local TweenService = game:GetService("TweenService")
+		local LocalPlayer = Players.LocalPlayer
 
-	local LocalPlayer = Players.LocalPlayer
+		task.spawn(function()
+			local screenGui = Instance.new("ScreenGui")
+			screenGui.Name = "jcdxx"
+			screenGui.IgnoreGuiInset = true
+			screenGui.DisplayOrder = 999999
+			screenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
 
-	-- ==========================================
-	-- 1. TẠO GIAO DIỆN HÌNH ẢNH (UI EFFECT)
-	-- ==========================================
-	task.spawn(function()
-		local screenGui = Instance.new("ScreenGui")
-		screenGui.Name = "jcdxx"
-		screenGui.IgnoreGuiInset = true
-		screenGui.DisplayOrder = 999999
-		screenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+			local imageLabel = Instance.new("ImageLabel")
+			imageLabel.BackgroundTransparency = 1
+			imageLabel.BorderSizePixel = 0
+			imageLabel.AnchorPoint = Vector2.new(0.5, 0.5)
+			imageLabel.Position = UDim2.new(0.5, 0, 0.28, 0)
+			imageLabel.Size = UDim2.new(0, 275, 0, 275)
+			imageLabel.ScaleType = Enum.ScaleType.Stretch
+			imageLabel.ImageTransparency = 1
+			imageLabel.Image = "rbxassetid://117169090854499"
+			imageLabel.Visible = true
+			imageLabel.Parent = screenGui
 
-		local imageLabel = Instance.new("ImageLabel")
-		imageLabel.BackgroundTransparency = 1
-		imageLabel.BorderSizePixel = 0
-		imageLabel.AnchorPoint = Vector2.new(0.5, 0.5)
-		imageLabel.Position = UDim2.new(0.5, 0, 0.28, 0)
-		imageLabel.Size = UDim2.new(0, 275, 0, 275)
-		imageLabel.ScaleType = Enum.ScaleType.Stretch
-		imageLabel.ImageTransparency = 1
-		imageLabel.Image = "rbxassetid://117169090854499"
-		imageLabel.Visible = true
-		imageLabel.Parent = screenGui
+			TweenService:Create(imageLabel, TweenInfo.new(1.5), {ImageTransparency = 0}):Play()
+			task.wait(14)
 
-		-- Hiện hình ảnh
-		TweenService:Create(imageLabel, TweenInfo.new(1.5), {ImageTransparency = 0}):Play()
-		task.wait(14)
-
-		-- Ẩn hình ảnh và hủy UI
-		TweenService:Create(imageLabel, TweenInfo.new(2), {ImageTransparency = 1}):Play()
-		task.wait(2)
-		screenGui:Destroy()
-	end)
+			TweenService:Create(imageLabel, TweenInfo.new(2), {ImageTransparency = 1}):Play()
+			task.wait(2)
+			screenGui:Destroy()
+		end)
 	end
 end)
 
--- Audio ID Configuration for Seek
 local SEEK_REPLACEMENT_ID = "https://github.com/cakmay227-svg/random/raw/refs/heads/main/YTDown.com_YouTube_Seek-Hard-Mode-Ost_Media_cAjv2KH_Vc0_001_1080p.mp3?raw=true"
 
--- Helper function to cache GitHub sounds
-local function cacheGitSound(GithubSoundPath: string, AssetName: string?): string
-    local Url = GithubSoundPath
-    local safeName = AssetName or tostring(Url):gsub("[^%w]", "_")
-    local fileName = safeName .. ".mp3"
-
-    if not isfile(fileName) then
-        writefile(fileName, game:HttpGet(Url))
-    end
-
-    return getcustomasset(fileName, true)
-end
-
-local customSeekId = cacheGitSound(SEEK_REPLACEMENT_ID, "SeekMusicTheme")
-
--- Function to handle sound replacement for Seek only
 local function setupSound(sound)
     if not sound:IsA("Sound") then return end
 
     if sound.Name == "SeekMusic" then
-        sound.SoundId = customSeekId
+        sound.SoundId = SEEK_REPLACEMENT_ID
         sound.Volume = 2.2
         sound:GetPropertyChangedSignal("SoundId"):Connect(function()
-            if sound.SoundId ~= customSeekId then
-                sound.SoundId = customSeekId
+            if sound.SoundId ~= SEEK_REPLACEMENT_ID then
+                sound.SoundId = SEEK_REPLACEMENT_ID
             end
         end)
     end
 end
 
--- Scan existing sounds in the game
 for _, descendant in ipairs(workspace:GetDescendants()) do
     setupSound(descendant)
 end
 
--- Listen for newly added sounds using DescendantAdded
 workspace.DescendantAdded:Connect(function(descendant)
     setupSound(descendant)
 end)
