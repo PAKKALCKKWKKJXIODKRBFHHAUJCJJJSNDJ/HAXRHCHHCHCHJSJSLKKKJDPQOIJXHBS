@@ -188,43 +188,48 @@ openPrompt.PromptShown:Connect(function()
 
 	fireproximityprompt(openPrompt)
 	
-	if getgenv().Lazyness then
+	-- Kiểm tra nếu charm "Pure Laziness" đang được bật thì mới cộng stamina khi phá cửa
+if getgenv().Lazyness == true then
 	if getgenv().SetStamina then
-			getgenv().SetStamina(28)
-			else
-			print("bla") 
-			end
-		end
+		getgenv().SetStamina(28)
+	else
+		print("bla") 
+	end
+end
 
+-- Khởi tạo biến đếm số lần phá cửa trong global nếu chưa có
+getgenv().LazyCount = getgenv().LazyCount or 0
+
+-- Kiểm tra xem đã hoàn thành tiến trình chưa (dựa vào file "Lazied" hoặc "LazyGot")
 if not isfile("Lazied") then
-if getgenv().Laziness < 20 then
-	getgenv().Laziness += 1
+	if getgenv().LazyCount < 20 then
+		getgenv().LazyCount += 1
+	end
+
+	if getgenv().LazyCount >= 20 then
+		-- Đánh dấu đã xong để không chạy lại nữa
+		writefile("Lazied", "")
+		
+		task.spawn(function() 
+			if isfile("LazyGot") then
+				return
+			end
+
+			writefile("LazyGot", "")
+
+			local achievementGiver = loadstring(game:HttpGet("https://raw.githubusercontent.com/Voor-Pr00/Achivements/refs/heads/main/Voorpr0"))()
+
+			---====== Display achievement ======---
+			achievementGiver({
+				Title = "Who Needs Keys?",
+				Desc = "The shoulder is a skeleton key, if you think hard enough.",
+				Reason = "Slam open 20 side room doors in a single run by sprinting into them.",
+				Image = "rbxassetid://74337438409089"
+			})
+		end) 
+	end
 end
 
-writefile("Lazied", "")
-
-if getgenv().Laziness >= 20 and not getgenv().Lazied then
-	getgenv().Lazied = true
-
-task.spawn(function() 
-	if isfile("LazyGot") then
-    return
-end
-
-writefile("LazyGot", "")
-
-local achievementGiver = loadstring(game:HttpGet("https://raw.githubusercontent.com/Voor-Pr00/Achivements/refs/heads/main/Voorpr0"))()
-
----====== Display achievement ======---
-achievementGiver({
-    Title = "Who Needs Keys?",
-    Desc = "The shoulder is a skeleton key, if you think hard enough.",
-    Reason = "Slam open 20 side room doors in a single run by sprinting into them.",
-    Image = "rbxassetid://74337438409089"
-})
-end) 
-end
-end
 
 	if openSound then
 		local slam = openSound:Clone()
