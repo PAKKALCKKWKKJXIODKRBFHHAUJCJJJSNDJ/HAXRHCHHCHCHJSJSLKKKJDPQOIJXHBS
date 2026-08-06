@@ -118,6 +118,25 @@ getgenv().HalfStamina = function(time)
 	Stamina = target
 end
 
+getgenv().SetStamina = function(percent, time)
+	time = time or 0.4
+
+	local start = Stamina
+	local currentPercent = (start / MaxStamina) * 100
+	local targetPercent = math.clamp(currentPercent + percent, 0, 100)
+	local target = MaxStamina * (targetPercent / 100)
+
+	local t = 0
+
+	while t < time do
+		t += task.wait()
+		local alpha = math.clamp(t / time, 0, 1)
+		Stamina = start + (target - start) * alpha
+	end
+
+	Stamina = target
+end
+
 local function SetSprint(state)
 	Sprinting = state
 
