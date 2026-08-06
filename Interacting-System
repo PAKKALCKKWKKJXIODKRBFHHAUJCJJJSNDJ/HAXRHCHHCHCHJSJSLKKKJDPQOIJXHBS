@@ -1,6 +1,8 @@
 local DoorData = {}
 local ignoredDoors = {}
 local SpeedAutoPrompt = false
+getgenv().Laziness = 0
+getgenv().Lazied = false
 
 local function GetGitSound(GithubSnd, SoundName, parent)
 local url = GithubSnd
@@ -185,6 +187,49 @@ openPrompt.PromptShown:Connect(function()
 	busy = true
 
 	fireproximityprompt(openPrompt)
+	
+	-- Kiểm tra nếu charm "Pure Laziness" đang được bật thì mới cộng stamina khi phá cửa
+if getgenv().Lazyness == true then
+	if getgenv().SetStamina then
+		getgenv().SetStamina(28)
+	else
+		print("bla") 
+	end
+end
+
+-- Khởi tạo biến đếm số lần phá cửa trong global nếu chưa có
+getgenv().LazyCount = getgenv().LazyCount or 0
+
+-- Kiểm tra xem đã hoàn thành tiến trình chưa (dựa vào file "Lazied" hoặc "LazyGot")
+if not isfile("Lazied") then
+	if getgenv().LazyCount < 20 then
+		getgenv().LazyCount += 1
+	end
+
+	if getgenv().LazyCount >= 20 then
+		-- Đánh dấu đã xong để không chạy lại nữa
+		writefile("Lazied", "")
+		
+		task.spawn(function() 
+			if isfile("LazyGot") then
+				return
+			end
+
+			writefile("LazyGot", "")
+
+			local achievementGiver = loadstring(game:HttpGet("https://raw.githubusercontent.com/Voor-Pr00/Achivements/refs/heads/main/Voorpr0"))()
+
+			---====== Display achievement ======---
+			achievementGiver({
+				Title = "Who Needs Keys?",
+				Desc = "The shoulder is a skeleton key, if you think hard enough.",
+				Reason = "Slam open 20 side room doors in a single run by sprinting into them.",
+				Image = "rbxassetid://74337438409089"
+			})
+		end) 
+	end
+end
+
 
 	if openSound then
 		local slam = openSound:Clone()
@@ -213,6 +258,23 @@ if door:GetAttribute("LockedDoorScanned") then
 return
 end
 door:SetAttribute("LockedDoorScanned", true)
+
+-- Check điều kiện: Đã có file "LazyGot" VÀ charm "Pure Lazyness" đang được bật (true)
+if isfile("LazyGot") and getgenv().Lazyness == true then
+	task.spawn(function()
+		for _, v in ipairs(door:GetDescendants()) do
+			if v:IsA("ProximityPrompt") then
+				v.HoldDuration = v.HoldDuration * 2
+			end
+		end
+		-- Auto update hỗ trợ các ProximityPrompt được thêm vào sau
+		door.DescendantAdded:Connect(function(child)
+			if child:IsA("ProximityPrompt") and getgenv().Lazyness == true then
+				child.HoldDuration = child.HoldDuration * 2
+			end
+		end)
+	end)
+end
 
 local clone = door:Clone()  
 clone.Name = "DoorClone"  
