@@ -690,9 +690,9 @@ local function InitializeCharmList()
 	if not SharedState.ListFolder then return end
 
 	local unlockOrder = 0
-	local upcomingOrder = 1000
-	local tbaOrder = 2000
-	local lockOrder = 3000
+local lockOrder = 1000
+local upcomingOrder = 2000
+local tbaOrder = 3000
 
 	for _, v in ipairs(SharedState.ListFolder:GetChildren()) do
 		if v:IsA("ImageButton") then
@@ -711,19 +711,22 @@ local function InitializeCharmList()
 			if charmConfig then
 				local unlocked = isfile(charmConfig.UnlockFile) or charmConfig.TestMode == true
 
-				if charmConfig.IsTBA then
-					tbaOrder += 1
-					v.LayoutOrder = tbaOrder
-				elseif unlocked and not charmConfig.IsUpcoming then
-					unlockOrder += 1
-					v.LayoutOrder = unlockOrder
-				elseif charmConfig.IsUpcoming then
-					upcomingOrder += 1
-					v.LayoutOrder = upcomingOrder
-				else
-					lockOrder += 1
-					v.LayoutOrder = lockOrder
-				end
+		if charmConfig.IsTBA then
+	tbaOrder += 1
+	v.LayoutOrder = tbaOrder
+
+elseif unlocked and not charmConfig.IsUpcoming then
+	unlockOrder += 1
+	v.LayoutOrder = unlockOrder
+
+elseif not unlocked and not charmConfig.IsUpcoming then
+	lockOrder += 1
+	v.LayoutOrder = lockOrder
+
+elseif charmConfig.IsUpcoming then
+	upcomingOrder += 1
+	v.LayoutOrder = upcomingOrder
+end
 			end
 
 			if shouldShow then
