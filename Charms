@@ -1,0 +1,745 @@
+-- ============================================================================
+-- CONFIGURATION & GLOBAL VARIABLES
+-- ============================================================================
+local CONFIG = {
+	Files = {
+		LobbyFile = "LobbyFrame.txt",
+		ButtonFile = "ButtonCharms.txt"
+	},
+	Urls = {
+		LobbyGui = "https://raw.githubusercontent.com/lynguyen26031993-design/-u/refs/heads/main/Place_74871629393921_Frame_LobbyFrame_1785934723.txt",
+		ButtonGui = "https://raw.githubusercontent.com/lynguyen26031993-design/-u/refs/heads/main/Place_74871629393921_TextButton_ButtonCharms_1785943384.txt"
+	},
+	Names = {
+		ParentUI = "MainUI",
+		GuiName = "CharmsThingy",
+		CharmsFolder = "Charms",
+		CloseButton = "CloseButton",
+		ListFolder = "List",
+		EffectsFolder = "Effects",
+		DownsidesLabel = "Downsides",
+		UpsidesLabel = "Upsides",
+		MainFrame = "Frame",
+		ApplyButton = "Apply",
+		AppliedButton = "Applied",
+		UnlockLabel = "Unlock",
+		ImageObj = "ImageLabel",
+		DescLabel = "Desc",
+        TaglineLabel = "Tagline",
+		TitleLabel = "Title"
+	},
+	DisplaySettings = {
+		ShowAllByDefault = false 
+	},
+	Charms = {
+		Laziness = {
+			Visible = true,
+			GetGenVar = "Lazyness",
+			UnlockFile = "LazyGot",
+			TestMode = false,
+			IsUpcoming = false,
+			IsTBA = false, -- Thêm config TBA (true sẽ ẩn tất cả icons và đặt ở cuối hàng)
+			Data = {
+				Downsides = '<font color="rgb(255,222,189)">DOWNSIDES</font>\n- Unlocking doors with a key takes twice as long\n- Half stamima will be reduced when player uses tracking keys power',
+				Upsides = '<font color="rgb(255,222,189)">UPSIDES</font>\n+ Every sideroom door bash pays back 28 stamina and a burst of speed\n+ Track key in room where player is in',
+				Image = "rbxassetid://105951848239499",
+				Desc = "Locked doors are a suggestion. Lower a shoulder, pay in bruises, and walk right through.. just don't expect keys to feel like helping anymore.",
+				Tagline = '"Effort is overrated."',
+				Title = "Pure Laziness",
+				Unlock = "Unlock: Slam open 20 side room doors in a single run by sprinting into them."
+			}
+		},
+		Accursed = {
+			Visible = false,
+			GetGenVar = "AccursedCharm",
+			UnlockFile = "AccursedGot",
+			TestMode = false,
+			IsUpcoming = false,
+			IsTBA = true,
+			Data = {
+				Downsides = '<font color="rgb(255,222,189)">DOWNSIDES</font>\n- Upcoming',
+				Upsides = '<font color="rgb(255,222,189)">UPSIDES</font>\n+ Upcoming',
+				Image = "",
+				Desc = "",
+				Tagline = '""',
+				Title = "Accursed",
+				Unlock = "Unlock: Upcoming."
+			}
+		},
+		Adrenaline = {
+			Visible = true,
+			GetGenVar = "AdrenalineCharm",
+			UnlockFile = "AdrenalineGot",
+			TestMode = false,
+			IsUpcoming = false,
+			IsTBA = false,
+			Data = {
+				Downsides = '<font color="rgb(255,222,189)">DOWNSIDES</font>\n- You cannot sprint',
+				Upsides = '<font color="rgb(255,222,189)">UPSIDES</font>\n+ The closer to death, the faster you move',
+				Image = "rbxassetid://104874764918679",
+				Desc = "Your legs only remember how to run when death leans in close. The rest of the time, they refuse to hurry at all.",
+				Tagline = '"Fear is fuel."',
+				Title = "Adrenaline",
+				Unlock = "Unlock: Survive 10 entity attacks without hiding."
+			}
+		},
+		CharmTile = {
+			Visible = false,
+			GetGenVar = "CharmTileCharm",
+			UnlockFile = "CharmTileGot",
+			TestMode = false,
+			IsUpcoming = false,
+			IsTBA = false,
+			Data = {
+				Downsides = '<font color="rgb(255,222,189)">DOWNSIDES</font>\n- ???',
+				Upsides = '<font color="rgb(255,222,189)">UPSIDES</font>\n+ ???',
+				Image = "",
+				Desc = "???",
+				Tagline = '"???"',
+				Title = "CharmTile",
+				Unlock = "Unlock: ???"
+			}
+		},
+		Favored = {
+			Visible = true,
+			GetGenVar = "FavoredCharm",
+			UnlockFile = "FavoredGot",
+			TestMode = false,
+			IsUpcoming = false,
+			IsTBA = true,
+			Data = {
+				Downsides = '<font color="rgb(255,222,189)">DOWNSIDES</font>\n- ???',
+				Upsides = '<font color="rgb(255,222,189)">UPSIDES</font>\n+ ???',
+				Image = "",
+				Desc = "???",
+				Tagline = '"???"',
+				Title = "Favored",
+				Unlock = "Unlock: ???"
+			}
+		},
+		Glass = {
+			Visible = true,
+			GetGenVar = "GlassCharm",
+			UnlockFile = "GlassGot",
+			TestMode = false,
+			IsUpcoming = false,
+			IsTBA = true,
+			Data = {
+				Downsides = '<font color="rgb(255,222,189)">DOWNSIDES</font>\n- ???',
+				Upsides = '<font color="rgb(255,222,189)">UPSIDES</font>\n+ ???',
+				Image = "",
+				Desc = "???",
+				Tagline = '"???"',
+				Title = "Glass",
+				Unlock = "Unlock: ???"
+			}
+		},
+		Keen = {
+			Visible = true,
+			GetGenVar = "KeenCharm",
+			UnlockFile = "KeenGot",
+			TestMode = false,
+			IsUpcoming = false,
+			IsTBA = true,
+			Data = {
+				Downsides = '<font color="rgb(255,222,189)">DOWNSIDES</font>\n- ???',
+				Upsides = '<font color="rgb(255,222,189)">UPSIDES</font>\n+ ???',
+				Image = "",
+				Desc = "???",
+				Tagline = '"???"',
+				Title = "Keen",
+				Unlock = "Unlock: ???"
+			}
+		},
+		Timid = {
+			Visible = true,
+			GetGenVar = "TimidCharm",
+			UnlockFile = "TimidGot",
+			TestMode = false,
+			IsUpcoming = true,
+			IsTBA = true,
+			Data = {
+				Downsides = '<font color="rgb(255,222,189)">DOWNSIDES</font>\n- ???',
+				Upsides = '<font color="rgb(255,222,189)">UPSIDES</font>\n+ ???',
+				Image = "",
+				Desc = "???",
+				Tagline = '"???"',
+				Title = "Timid",
+				Unlock = "Unlock: ???"
+			}
+		},
+		Wired = {
+			Visible = true,
+			GetGenVar = "WiredCharm",
+			UnlockFile = "WiredGot",
+			TestMode = false,
+			IsUpcoming = false,
+			IsTBA = true,
+			Data = {
+				Downsides = '<font color="rgb(255,222,189)">DOWNSIDES</font>\n- ???',
+				Upsides = '<font color="rgb(255,222,189)">UPSIDES</font>\n+ ???',
+				Image = "",
+				Desc = "???",
+				Tagline = '"???"',
+				Title = "Wired",
+				Unlock = "Unlock: ???"
+			}
+		},
+		BackpackPlus = {
+			Visible = true,
+			GetGenVar = "BackpackPlusCharm",
+			UnlockFile = "BackpackPlusGot",
+			TestMode = false,
+			IsUpcoming = false,
+			IsTBA = true,
+			Data = {
+				Downsides = '<font color="rgb(255,222,189)">DOWNSIDES</font>\n- ???',
+				Upsides = '<font color="rgb(255,222,189)">UPSIDES</font>\n+ ???',
+				Image = "",
+				Desc = "???",
+				Tagline = '"???"',
+				Title = "BackpackPlus",
+				Unlock = "Unlock: ???"
+			}
+		}
+	},
+	DefaultData = {
+		Downsides = '<font color="rgb(255,222,189)">DOWNSIDES</font>\n- ???',
+		Upsides = '<font color="rgb(255,222,189)">UPSIDES</font>\n+ ???',
+		Image = "",
+		Desc = "???",
+		Tagline = '"???"',
+		Title = "???",
+		Unlock = "Unlock: ???"
+	},
+	Animation = {
+		ScaleMultiplier = 1.08,
+		TweenDuration = 0.1,
+		TextPopDuration = 0.5,
+		TextPopOffset = 8
+	}
+}
+
+-- Initialize Global Variables from Config
+for _, charmInfo in pairs(CONFIG.Charms) do
+	if charmInfo.GetGenVar then
+		getgenv()[charmInfo.GetGenVar] = false
+	end
+end
+
+-- Services & Shared Variables
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local LocalPlayer = Players.LocalPlayer
+
+local SharedState = {
+	Gui = nil,
+	CharmsFolder = nil,
+	EffectsFolder = nil,
+	ListFolder = nil,
+	MainFrame = nil,
+	DownsidesLabel = nil,
+	UpsidesLabel = nil,
+	ApplyButton = nil,
+	AppliedButton = nil,
+	UnlockLabel = nil,
+	ImageObj = nil,
+	DescLabel = nil,
+	TaglineLabel = nil,
+	TitleLabel = nil,
+	CurrentSelectedCharm = nil
+}
+
+-- Forward declaration of RefreshCharmListUI function
+local RefreshCharmListUI
+
+-- ============================================================================
+-- HELPER & CORE FUNCTIONS
+-- ============================================================================
+
+local function LoadGui(file, url)
+	if not isfile(file) then
+		writefile(file, game:HttpGet(url))
+	end
+	return game:GetObjects(getcustomasset(file))[1]
+end
+
+local function ApplyAnimationToButton(btn)
+	local size = btn.Size
+	local big = UDim2.new(
+		size.X.Scale * CONFIG.Animation.ScaleMultiplier, size.X.Offset,
+		size.Y.Scale * CONFIG.Animation.ScaleMultiplier, size.Y.Offset
+	)
+	local info = TweenInfo.new(CONFIG.Animation.TweenDuration, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)  
+
+	btn.MouseButton1Down:Connect(function()  
+		TweenService:Create(btn, info, { Size = big }):Play()  
+	end)  
+
+	local function Reset()  
+		TweenService:Create(btn, info, { Size = size }):Play()  
+	end  
+
+	btn.MouseButton1Up:Connect(Reset)  
+	btn.MouseLeave:Connect(Reset)
+end
+
+local function SetupTextPopAnimation(lbl, delayTime)
+	if not lbl then return function() end end
+	local pos = lbl.Position
+	local busy = false
+
+	local function Play()  
+		if busy then return end  
+		busy = true  
+
+		task.delay(delayTime or 0, function()  
+			lbl.Position = pos + UDim2.new(0, 0, 0, CONFIG.Animation.TextPopOffset)  
+			TweenService:Create(  
+				lbl,  
+				TweenInfo.new(CONFIG.Animation.TextPopDuration, Enum.EasingStyle.Back, Enum.EasingDirection.Out),  
+				{ Position = pos }  
+			):Play()  
+			task.wait(CONFIG.Animation.TextPopDuration)  
+			busy = false  
+		end)  
+	end  
+
+	lbl:GetPropertyChangedSignal("Text"):Connect(Play)  
+	return Play
+end
+
+local function CacheGuiReferences(gui)
+	SharedState.Gui = gui
+	SharedState.CharmsFolder = gui:FindFirstChild(CONFIG.Names.CharmsFolder, true)
+	
+	if SharedState.CharmsFolder then
+		SharedState.EffectsFolder = SharedState.CharmsFolder:FindFirstChild(CONFIG.Names.EffectsFolder, true)
+		SharedState.ListFolder = SharedState.CharmsFolder:FindFirstChild(CONFIG.Names.ListFolder, true)
+		SharedState.MainFrame = SharedState.CharmsFolder:FindFirstChild(CONFIG.Names.MainFrame, true)
+		
+		if SharedState.EffectsFolder then
+			SharedState.DownsidesLabel = SharedState.EffectsFolder:FindFirstChild(CONFIG.Names.DownsidesLabel, true)
+			SharedState.UpsidesLabel = SharedState.EffectsFolder:FindFirstChild(CONFIG.Names.UpsidesLabel, true)
+		end
+		
+		if SharedState.MainFrame then
+			SharedState.ApplyButton = SharedState.MainFrame:FindFirstChild(CONFIG.Names.ApplyButton, true)
+			SharedState.AppliedButton = SharedState.MainFrame:FindFirstChild(CONFIG.Names.AppliedButton, true)
+			SharedState.UnlockLabel = SharedState.MainFrame:FindFirstChild(CONFIG.Names.UnlockLabel, true)
+			SharedState.ImageObj = SharedState.MainFrame:FindFirstChild(CONFIG.Names.ImageObj, true)
+			SharedState.DescLabel = SharedState.MainFrame:FindFirstChild(CONFIG.Names.DescLabel, true)
+			if SharedState.DescLabel then
+				SharedState.TaglineLabel = SharedState.DescLabel.Parent:FindFirstChild(CONFIG.Names.TaglineLabel)
+			end
+			SharedState.TitleLabel = SharedState.MainFrame:FindFirstChild(CONFIG.Names.TitleLabel, true)
+		end
+	end
+end
+
+local function UpdateCharmInfo(charmName, data)
+	SharedState.CurrentSelectedCharm = charmName
+	local charmConfig = CONFIG.Charms[charmName]
+
+	if SharedState.DownsidesLabel then
+		SharedState.DownsidesLabel.RichText = true
+		SharedState.DownsidesLabel.Text = data.Downsides
+	end
+
+	if SharedState.UpsidesLabel then
+		SharedState.UpsidesLabel.RichText = true
+		SharedState.UpsidesLabel.Text = data.Upsides
+	end
+
+	if SharedState.ApplyButton and SharedState.AppliedButton then
+		if charmConfig then
+			local isUnlocked = isfile(charmConfig.UnlockFile) or charmConfig.TestMode == true
+			local isApplied = false
+
+			for _, cfg in pairs(CONFIG.Charms) do
+				if cfg.GetGenVar and getgenv()[cfg.GetGenVar] then
+					isApplied = (cfg == charmConfig)
+					break
+				end
+			end
+
+			if not isUnlocked then
+				SharedState.ApplyButton.Visible = false
+				SharedState.AppliedButton.Visible = false
+				if SharedState.UnlockLabel then SharedState.UnlockLabel.Visible = true end
+			elseif isApplied then
+				SharedState.ApplyButton.Visible = false
+				SharedState.AppliedButton.Visible = true
+				if SharedState.UnlockLabel then SharedState.UnlockLabel.Visible = false end
+			else
+				SharedState.ApplyButton.Visible = true
+				SharedState.AppliedButton.Visible = false
+				if SharedState.UnlockLabel then SharedState.UnlockLabel.Visible = false end
+			end
+		else
+			SharedState.ApplyButton.Visible = false
+			SharedState.AppliedButton.Visible = false
+			if SharedState.UnlockLabel then SharedState.UnlockLabel.Visible = false end
+		end
+	end
+
+	if SharedState.ImageObj and SharedState.ImageObj:IsA("ImageLabel") then
+		if data.Image ~= "" then
+			SharedState.ImageObj.Image = data.Image
+		else
+			SharedState.ImageObj.Image = ""
+		end
+	end
+
+	if SharedState.DescLabel then
+		SharedState.DescLabel.Text = data.Desc
+	end
+
+	if SharedState.TaglineLabel then
+		SharedState.TaglineLabel.Text = data.Tagline
+	end
+
+	if SharedState.TitleLabel then
+		SharedState.TitleLabel.Text = data.Title
+	end
+
+	if SharedState.UnlockLabel then
+		SharedState.UnlockLabel.Text = data.Unlock
+	end
+end
+
+local function SetupButtonInteractions()
+	if not SharedState.ApplyButton or not SharedState.AppliedButton then return end
+
+	if not SharedState.ApplyButton:GetAttribute("Connected") then
+		SharedState.ApplyButton:SetAttribute("Connected", true)
+
+		SharedState.ApplyButton.MouseButton1Click:Connect(function()
+			local currentName = SharedState.CurrentSelectedCharm
+			if not currentName then
+				return
+			end
+
+			local charmConfig = CONFIG.Charms[currentName]
+			if not charmConfig or not (isfile(charmConfig.UnlockFile) or charmConfig.TestMode == true) then
+				return
+			end
+
+			-- Unapply tất cả charm đang bật
+			for _, cfg in pairs(CONFIG.Charms) do
+				if cfg.GetGenVar then
+					getgenv()[cfg.GetGenVar] = false
+				end
+			end
+
+			-- Apply charm mới
+			if charmConfig.GetGenVar then
+				getgenv()[charmConfig.GetGenVar] = true
+			end
+
+			SharedState.ApplyButton.Visible = false
+			SharedState.AppliedButton.Visible = true
+
+			if SharedState.UnlockLabel then
+				SharedState.UnlockLabel.Visible = false
+			end
+
+			RefreshCharmListUI()
+		end)
+
+		SharedState.AppliedButton.MouseButton1Click:Connect(function()
+			local currentName = SharedState.CurrentSelectedCharm
+			if not currentName then return end
+			local charmConfig = CONFIG.Charms[currentName]
+			if not charmConfig then return end
+
+			if charmConfig.GetGenVar then
+				getgenv()[charmConfig.GetGenVar] = false
+			end
+
+			SharedState.AppliedButton.Visible = false
+			SharedState.ApplyButton.Visible = true
+
+			RefreshCharmListUI()
+		end)
+	end
+end
+
+RefreshCharmListUI = function()
+	if not SharedState.ListFolder then return end
+
+	for _, v in ipairs(SharedState.ListFolder:GetChildren()) do
+		if v:IsA("ImageButton") then
+			local charmConfig = CONFIG.Charms[v.Name]
+			if charmConfig then
+				local unlocked = isfile(charmConfig.UnlockFile) or charmConfig.TestMode == true
+				local isApplied = charmConfig.GetGenVar and getgenv()[charmConfig.GetGenVar] == true
+
+				local icons = v:FindFirstChild("Icons")
+				if icons then
+					local star = icons:FindFirstChild("Star")
+					local question = icons:FindFirstChild("Question")
+					local upcoming = icons:FindFirstChild("Upcoming")
+
+					if charmConfig.IsTBA then
+						if star then star.Visible = false end
+						if question then question.Visible = false end
+						if upcoming then upcoming.Visible = false end
+					elseif charmConfig.IsUpcoming then
+						if star then star.Visible = false end
+						if question then question.Visible = false end
+					elseif unlocked then
+						-- Chỉ hiện Star nếu charm này đang được apply, hết apply thì Star tự ẩn
+						if star and star:IsA("ImageLabel") then
+							star.Visible = isApplied
+						end
+						if question then question.Visible = false end
+						if upcoming then upcoming.Visible = false end
+					else
+						if star then star.Visible = false end
+						if question then question.Visible = true end
+						if upcoming then upcoming.Visible = false end
+					end
+				end
+			end
+		end
+	end
+end
+
+local function InitializeCharmList()
+	if not SharedState.ListFolder then return end
+
+	local unlockOrder = 0
+	local upcomingOrder = 1000
+	local tbaOrder = 2000
+	local lockOrder = 3000
+
+	for _, v in ipairs(SharedState.ListFolder:GetChildren()) do
+		if v:IsA("ImageButton") then
+
+			local charmConfig = CONFIG.Charms[v.Name]
+			local shouldShow = false
+
+			if charmConfig then
+				shouldShow = charmConfig.Visible
+			else
+				shouldShow = CONFIG.DisplaySettings.ShowAllByDefault
+			end
+
+			v.Visible = shouldShow
+			
+			if charmConfig then
+				local unlocked = isfile(charmConfig.UnlockFile) or charmConfig.TestMode == true
+
+				if charmConfig.IsTBA then
+					tbaOrder += 1
+					v.LayoutOrder = tbaOrder
+				elseif unlocked and not charmConfig.IsUpcoming then
+					unlockOrder += 1
+					v.LayoutOrder = unlockOrder
+				elseif charmConfig.IsUpcoming then
+					upcomingOrder += 1
+					v.LayoutOrder = upcomingOrder
+				else
+					lockOrder += 1
+					v.LayoutOrder = lockOrder
+				end
+			end
+
+			if shouldShow then
+				ApplyAnimationToButton(v)
+
+				local icons = v:FindFirstChild("Icons")
+				if icons then
+					local star = icons:FindFirstChild("Star")
+					local question = icons:FindFirstChild("Question")
+					local upcoming = icons:FindFirstChild("Upcoming")
+
+					if charmConfig then
+						local unlocked = isfile(charmConfig.UnlockFile) or charmConfig.TestMode == true
+						local isApplied = charmConfig.GetGenVar and getgenv()[charmConfig.GetGenVar] == true
+
+						if charmConfig.IsTBA then
+							-- Ẩn tất cả các icon nếu IsTBA = true
+							if star then star.Visible = false end
+							if question then question.Visible = false end
+							if upcoming then upcoming.Visible = false end
+						elseif charmConfig.IsUpcoming then
+							if upcoming and upcoming:IsA("ImageLabel") then
+								upcoming.Image = "rbxassetid://85509926410946"
+								upcoming.Visible = true
+							end
+							if star then star.Visible = false end
+							if question then question.Visible = false end
+						elseif unlocked then
+							v.ImageTransparency = 0
+							
+							-- Chỉ hiện Star khi charm này đang được apply
+							if star and star:IsA("ImageLabel") then 
+								star.Visible = isApplied 
+							end
+							if question then question.Visible = false end
+							if upcoming then upcoming.Visible = false end
+						else
+							if star then star.Visible = false end
+							if question then question.Visible = true end
+							if upcoming then upcoming.Visible = false end
+						end
+					end
+				end
+
+				v.MouseButton1Click:Connect(function()
+					local data = charmConfig and charmConfig.Data or CONFIG.DefaultData
+					UpdateCharmInfo(v.Name, data)
+				end)
+			end
+		end
+	end
+end
+
+local function InitializeGui()
+	local gui = LoadGui(CONFIG.Files.LobbyFile, CONFIG.Urls.LobbyGui)
+	if not gui then return end
+
+	gui.Parent = LocalPlayer.PlayerGui:WaitForChild(CONFIG.Names.ParentUI)
+	gui.Name = CONFIG.Names.GuiName
+
+	CacheGuiReferences(gui)
+
+	if SharedState.CharmsFolder then
+		local closeBtn = SharedState.CharmsFolder:FindFirstChild(CONFIG.Names.CloseButton)
+		if closeBtn then closeBtn:Destroy() end
+		SharedState.CharmsFolder.Visible = false
+
+		local button = LoadGui(CONFIG.Files.ButtonFile, CONFIG.Urls.ButtonGui)
+		if button then
+			button.Parent = gui
+			ApplyAnimationToButton(button)
+
+			if button:IsA("TextButton") then
+				button.MouseButton1Click:Connect(function()
+					SharedState.CharmsFolder.Visible = not SharedState.CharmsFolder.Visible
+				end)
+			end
+		end
+
+		local popUp = SetupTextPopAnimation(SharedState.UpsidesLabel, 0)
+		local popDown = SetupTextPopAnimation(SharedState.DownsidesLabel, 0.1)
+
+		SharedState.CharmsFolder:GetPropertyChangedSignal("Visible"):Connect(function()
+			if SharedState.CharmsFolder.Visible then
+				popUp()
+				popDown()
+			end
+		end)
+
+		SetupButtonInteractions()
+		
+		task.spawn(function()
+			UpdateCharmInfo("Default", CONFIG.DefaultData)
+		end)
+
+		InitializeCharmList()
+	end
+
+	return gui
+end
+
+-- ============================================================================
+-- SCRIPT EXECUTION
+-- ============================================================================
+
+SharedState.Gui = InitializeGui()
+
+game.ReplicatedStorage.GameData.LatestRoom.Changed:Wait()
+
+if SharedState.Gui then
+	SharedState.Gui:Destroy()
+	SharedState.Gui = nil
+end
+
+local function CheckAndPlayAutoEffects()
+	for charmName, charmConfig in pairs(CONFIG.Charms) do
+		if charmConfig.GetGenVar and getgenv()[charmConfig.GetGenVar] == true then
+			task.spawn(function()
+				local playerGui = LocalPlayer:FindFirstChildOfClass("PlayerGui")
+				if playerGui then
+					local effectScreenGui = Instance.new("ScreenGui")
+					effectScreenGui.Name = charmName .. "EffectScreen"
+					effectScreenGui.ResetOnSpawn = false
+					effectScreenGui.IgnoreGuiInset = true
+					effectScreenGui.DisplayOrder = 9999
+					effectScreenGui.Parent = playerGui
+
+					local textLabel = Instance.new("TextLabel")
+					textLabel.Name = charmName .. "Effect"
+					textLabel.AnchorPoint = Vector2.new(0.5, 0.5)
+					textLabel.Position = UDim2.new(0.5, 0, 0.5, 0)
+					textLabel.Size = UDim2.new(50, 0, 50, 0)
+					textLabel.BackgroundTransparency = 1
+					textLabel.BorderSizePixel = 0
+					textLabel.Font = Enum.Font.Oswald
+					textLabel.Text = charmConfig.Data and charmConfig.Data.Title or charmName
+					textLabel.TextScaled = true
+					textLabel.TextColor3 = Color3.fromRGB(255, 222, 189)
+					textLabel.TextTransparency = 1
+					textLabel.TextStrokeTransparency = 0
+					textLabel.TextStrokeColor3 = Color3.new()
+					textLabel.ZIndex = 9999
+					textLabel.Parent = effectScreenGui
+					
+					local gradient = Instance.new("UIGradient")
+					gradient.Color = ColorSequence.new({
+						ColorSequenceKeypoint.new(0.00, Color3.fromRGB(255, 222, 189)),
+						ColorSequenceKeypoint.new(0.35, Color3.fromRGB(255, 222, 189)),
+						ColorSequenceKeypoint.new(0.65, Color3.fromRGB(255, 213, 46)),
+						ColorSequenceKeypoint.new(1.00, Color3.fromRGB(255, 213, 46))
+					})
+					gradient.Rotation = 90
+					gradient.Parent = textLabel
+
+					local tweenInfo1 = TweenInfo.new(1.5, Enum.EasingStyle.Sine, Enum.EasingDirection.Out)
+					local tween1 = TweenService:Create(textLabel, tweenInfo1, {
+						Size = UDim2.new(0, 1200, 0, 200),
+						Position = UDim2.new(0.5, 0, 0.5, 0),
+						TextTransparency = 0
+					})
+
+					tween1:Play()
+					tween1.Completed:Wait()
+
+					task.wait(3)
+
+					local tween2 = TweenService:Create(
+						textLabel,
+						TweenInfo.new(0.8, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+						{
+							Size = UDim2.new(0, 1600, 0, 260),
+							Position = UDim2.new(0.5, 0, 0.5, 0)
+						}
+					)
+					tween2:Play()
+					tween2.Completed:Wait()
+
+					task.wait(2)
+
+					local tween3 = TweenService:Create(
+						textLabel,
+						TweenInfo.new(0.6, Enum.EasingStyle.Quad, Enum.EasingDirection.In),
+						{
+							Position = UDim2.new(0.5, 0, -0.3, 0)
+						}
+					)
+					tween3:Play()
+					tween3.Completed:Wait()
+
+					effectScreenGui:Destroy()
+				end
+
+				print("work: " .. charmName)
+			end)
+		end
+	end
+end
+
+CheckAndPlayAutoEffects()
