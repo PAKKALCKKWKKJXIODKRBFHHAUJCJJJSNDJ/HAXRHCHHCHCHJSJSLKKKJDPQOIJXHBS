@@ -27,6 +27,56 @@ local function GetGitSound(GithubSnd, SoundName)
 					sound.SoundId = (getcustomasset or getsynasset)(SoundName .. ".mp3")
 					return sound
 				end
+				
+				local Players = game:GetService("Players")
+
+local Player = Players.LocalPlayer
+local Character = Player.Character or Player.CharacterAdded:Wait()
+
+local HidingFound = false
+local CheckingHiding = false
+
+local function CheckHiding()
+	CheckingHiding = true
+	HidingFound = false
+
+	task.spawn(function()
+		while CheckingHiding do
+			if Character:GetAttribute("Hiding") == true then
+				HidingFound = true
+				break
+			end
+
+			task.wait(0.1)
+		end
+	end)
+end
+
+
+local function CheckNoHidingCount()
+CheckingHiding = false
+
+if not HidingFound then
+		getgenv().NoHidingCount += 1
+	end
+
+	if getgenv().NoHidingCount >= 10 then
+		if not isfile("AdrenalineGot") then
+			writefile("AdrenalineGot", "-- Adrenaline unlocked")
+
+			local achievementGiver = loadstring(game:HttpGet("https://raw.githubusercontent.com/Voor-Pr00/Achivements/refs/heads/main/Voorpr0"))()
+
+			---====== Display achievement ======---
+			achievementGiver({
+				Title = "White Knuckles",
+				Desc = "Just a hallway, the thing in it, and a heart that refuses to quit.",
+				Reason = "Survive 10 entity attacks without hiding.",
+				Image = "rbxassetid://99618297248695"
+			})
+			
+		end
+	end
+end
 
 local TweenService = game:GetService("TweenService")
 
@@ -128,7 +178,7 @@ local entity = Spawner:Create({
 		Delay = 2
 	},
 	Damage = {
-		Enabled = true,
+		Enabled = false,
 		Range = 50,
 		Amount = 0.001
 	},
@@ -149,6 +199,10 @@ local entity = Spawner:Create({
 
 entity:SetCallback("OnSpawned", function()
 	print("Entity has spawned")
+	
+	task.spawn(function() 
+	CheckHiding()
+	end) 
 	
 	local _Sound = Instance.new('Sound')
 
@@ -674,6 +728,10 @@ end)
 
 entity:SetCallback("OnDespawning", function()
 	print("Entity is despawning")
+	task.spawn(function() 
+	CheckNoHidingCount()
+	end) 
+	
 	task.spawn(function() 
 	if getgenv()._GUESTLYRIPPERRR_ALREADY_EXECUTED then
     return
