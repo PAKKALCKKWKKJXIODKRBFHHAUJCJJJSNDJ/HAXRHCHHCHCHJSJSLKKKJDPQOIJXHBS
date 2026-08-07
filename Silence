@@ -220,7 +220,7 @@ end)
 
 local BloodRoom = {}
 
-local id = "rbxassetid://109694760281913"
+local id = "rbxassetid://11306695974"
 local rots = {90, 180, 270}
 
 local textures = {}
