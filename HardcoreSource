@@ -1148,7 +1148,7 @@ require(game.Players.LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game).caption("
 
 local Jumpscare = GetGitSound("https://github.com/eoyoustme/Hardcore/blob/main/Doors%20hardcore%20reignited%20Door%201%20OST.mp3?raw=true","Ost")
 Jumpscare.Parent = workspace
-Jumpscare.Volume = 1.7
+Jumpscare.Volume = 1.3
 Jumpscare.Name = "ThemebLla" 
 Jumpscare.PlaybackSpeed = 1
 Jumpscare:Play()
