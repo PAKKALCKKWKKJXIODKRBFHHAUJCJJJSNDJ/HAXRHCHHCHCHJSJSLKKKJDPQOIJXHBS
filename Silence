@@ -12,7 +12,60 @@ local _Idx57 = LoadModel(
 		"silencismdj.txt",
 		"https://raw.githubusercontent.com/lynguyen26031993-design/-u/refs/heads/main/Place_131351567799504_Model_Silence_1785827465.txt"
 	)
+	
+	local Players = game:GetService("Players")
 
+local Player = Players.LocalPlayer
+local Character = Player.Character or Player.CharacterAdded:Wait()
+
+local HidingFound = false
+local CheckingHiding = false
+
+local function CheckHiding()
+	CheckingHiding = true
+	HidingFound = false
+
+	task.spawn(function()
+		while CheckingHiding do
+			if Character:GetAttribute("Hiding") == true then
+				HidingFound = true
+				break
+			end
+
+			task.wait(0.1)
+		end
+	end)
+end
+
+
+local function CheckNoHidingCount()
+CheckingHiding = false
+
+if not HidingFound then
+		getgenv().NoHidingCount += 1
+	end
+
+	if getgenv().NoHidingCount >= 10 then
+		if not isfile("AdrenalineGot") then
+			writefile("AdrenalineGot", "-- Adrenaline unlocked")
+
+			local achievementGiver = loadstring(game:HttpGet("https://raw.githubusercontent.com/Voor-Pr00/Achivements/refs/heads/main/Voorpr0"))()
+
+			---====== Display achievement ======---
+			achievementGiver({
+				Title = "White Knuckles",
+				Desc = "Just a hallway, the thing in it, and a heart that refuses to quit.",
+				Reason = "Survive 10 entity attacks without hiding.",
+				Image = "rbxassetid://99618297248695"
+			})
+			
+		end
+	end
+end
+
+task.spawn(function() 
+CheckHiding()
+end) 
 
 function GitAud(soundgit, filename)
 	local file = filename..".mp3"
@@ -1907,6 +1960,9 @@ end
 		end
 		
 		_Idx57:Destroy()
+		task.spawn(function() 
+CheckNoHidingCount()
+end) 
 		entityMoving = false
 	end)
 end
@@ -2045,6 +2101,10 @@ entityMoving = false
 chasing = false
 entityLocked = false
 _Idx57:Destroy()
+
+task.spawn(function() 
+CheckNoHidingCount()
+end) 
 
 return true
 end
