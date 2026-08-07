@@ -15,6 +15,56 @@ function light(tim,color0,color1)
 	end
 end
 
+local Players = game:GetService("Players")
+
+local Player = Players.LocalPlayer
+local Character = Player.Character or Player.CharacterAdded:Wait()
+
+local HidingFound = false
+local CheckingHiding = false
+
+local function CheckHiding()
+	CheckingHiding = true
+	HidingFound = false
+
+	task.spawn(function()
+		while CheckingHiding do
+			if Character:GetAttribute("Hiding") == true then
+				HidingFound = true
+				break
+			end
+
+			task.wait(0.1)
+		end
+	end)
+end
+
+
+local function CheckNoHidingCount()
+CheckingHiding = false
+
+if not HidingFound then
+		getgenv().NoHidingCount += 1
+	end
+
+	if getgenv().NoHidingCount >= 10 then
+		if not isfile("AdrenalineGot") then
+			writefile("AdrenalineGot", "-- Adrenaline unlocked")
+
+			local achievementGiver = loadstring(game:HttpGet("https://raw.githubusercontent.com/Voor-Pr00/Achivements/refs/heads/main/Voorpr0"))()
+
+			---====== Display achievement ======---
+			achievementGiver({
+				Title = "White Knuckles",
+				Desc = "Just a hallway, the thing in it, and a heart that refuses to quit.",
+				Reason = "Survive 10 entity attacks without hiding.",
+				Image = "rbxassetid://99618297248695"
+			})
+			
+		end
+	end
+end
+
 local Reboundcolor = Instance.new("ColorCorrectionEffect",game.Lighting) game.Debris:AddItem(Reboundcolor,24)
 Reboundcolor.Name = "Bla"
 Reboundcolor.TintColor = Color3.fromRGB(65, 138, 255) Reboundcolor.Saturation = -0.7 Reboundcolor.Contrast = 0.2
@@ -137,6 +187,10 @@ local entity = Spawner:Create({
 
 entity:SetCallback("OnSpawned", function()
 	print("Entity has spawned")
+	task.spawn(function() 
+	CheckHiding()
+	end) 
+	
 	task.spawn(function()
 	local function GetGitSound(GithubSnd, SoundName)
 		local url = GithubSnd
@@ -216,6 +270,9 @@ end)
 
 entity:SetCallback("OnDespawning", function()
 	print("Entity is despawning")
+	task.spawn(function() 
+	CheckNoHidingCount()
+	end) 
 end)
 
 entity:SetCallback("OnDespawned", function()
