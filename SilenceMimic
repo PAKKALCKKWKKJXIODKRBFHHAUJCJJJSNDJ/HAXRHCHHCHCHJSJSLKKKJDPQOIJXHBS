@@ -1,0 +1,983 @@
+local TweenService = game:GetService("TweenService")
+
+local function LoadModel(file, url)
+	if not isfile(file) then
+		writefile(file, game:HttpGet(url))
+	end
+
+	return game:GetObjects(getcustomasset(file))[1]
+end
+
+local _Idx57 = LoadModel(
+		"a60silence",
+		"https://github.com/lynguyen26031993-design/-u/raw/refs/heads/main/Multimonster%20(1).rbxm"
+	)
+
+function GitAud(soundgit, filename)
+	local file = filename..".mp3"
+
+	if not isfile(file) then
+		writefile(file, game:HttpGet(soundgit))
+	end
+
+	return (getcustomasset or getsynasset)(file)
+end
+
+local function GetGitSound(GithubSnd, SoundName)
+	local url = GithubSnd
+	local file = SoundName .. ".mp3"
+
+	if not isfile(file) then
+		writefile(file, game:HttpGet(url))
+	end
+
+	local sound = Instance.new("Sound")
+	sound.SoundId = (getcustomasset or getsynasset)(file)
+	return sound
+end
+
+local noChase = false
+local currentEntityRoom
+local stopChaseTrigger = false
+local finalRoom = false
+local Fail
+
+
+function CustomGitSound(soundlink, volume, distance, filename, soundName, parent, looped, mode, emitter)
+	local sound = Instance.new("Sound")
+
+	sound.SoundId = GitAud(soundlink, filename)
+	sound.Parent = parent or workspace
+
+	sound.Volume = volume or 1
+
+	sound.RollOffMaxDistance = distance or 100
+	sound.RollOffMinDistance = 5
+
+	if mode then
+		sound.RollOffMode = mode
+	end
+
+	sound.EmitterSize = emitter or 100000
+
+	sound.PlaybackSpeed = 1
+	sound.Name = soundName or "bgtheme"
+	sound.Looped = looped or false
+
+	return sound
+end
+
+
+_Idx57.Parent = workspace
+_Idx57.Name = "A60ButSilence"
+local chaseTrigger = false
+
+
+
+task.spawn(function()
+	local player = game.Players.LocalPlayer
+
+	repeat
+		task.wait()
+	until _Idx57:FindFirstChild("Multi")
+
+	while _Idx57.Parent do
+
+		if noChase or stopChaseTrigger then
+			chaseTrigger = false
+			task.wait(0.2)
+			continue
+		end
+
+		local char = player.Character
+		local hrp = char and char:FindFirstChild("HumanoidRootPart")
+
+		chaseTrigger = false
+
+		if hrp then
+			local distance = (
+				hrp.Position - _Idx57.Multi.Position
+			).Magnitude
+
+			if distance <= 65 then
+
+				local oldPos = hrp.Position
+
+				task.wait(0.2)
+
+				if not noChase 
+				and not stopChaseTrigger then
+					local isCrouching = char:GetAttribute("Crouching") == true
+					local hasMoved = (hrp.Position - oldPos).Magnitude > 0.5
+
+					if hasMoved and not isCrouching then
+						chaseTrigger = true
+					end
+				end
+			end
+		end
+
+		task.wait(0.2)
+	end
+end)
+
+local playerTriggered = false
+local entityLocked = false
+local entityMoving = false
+local lockedCFrame
+local chasing = false
+
+local function GetPlayerRoom()
+	local char = game.Players.LocalPlayer.Character
+	local hrp = char and char:FindFirstChild("HumanoidRootPart")
+
+	if not hrp then return end
+
+	for _,room in pairs(workspace.CurrentRooms:GetChildren()) do
+		local cf,size = room:GetBoundingBox()
+
+		local pos = cf:PointToObjectSpace(hrp.Position)
+
+		if math.abs(pos.X) <= size.X/2
+		and math.abs(pos.Y) <= size.Y/2
+		and math.abs(pos.Z) <= size.Z/2 then
+
+			return room
+		end
+	end
+end
+
+task.spawn(function() 
+local SCREAM = GetGitSound("https://github.com/lynguyen26031993-design/-u/raw/refs/heads/main/Lhouijie%20Almendras%20-%20Multimonster_silence_scream%20-%201786119426713%202026-08-07%2020_17.mp3?raw=true","nllakkjdjjjejj")
+SCREAM.Parent = _Idx57.Multi
+SCREAM.Volume = 5
+SCREAM.Name = "SCREAMOFA60BLA" 
+SCREAM.PlaybackSpeed = 1
+SCREAM.RollOffMaxDistance = 165
+end) 
+
+
+task.spawn(function()
+	CustomGitSound(
+	"https://github.com/lynguyen26031993-design/-u/raw/refs/heads/main/Lhouijie%20Almendras%20-%20Multimonster_silence_scream%20-%201786119426713%202026-08-07%2020_17.mp3?raw=true",
+	0,
+	25000,
+	"njcjjkks",
+	"BOKKOMOFFHSJEJSJSJ",
+	_Idx57.Multi,
+	false,
+	Enum.RollOffMode.Linear,
+	10000
+)
+end)
+
+local scream
+
+repeat
+	scream = _Idx57.Multi:FindFirstChild("SCREAMOFA60BLA")
+	task.wait()
+until scream
+
+local boom
+
+repeat
+	boom = _Idx57.Multi:FindFirstChild("BOKKOMOFFHSJEJSJSJ")
+	task.wait()
+until boom
+
+local TweenService = game:GetService("TweenService")
+
+local gui = Instance.new("ScreenGui")
+gui.IgnoreGuiInset = true
+gui.Parent = game:GetService("CoreGui")
+
+local img = Instance.new("ImageLabel")
+img.Parent = gui
+img.Size = UDim2.fromScale(1, 1)
+img.Position = UDim2.fromScale(0.5, 0.5)
+img.AnchorPoint = Vector2.new(0.5, 0.5)
+img.BackgroundTransparency = 1
+img.Image = "rbxassetid://101455003929771"
+img.ScaleType = Enum.ScaleType.Stretch
+
+local tween = TweenService:Create(
+	img,
+	TweenInfo.new(1.5, Enum.EasingStyle.Linear),
+	{ImageTransparency = 1}
+)
+
+tween:Play()
+
+task.spawn(function()
+	while img.Parent do
+		img.Rotation += 180
+		task.wait(0.05)
+	end
+end)
+
+task.spawn(function() 
+tween.Completed:Wait()
+gui:Destroy()
+end) 
+
+local BloodRoom = {}
+
+local id = "rbxassetid://11306695974"
+local rots = {90, 180, 270}
+
+local textures = {}
+local surfaceGuis = {}
+
+local enabled = false
+local rotationThread
+
+function BloodRoom.Enable(room)
+	if enabled then
+		return
+	end
+
+	enabled = true
+
+	task.spawn(function()
+		for _, v in ipairs(room:GetDescendants()) do
+			if not enabled then break end
+			if v:IsA("BasePart") and not (v.Transparency == 1 and v.CanCollide) then
+
+				for _, face in ipairs(Enum.NormalId:GetEnumItems()) do
+					if not enabled then break end
+					local tex = Instance.new("Texture")
+					tex.Texture = "rbxassetid://11306695974"
+					tex.Color3 = Color3.fromRGB(170, 85, 255)
+					tex.Face = face
+					tex.StudsPerTileU = 48
+					tex.StudsPerTileV = 48
+					tex.Transparency = 0.66
+					tex.Parent = v
+
+					table.insert(textures, tex)
+
+					-- Cho phép mỗi texture tự động chạy hiệu ứng fade out sau 0.5 giây kể từ khi xuất hiện
+					task.delay(0.5, function()
+						if tex and tex.Parent then
+							local tw = TweenService:Create(tex, TweenInfo.new(4, Enum.EasingStyle.Linear), {Transparency = 1})
+							tw:Play()
+							tw.Completed:Connect(function()
+								tex:Destroy()
+							end)
+						end
+					end)
+				end
+				
+				task.wait(0.01)
+			end
+		end
+	end)
+
+	rotationThread = task.spawn(function()
+		while enabled do
+			task.wait(1)
+
+			for i = #textures, 1, -1 do
+				local tex = textures[i]
+
+				if tex.Parent then
+					tex.Rotation = rots[math.random(#rots)]
+				else
+					table.remove(textures, i)
+				end
+			end
+		end
+	end)
+end
+
+function BloodRoom.Disable()
+	if not enabled then
+		return
+	end
+
+	enabled = false
+
+	-- Vẫn giữ nguyên cơ chế dọn dẹp bộ nhớ của bạn
+	table.clear(textures)
+
+	for _, gui in ipairs(surfaceGuis) do
+		if gui.Parent then
+			gui:Destroy()
+		end
+	end
+
+	table.clear(surfaceGuis)
+end
+
+
+
+local _call60 = _Idx57:FindFirstChildWhichIsA("BasePart")
+local _CurrentRooms62 = workspace.CurrentRooms
+
+
+local roomQueue = {}
+local visited = {}
+local running = false
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
+
+local camera = workspace.CurrentCamera
+
+
+local function ImpactEffect()
+
+	local player = Players.LocalPlayer
+	local char = player.Character
+
+	if not char then return end
+
+
+	local hrp = char:FindFirstChild("HumanoidRootPart")
+	local entityRoot = _Idx57.Multi
+
+	if not hrp or not entityRoot then return end
+
+
+	local distance = (
+		hrp.Position - entityRoot.Position
+	).Magnitude
+
+
+	local oldFov = camera.FieldOfView
+
+
+
+	if distance <= 100 then
+
+		local fovLock = true
+
+		RunService:BindToRenderStep(
+			"ForceImpactFOV",
+			Enum.RenderPriority.Camera.Value + 5,
+			function()
+				if fovLock then
+					camera.FieldOfView = 120
+				end
+			end
+		)
+
+
+		task.delay(0.25,function()
+
+			fovLock = false
+
+			RunService:UnbindFromRenderStep(
+				"ForceImpactFOV"
+			)
+
+
+			local value = Instance.new("NumberValue")
+			value.Value = 120
+
+
+			value.Changed:Connect(function(v)
+				camera.FieldOfView = v
+			end)
+
+
+			TweenService:Create(
+				value,
+				TweenInfo.new(
+					2,
+					Enum.EasingStyle.Quad,
+					Enum.EasingDirection.Out
+				),
+				{
+					Value = oldFov
+				}
+			):Play()
+
+
+			task.delay(2,function()
+				value:Destroy()
+			end)
+		end)
+	end
+
+
+
+	if distance < 100 then
+
+		local duration = 2.5
+		local start = tick()
+
+
+		local power = math.clamp(
+			1 - (distance / 300),
+			0.05,
+			1
+		)
+
+
+		local velocity = Vector3.new(
+			math.random(-100,100),
+			220,
+			math.random(-100,100)
+		)
+
+
+		RunService:BindToRenderStep(
+			"EntityImpactShake",
+			Enum.RenderPriority.Camera.Value + 6,
+			function(dt)
+
+				local t = tick() - start
+
+
+				local alpha =
+					1 - math.clamp(
+						t / duration,
+						0,
+						1
+					)
+
+
+				if alpha <= 0 then
+					RunService:UnbindFromRenderStep(
+						"EntityImpactShake"
+					)
+					return
+				end
+
+
+				velocity *= math.pow(0.0005,dt)
+
+
+				local kick =
+					velocity
+					*
+					alpha
+					*
+					power
+
+
+				local sway = Vector3.new(
+					math.sin(tick()*3),
+					math.sin(tick()*4),
+					math.cos(tick()*2)
+				)
+
+
+				sway *= 15 * alpha * power
+
+
+				camera.CFrame *=
+					CFrame.new(
+						kick.X/100,
+						kick.Y/100,
+						kick.Z/100
+					)
+					*
+					CFrame.Angles(
+						math.rad(sway.X + kick.X/5),
+						math.rad(sway.Y),
+						math.rad(sway.Z + kick.Z/5)
+					)
+
+			end
+		)
+
+
+	else
+
+		local shakePower = 2
+		local speed = 45
+		local fadeSpeed = 2
+
+		RunService:BindToRenderStep(
+			"EntityFarShake",
+			Enum.RenderPriority.Camera.Value + 6,
+			function(dt)
+
+				if shakePower > 0 then
+					shakePower = math.max(0, shakePower - fadeSpeed * dt)
+				else
+					RunService:UnbindFromRenderStep("EntityFarShake")
+					return
+				end
+
+				local t = tick() * speed
+
+				local x = math.sin(t * 1.00) * shakePower / 100
+				local y = math.cos(t * 1.35) * shakePower / 100
+				local z = math.sin(t * 0.82) * shakePower / 100
+
+				local pitch = math.rad(math.sin(t * 0.90) * shakePower * 0.45)
+				local yaw   = math.rad(math.cos(t * 1.20) * shakePower * 0.35)
+				local roll  = math.rad(math.sin(t * 1.60) * shakePower * 0.60)
+
+				camera.CFrame *=
+					CFrame.new(x, y, z)
+					* CFrame.Angles(pitch, yaw, roll)
+			end
+		)
+
+	end
+end
+
+
+local function addRoom(room)
+	local number = tonumber(room.Name)
+
+	if number and not visited[number] then
+		visited[number] = true
+
+		table.insert(roomQueue,{
+			room = room,
+			number = number
+		})
+
+		table.sort(roomQueue,function(a,b)
+			return a.number < b.number
+		end)
+	end
+end
+
+
+
+for _,room in pairs(_CurrentRooms62:GetChildren()) do
+	addRoom(room)
+end
+
+
+
+_CurrentRooms62.ChildAdded:Connect(function(room)
+	addRoom(room)
+end)
+
+local function GetHighestRoom()
+	local highest = -math.huge
+	local result = nil
+
+	for _,room in pairs(_CurrentRooms62:GetChildren()) do
+		local num = tonumber(room.Name)
+
+		if num and num > highest then
+			highest = num
+			result = room
+		end
+	end
+
+	return result
+end
+
+
+local function SpawnInRoom(room)
+if chasing then
+	return true
+end
+
+currentEntityRoom = room
+
+local highestRoom = GetHighestRoom()
+
+if highestRoom == room then
+	finalRoom = true
+	stopChaseTrigger = true
+	noChase = true
+	chaseTrigger = false
+end
+
+	local parts = room:FindFirstChild("Parts")
+
+	if not parts then
+		return
+	end
+
+	local floor
+
+repeat
+	task.wait(0.1)
+
+	local parts = room:FindFirstChild("Parts")
+
+	if parts then
+		floor = parts:FindFirstChild("Floor")
+	end
+
+until floor or not room.Parent
+
+
+if not floor or not _call60 then
+	return
+end
+
+
+	local target = floor.CFrame
+
+	_call60.CFrame = target + Vector3.new(0,22,0)
+	
+	for _,v in ipairs(room:GetDescendants()) do
+	if v:IsA("PointLight")
+	or v:IsA("SpotLight")
+	or v:IsA("SurfaceLight") then
+
+		local originalBrightness = v.Brightness
+
+		v.Brightness = originalBrightness * 3
+
+		task.spawn(function()
+			task.wait(0.5)
+
+			local tween = TweenService:Create(
+				v,
+				TweenInfo.new(
+					2,
+					Enum.EasingStyle.Quad,
+					Enum.EasingDirection.Out
+				),
+				{
+					Brightness = originalBrightness
+				}
+			)
+
+			tween:Play()
+		end)
+	end
+end
+
+	
+	for _,v in ipairs(_Idx57:GetDescendants()) do
+	if v:IsA("PointLight") then
+		v.Enabled = false
+	end
+end
+
+local light = Instance.new("PointLight")
+light.Parent = _Idx57.Multi
+light.Color = Color3.fromRGB(255,0,0)
+light.Range = 70
+light.Brightness = 5
+
+	task.spawn(function()
+		task.wait(0.5)
+
+		local tween = TweenService:Create(
+			light,
+			TweenInfo.new(
+				2,
+				Enum.EasingStyle.Quad,
+				Enum.EasingDirection.Out
+			),
+			{
+				Range = 0
+			}
+		)
+
+		tween:Play()
+		tween.Completed:Wait()
+	end)
+	
+	task.spawn(ImpactEffect)
+
+
+	local boom = _Idx57.Multi.BOKKOMOFFHSJEJSJSJ
+	local scream = _Idx57.Multi.SCREAMOFA60BLA
+
+
+	boom:Stop()
+
+	boom.TimePosition = 0
+
+
+	boom:Play()
+	scream:Play()
+
+
+	local tween = TweenService:Create(
+		_call60,
+		TweenInfo.new(
+			0.5,
+			Enum.EasingStyle.Quad,
+			Enum.EasingDirection.Out
+		),
+		{
+			CFrame = target + Vector3.new(0,6,0)
+		}
+	)
+
+	tween:Play()
+
+task.spawn(function() 
+tween.Completed:Wait()
+if room == GetPlayerRoom() then
+BloodRoom.Enable(room)
+end
+	
+	local char = Players.LocalPlayer.Character
+	local hrp = char and char:FindFirstChild("HumanoidRootPart")
+
+	if hrp then
+		lockedCFrame = _call60.CFrame
+
+		local lastPos = hrp.Position
+
+				task.spawn(function()
+			local watchingRoom = room
+
+			while _Idx57.Parent 
+			and not entityLocked 
+			and not finalRoom 
+			and not stopChaseTrigger do
+				if currentEntityRoom ~= watchingRoom then
+					break
+				end
+
+				if GetPlayerRoom() ~= watchingRoom and not chaseTrigger then
+					task.wait()
+					continue
+				end
+				
+				local isCrouching = char and char:GetAttribute("Crouching") == true
+				local hasMoved = (hrp.Position - lastPos).Magnitude > 0.1
+
+				if not finalRoom and ((hasMoved and not isCrouching) or chaseTrigger) then
+					entityMoving = true
+					entityLocked = false
+					chasing = true
+
+local hiding = false
+
+task.spawn(function()
+	local player = game.Players.LocalPlayer
+
+	while chasing and _Idx57.Parent do
+		local char = player.Character
+
+		if char then
+			hiding = char:GetAttribute("Hiding") ~= nil
+		else
+			hiding = false
+		end
+
+		task.wait()
+	end
+end)
+
+local char = Players.LocalPlayer.Character
+local hrp = char and char:FindFirstChild("HumanoidRootPart")
+
+if hrp then
+	local oldY = _call60.Position.Y
+	local speed = 20
+
+	task.spawn(function()
+		while _Idx57.Parent and entityMoving and not noChase do
+
+			local target = Vector3.new(
+				hrp.Position.X,
+				oldY,
+				hrp.Position.Z
+			)
+
+			local current = _call60.Position
+
+			local direction = target - current
+			local distance = direction.Magnitude
+
+			if distance < 3 and not noChase then
+
+				if hiding then
+					chasing = false
+					noChase = true
+					entityMoving = false
+					_Idx57:Destroy()
+					entityMoving = false
+					break
+				else
+					chasing = false
+					entityMoving = false
+
+					local player = game.Players.LocalPlayer
+					local humanoid = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+
+					if humanoid then
+						humanoid:TakeDamage(1000)
+					end
+
+					pcall(function()
+
+						game.ReplicatedStorage.GameStats['Player_' .. game.Players.LocalPlayer.Name].Total.DeathCause.Value = 'Multi Monster'
+					end)
+
+					break
+				end
+
+			end
+
+			local step = math.min(
+				speed * RunService.Heartbeat:Wait(),
+				distance
+			)
+
+			_call60.CFrame = CFrame.new(
+				current + direction.Unit * step
+			)
+		end
+		
+		_Idx57:Destroy()
+		entityMoving = false
+	end)
+end
+					
+					entityLocked = true
+					
+					lockedCFrame = _call60.CFrame
+					
+					break
+				end
+				
+				task.wait()
+			end
+		end)
+end
+end) 
+
+	if room == GetPlayerRoom() then
+		task.wait(6)
+	else
+		task.wait(2.1)
+	end
+
+boom:Stop()
+
+boom.TimePosition = 0
+
+
+BloodRoom.Disable()
+
+if chasing then
+
+	else
+	local upTween = TweenService:Create(
+		_call60,
+		TweenInfo.new(
+			0.5,
+			Enum.EasingStyle.Quad,
+			Enum.EasingDirection.In
+		),
+		{
+			CFrame = _call60.CFrame + Vector3.new(0,22,0)
+		}
+	)
+
+	upTween:Play()
+	upTween.Completed:Wait()
+	
+	currentEntityRoom = nil
+end
+
+if entityLocked then
+	
+	_call60.CFrame = lockedCFrame
+	
+	while entityLocked do
+		task.wait()
+	end
+	
+end
+
+local highestRoom = GetHighestRoom()
+
+if highestRoom == room then
+finalRoom = true
+
+stopChaseTrigger = true
+chaseTrigger = false
+noChase = true
+
+	entityMoving = false
+	chasing = false
+	entityLocked = false
+
+	for _,v in pairs(_Idx57:GetDescendants()) do
+		if v:IsA("Sound") then
+			v:Stop()
+		end
+
+		if v:IsA("Tween") then
+			pcall(function()
+				v:Cancel()
+			end)
+		end
+	end
+
+
+	RunService:UnbindFromRenderStep(
+		"ForceImpactFOV"
+	)
+
+	RunService:UnbindFromRenderStep(
+		"EntityImpactShake"
+	)
+
+
+_call60.Anchored = true
+noChase = true
+chaseTrigger = false
+entityMoving = false
+chasing = false
+entityLocked = false
+_Idx57:Destroy()
+
+return true
+end
+end
+
+
+
+local function Start()
+	if running then return end
+	running = true
+
+	local lowestRoom = math.huge
+	local roomCount = 0
+
+	for _,room in ipairs(_CurrentRooms62:GetChildren()) do
+		local number = tonumber(room.Name)
+
+		if number then
+			roomCount += 1
+
+			if number < lowestRoom then
+				lowestRoom = number
+			end
+		end
+	end
+
+	local spawnFrom
+
+	if roomCount <= 3 then
+		spawnFrom = lowestRoom
+	else
+		spawnFrom = lowestRoom + 2
+	end
+
+	while true do
+		local data = table.remove(roomQueue, 1)
+
+		if data then
+			if data.number >= spawnFrom then
+				local destroyed = SpawnInRoom(data.room)
+
+				if destroyed then
+					break
+				end
+
+				task.wait(1)
+			end
+		else
+			task.wait(0.1)
+		end
+	end
+end
+
+
+task.spawn(Start)
