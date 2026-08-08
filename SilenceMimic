@@ -73,6 +73,17 @@ _Idx57.Name = "A60ButSilence"
 local chaseTrigger = false
 
 
+local model =  _Idx57
+
+	if model then
+		-- Tắt toàn bộ PointLight có sẵn
+		for _, v in ipairs(model:GetDescendants()) do
+	if v:IsA("Sound") then
+		v.Volume = 0
+	end
+end
+		end
+
 
 task.spawn(function()
 	local player = game.Players.LocalPlayer
@@ -99,7 +110,7 @@ task.spawn(function()
 				hrp.Position - _Idx57.Multi.Position
 			).Magnitude
 
-			if distance <= 65 then
+			if distance <= 0 then
 
 				local oldPos = hrp.Position
 
@@ -694,7 +705,7 @@ light.Brightness = 5
 	local tween = TweenService:Create(
 		_call60,
 		TweenInfo.new(
-			0.5,
+			0,
 			Enum.EasingStyle.Quad,
 			Enum.EasingDirection.Out
 		),
@@ -706,7 +717,6 @@ light.Brightness = 5
 	tween:Play()
 
 task.spawn(function() 
-tween.Completed:Wait()
 if room == GetPlayerRoom() then
 BloodRoom.Enable(room)
 end
@@ -843,7 +853,7 @@ end)
 	if room == GetPlayerRoom() then
 		task.wait(6)
 	else
-		task.wait(2.1)
+		task.wait(1.5)
 	end
 
 boom:Stop()
@@ -859,7 +869,7 @@ if chasing then
 	local upTween = TweenService:Create(
 		_call60,
 		TweenInfo.new(
-			0.5,
+			0,
 			Enum.EasingStyle.Quad,
 			Enum.EasingDirection.In
 		),
@@ -869,7 +879,6 @@ if chasing then
 	)
 
 	upTween:Play()
-	upTween.Completed:Wait()
 	
 	currentEntityRoom = nil
 end
@@ -957,7 +966,7 @@ local function Start()
 	if roomCount <= 3 then
 		spawnFrom = lowestRoom
 	else
-		spawnFrom = lowestRoom + 2
+		spawnFrom = lowestRoom + 1
 	end
 
 	while true do
