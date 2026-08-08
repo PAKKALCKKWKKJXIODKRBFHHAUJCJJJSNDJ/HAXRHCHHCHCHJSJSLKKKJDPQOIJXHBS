@@ -1268,16 +1268,16 @@ end
 
 local TimeEntities = {
     { Name = "Shocker",    Interval = 35,  Chance = 100, Url = "https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/Shocker" },
-    { Name = "Limbo",      Interval = 200, Chance = 40, Url = "https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/Limbo" },
-    { Name = "Silence",    Interval = 240, Chance = 55, Url = "https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/Silence" },
-    { Name = "Deer God",   Interval = 400, Chance = 20, Url = "https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/DeerGod" },
+    { Name = "Limbo",      Interval = 150, Chance = 40, Url = "https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/Limbo" },
+    { Name = "Silence",    Interval = 220, Chance = 55, Url = "https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/Silence" },
+    { Name = "Deer God",   Interval = 300, Chance = 20, Url = "https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/DeerGod" },
 }
 
 local RoomEntities = {
-    { Name = "Cease",       Interval = 160, Chance = 35, Url = "https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/Cease" },
+    { Name = "Cease",       Interval = 110, Chance = 60, Url = "https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/Cease" },
     { Name = "Ripper",      Interval = 120, Chance = 70, Url = "https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/Ripper" },
-    { Name = "Singularity", Interval = 90,  Chance = 60, Url = "https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/Singularity-1" },
-    { Name = "Rebound",     Interval = 250, Chance = 40, Url = "https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/Rebound" },
+    { Name = "Singularity", Interval = 80,  Chance = 60, Url = "https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/Singularity-1" },
+    { Name = "Rebound",     Interval = 185, Chance = 40, Url = "https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/Rebound" },
     { Name = "Singularity-2",     Interval = 100, Chance = 55, Url = "https://raw.githubusercontent.com/vokfhehnbfhixiusushiicshshjjjssGSHHDXGX/REBLAHARDCOREDI/refs/heads/main/Singularity-2" },
 }
 
