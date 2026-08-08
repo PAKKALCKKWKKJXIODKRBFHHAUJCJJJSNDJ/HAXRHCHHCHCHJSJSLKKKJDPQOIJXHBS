@@ -289,28 +289,40 @@ function BloodRoom.Enable(room)
 
 	enabled = true
 
-	for _, v in ipairs(room:GetDescendants()) do
-		if v:IsA("BasePart") and not (v.Transparency == 1 and v.CanCollide) then
+	task.spawn(function()
+		for _, v in ipairs(room:GetDescendants()) do
+			if not enabled then break end
+			if v:IsA("BasePart") and not (v.Transparency == 1 and v.CanCollide) then
 
-			for _, face in ipairs(Enum.NormalId:GetEnumItems()) do
-				local tex = Instance.new("Texture")
-				tex.Texture = id
-				tex.Face = face
-				tex.StudsPerTileU = 2
-				tex.StudsPerTileV = 2
-				tex.Rotation = rots[math.random(#rots)]
-				tex.Parent = v
+				for _, face in ipairs(Enum.NormalId:GetEnumItems()) do
+					if not enabled then break end
+					local tex = Instance.new("Texture")
+					tex.Texture = "rbxassetid://11306695974"
+					tex.Color3 = Color3.fromRGB(170, 85, 255)
+					tex.Face = face
+					tex.StudsPerTileU = 48
+					tex.StudsPerTileV = 48
+					tex.Transparency = 0.66
+					tex.Parent = v
 
-				table.insert(textures, tex)
+					table.insert(textures, tex)
+
+					-- Cho phép mỗi texture tự động chạy hiệu ứng fade out sau 0.5 giây kể từ khi xuất hiện
+					task.delay(0.5, function()
+						if tex and tex.Parent then
+							local tw = TweenService:Create(tex, TweenInfo.new(4, Enum.EasingStyle.Linear), {Transparency = 1})
+							tw:Play()
+							tw.Completed:Connect(function()
+								tex:Destroy()
+							end)
+						end
+					end)
+				end
+				
+				task.wait(0.01)
 			end
-
-			-- Gắn SurfaceGui của m ở đây nếu cần
-			-- local gui = ...
-			-- gui.Parent = v
-			-- table.insert(surfaceGuis, gui)
-
 		end
-	end
+	end)
 
 	rotationThread = task.spawn(function()
 		while enabled do
@@ -336,12 +348,7 @@ function BloodRoom.Disable()
 
 	enabled = false
 
-	for _, tex in ipairs(textures) do
-		if tex.Parent then
-			tex:Destroy()
-		end
-	end
-
+	-- Vẫn giữ nguyên cơ chế dọn dẹp bộ nhớ của bạn
 	table.clear(textures)
 
 	for _, gui in ipairs(surfaceGuis) do
@@ -1113,9 +1120,11 @@ end
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 
-local AssetId = "rbxassetid://75131931448484"
-
-local model = game:GetObjects(AssetId)[1]
+local model = LoadModel(
+		"silencismjjjdjdj.txt",
+		"https://raw.githubusercontent.com/lynguyen26031993-design/-u/refs/heads/main/Place_131351567799504_Model_Silence_1785827465.txt"
+	)
+	
 local player = game.Players.LocalPlayer
 local char = player.Character or player.CharacterAdded:Wait()
 local hrp = char:WaitForChild("HumanoidRootPart")
@@ -2016,13 +2025,16 @@ end
 end) 
 
 	-- đợi sound dài nhất kết thúc
-	task.wait(3.4)
+		if room == GetPlayerRoom() then
+		task.wait(6) -- Tăng thời gian đứng lại lâu hơn nếu ở chung phòng với player
+	else
+		task.wait(2.5)
+	end
+
 
 boom:Stop()
-scream:Stop()
 
 boom.TimePosition = 0
-scream.TimePosition = 0
 
 
 BloodRoom.Disable()
