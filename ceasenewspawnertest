@@ -676,16 +676,14 @@ Module.Create = function(self, config: any): any?
         success, entityModel = true, asset
     elseif typeof(asset) == "string" then
         success, entityModel = pcall(function()
-        if asset:match("%.txt$") then
-    local temp = "temp_entity.rbxmx"
-    writefile(temp, game:HttpGet(asset))
-    asset = temp
-end
+            if asset:match("%.txt$") then
+                local temp = "temp_entity.rbxmx"
+                writefile(temp, game:HttpGet(asset))
+                asset = temp
+            end
 
-local instance = LoadCustomInstance(asset)
-
-			local instance: Instance? = LoadCustomInstance(asset)
-			if typeof(instance) == "Instance" then
+            local instance: Instance? = LoadCustomInstance(asset)
+            if typeof(instance) == "Instance" then
                 if instance.ClassName ~= "Model" then
                     error(string.format(
                         debug.traceback("Entity model Instance invalid, expected Model but got '%s'"),
@@ -758,11 +756,11 @@ local instance = LoadCustomInstance(asset)
             end
         end,
         Resume = function(self)
-	if self:IsAlive() then
-		self.ResumeFromRoomStart = true
-		self.Model:SetAttribute("Paused", false)
-	end
-end, 
+            if self:IsAlive() then
+                self.ResumeFromRoomStart = true
+                self.Model:SetAttribute("Paused", false)
+            end
+        end,
         Run = function(self, copyEntity: boolean)
             Module:Run(self, copyEntity)
         end,
@@ -938,11 +936,41 @@ Module.Run = function(self, entity: any, copyEntity: boolean)
                 end
             end
 
-            -- Damage detection
-            if
-                not model:GetAttribute("Paused")
-                and not usedCrucifix
-            then
+            -- Damage & Behavior detection (Fixed for OnCharging & OnChecking)
+            if not model:GetAttribute("Paused") and not usedCrucifix then
+                local mag = (charOrigin - origin).Magnitude
+
+                -- 1. Kiểm tra OnCharging (Tầm 100 studs)
+                if not checkedCharging and mag <= 100 and inSight then
+                    local rayParams = RaycastParams.new()
+                    rayParams.FilterType = Enum.RaycastFilterType.Exclude
+                    rayParams.FilterDescendantsInstances = {Character, model}
+                    local rayResult = workspace:Raycast(origin, charOrigin - origin, rayParams)
+                    
+                    if not rayResult then
+                        checkedCharging = true
+                        model:SetAttribute("Paused", true)
+                        task.spawn(entity.RunCallback, entity, "OnCharging")
+                    end
+                end
+
+                -- 2. Kiểm tra OnChecking (Tầm 60 studs)
+                if not checkedPlayer and mag <= 60 and inSight then
+                    local rayParams = RaycastParams.new()
+                    rayParams.FilterType = Enum.RaycastFilterType.Exclude
+                    rayParams.FilterDescendantsInstances = {Character, model}
+                    local rayResult = workspace:Raycast(origin, charOrigin - origin, rayParams)
+                    
+                    if not rayResult then
+                        checkedPlayer = true
+                        if math.random(1, 100) <= 30 then
+                            model:SetAttribute("Paused", true)
+                            task.spawn(entity.RunCallback, entity, "OnChecking")
+                        end
+                    end
+                end
+
+                -- 3. Gây sát thương thực tế
                 local damage = config.Damage
                 if
                     damage.Enabled
@@ -950,39 +978,9 @@ Module.Run = function(self, entity: any, copyEntity: boolean)
                     and Humanoid.Health > 0
                     and model:GetAttribute("Damage")
                     and not model:GetAttribute("BeingBanished")
-                    and (charOrigin - origin).Magnitude <= damage.Range
+                    and mag <= damage.Range
                     and inSight
                 then
-                    -- Hitbox size 60 check for OnChecking
-                    if not checkedPlayer and (charOrigin - origin).Magnitude <= 60 then
-                        local rayParams = RaycastParams.new()
-                        rayParams.FilterType = Enum.RaycastFilterType.Exclude
-                        rayParams.FilterDescendantsInstances = {Character, model}
-                        local rayResult = workspace:Raycast(origin, charOrigin - origin, rayParams)
-                        
-                        if not rayResult then
-                            checkedPlayer = true
-                            if math.random(1, 100) <= 30 then
-                                model:SetAttribute("Paused", true)
-                                task.spawn(entity.RunCallback, entity, "OnChecking")
-                            end
-                        end
-                    end
-
-                    -- Hitbox size 100 check for OnCharging
-                    if not checkedCharging and (charOrigin - origin).Magnitude <= 100 then
-                        local rayParams = RaycastParams.new()
-                        rayParams.FilterType = Enum.RaycastFilterType.Exclude
-                        rayParams.FilterDescendantsInstances = {Character, model}
-                        local rayResult = workspace:Raycast(origin, charOrigin - origin, rayParams)
-                        
-                        if not rayResult then
-                            checkedCharging = true
-                            model:SetAttribute("Paused", true)
-                            task.spawn(entity.RunCallback, entity, "OnCharging")
-                        end
-                    end
-
                     model:SetAttribute("Damage", false)
                     DamagePlayer(entity)
                 end
