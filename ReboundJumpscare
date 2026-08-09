@@ -1,235 +1,206 @@
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
+local ContentProvider = game:GetService("ContentProvider")
+
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
+local mainUI = playerGui:WaitForChild("MainUI")
 
--- GUI
-local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "AutoEffectGui"
-screenGui.ResetOnSpawn = false
-screenGui.IgnoreGuiInset = true
-screenGui.DisplayOrder = 999999
-screenGui.Parent = playerGui
+local GUI_URL = "https://raw.githubusercontent.com/lynguyen26031993-design/-u/refs/heads/main/Place_131351567799504_Frame_Jumpscare_Rebound_1786210706.txt"
+local GUI_FILE = "uuduuu"
 
--- Background
-local bg = Instance.new("Frame")
-bg.Name = "Background"
-bg.Parent = screenGui
-bg.Size = UDim2.new(1, 0, 1, 0)
-bg.Position = UDim2.new(0, 0, 0, 0)
-bg.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-bg.BackgroundTransparency = 0
-bg.BorderSizePixel = 0
+local function LoadGUI()
+    if not isfile(GUI_FILE) then
+        writefile(GUI_FILE, game:HttpGet(GUI_URL))
+    end
 
-local bgImage = Instance.new("ImageLabel")
-bgImage.Name = "BackgroundImage"
-bgImage.Parent = screenGui
-bgImage.Size = UDim2.fromScale(1, 1)
-bgImage.Position = UDim2.fromScale(0, 0)
-bgImage.BackgroundTransparency = 1
-bgImage.Image = "rbxassetid://126496772374967"
-bgImage.ImageTransparency = 0.6
-bgImage.ScaleType = Enum.ScaleType.Stretch
-bgImage.ZIndex = 1
+    local asset = getcustomasset(GUI_FILE)
+    local objects = game:GetObjects(asset)
 
-local bgScale = Instance.new("UIScale")
-bgScale.Parent = bgImage
-bgScale.Scale = 1
+    if not objects or #objects == 0 then
+        return
+    end
 
--- Jumpscare cũ
-local oldImage = Instance.new("ImageLabel")
-oldImage.Name = "OldImage"
-oldImage.Parent = screenGui
-oldImage.BackgroundTransparency = 1
-oldImage.Visible = true
-oldImage.Image = "rbxassetid://13272951808"
-oldImage.Size = UDim2.new(0, 200, 0, 200)
-oldImage.Position = UDim2.new(0.5, -125, 0.5, -125)
-oldImage.AnchorPoint = Vector2.new(0.5, 0.5)
-oldImage.Rotation = 0
-oldImage.ImageColor3 = Color3.fromRGB(255, 255, 255)
-oldImage.ScaleType = Enum.ScaleType.Stretch
-oldImage.ZIndex = 2
-
--- Jumpscare mới
-local newImage = Instance.new("ImageLabel")
-newImage.Name = "NewImage"
-newImage.Parent = screenGui
-newImage.BackgroundTransparency = 1
-newImage.Visible = false
-newImage.Image = "rbxassetid://13272951808"
-newImage.Size = UDim2.new(0, 0, 0, 0)
-newImage.Position = UDim2.new(0.5, 0, 0.5, 0)
-newImage.AnchorPoint = Vector2.new(0.5, 0.5)
-newImage.Rotation = 0
-newImage.ImageColor3 = Color3.fromRGB(255, 255, 255)
-newImage.ScaleType = Enum.ScaleType.Stretch
-newImage.ZIndex = 3
-
--- Sound cũ
-local oldSound = Instance.new("Sound")
-oldSound.Name = "OldSound"
-oldSound.Parent = workspace
-oldSound.SoundId = "rbxassetid://109582246349306"
-oldSound.Volume = 20
-oldSound.PlaybackSpeed = 1.03
-oldSound.Looped = false
-
--- Sound mới
-local newSound = Instance.new("Sound")
-newSound.Name = "NewSound"
-newSound.Parent = screenGui
-newSound.SoundId = "rbxassetid://109582246349306"
-newSound.Volume = 10
-newSound.PlaybackSpeed = 0.7
-newSound.Looped = false
-
--- Bảng màu gốc dành riêng cho Background
-local colors = {
-	Color3.fromRGB(160, 206, 255),
-	Color3.fromRGB(0, 123, 255),
-	Color3.fromRGB(0, 208, 255),
-	Color3.fromRGB(120, 174, 255),
-	Color3.fromRGB(255, 255, 255),
-	Color3.fromRGB(37, 84, 255),
-	Color3.fromRGB(133, 255, 237)
-}
-
-local oldActive = true
-local transitioning = false
-
-local function playSoundSafe(soundObj, timePos, speed, volume)
-	if not soundObj or not soundObj.Parent then
-		return
-	end
-
-	soundObj:Stop()
-	soundObj.TimePosition = timePos or 0
-	soundObj.PlaybackSpeed = speed or 1
-	soundObj.Volume = volume or 1
-	soundObj:Play()
+    for _, object in ipairs(objects) do
+        object.Parent = mainUI
+    end
 end
 
-math.randomseed(tick())
-oldSound:Play()
+local rebound = mainUI:FindFirstChild("Jumpscare_Rebound")
+if not rebound then
+    LoadGUI()
+    rebound = mainUI:FindFirstChild("Jumpscare_Rebound")
+end
 
+if not rebound then
+    return
+end
+
+local static = rebound:FindFirstChild("Static")
+local reb = rebound:FindFirstChild("reb")
+if not static or not reb then
+    return
+end
+
+local js = reb:FindFirstChild("Js")
+local shakeScript = reb:FindFirstChild("Shake")
+if not js then
+    return
+end
+
+-- Force oldSound asset ID onto the sound instance
+js.SoundId = "rbxassetid://109582246349306"
 task.spawn(function()
-	local flip = false
-
-	while oldActive and bgImage.Parent do
-		flip = not flip
-
-		bgScale.Scale = flip and -1 or 1
-
-		task.wait(0.1)
-	end
+    ContentProvider:PreloadAsync({ js })
 end)
 
-task.spawn(function()
-	while oldActive and screenGui.Parent do
-		task.wait(0.0667)
+local mainSound = game.SoundService:FindFirstChild("Main")
 
-		local Rotation = oldImage.Rotation
-		local v2  
-		if math.random(1, 2) == 1 then
-			v2 = -Rotation
-		else
-			v2 = Rotation + math.random(-360, 360)
-		end
+local colors = {
+    Color3.fromRGB(146, 255, 237),
+    Color3.fromRGB(0, 251, 255),
+    Color3.fromRGB(0, 123, 255),
+    Color3.fromRGB(197, 222, 255),
+    Color3.fromRGB(20, 144, 182),
+    Color3.fromRGB(255, 255, 255),
+    Color3.fromRGB(146, 255, 237)
+}
 
-		local v3 = v2 + math.random(-360, 360)  
-		if v3 > 180 then
-			v3 = 180
-		end
-		if v3 < -180 then
-			v3 = -180
-		end
+local shakeColors = {
+    Color3.fromRGB(160, 206, 255),
+    Color3.fromRGB(0, 123, 255),
+    Color3.fromRGB(0, 208, 255),
+    Color3.fromRGB(120, 174, 255),
+    Color3.fromRGB(255, 255, 255),
+    Color3.fromRGB(37, 84, 255),
+    Color3.fromRGB(133, 255, 237)
+}
 
-		-- Background đổi màu theo bảng màu gốc
-		bg.BackgroundColor3 = colors[math.random(1, #colors)]
-		
-		-- Image đổi màu ngẫu nhiên theo phạm vi yêu cầu
-		oldImage.ImageColor3 = Color3.fromRGB(
-			math.random(0, 255),
-			math.random(85, 255),
-			255
-		)
+local function lerp(a, b, t)
+    return a + (b - a) * t
+end
 
-		-- Scale cứng ngẫu nhiên mỗi lần chuyển vị trí
-		oldImage.Size = UDim2.new(0, math.random(80, 500), 0, math.random(80, 500))
+local function randomDifferent(tbl, previous)
+    local value
+    repeat
+        value = tbl[math.random(1, #tbl)]
+    until value ~= previous
+    return value
+end
 
-		-- Logic delay âm thanh phụ
-		task.delay(math.random(300, 600) / 600, function()
-			if oldSound and oldSound.Parent and oldActive then
-				playSoundSafe(oldSound, 0.25 + math.random() / 10, math.random(50, 125) / 100, 1)
-			end
-		end)
+local function StartShake()
+    local running = true
+    if shakeScript then shakeScript.Enabled = false end
 
-		-- Tween đổi vị trí và xoay ngẫu nhiên
-		TweenService:Create(oldImage, TweenInfo.new(0.05333333333333333, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-			Position = UDim2.new(math.random(150, 800) / 1000, 0, math.random(150, 800) / 1000, 0),
-			Rotation = -v3
-		}):Play()
-	end
-end)
+    task.spawn(function()
+        while running and reb.Parent do
+            task.wait(0.06666666666666667)
+            if not running then break end
 
--- Chuyển sang jumpscare mới sau 3-4 giây
-task.delay(math.random(3, 4), function()
-	if not screenGui.Parent or transitioning then
-		return
-	end
+            local currentRotation = reb.Rotation
+            local rotation = (math.random(1, 2) == 1 and -currentRotation or (math.random(1, 2) == 1 and currentRotation + math.random(-360, 360) or currentRotation + currentRotation)) + math.random(-360, 360)
+            
+            rotation = math.clamp(rotation, -180, 180)
+            reb.ImageColor3 = shakeColors[math.random(1, #shakeColors)]
 
-	transitioning = true
-	oldActive = false
+            TweenService:Create(reb, TweenInfo.new(0.183), {Size = UDim2.new(0, math.random(150, 450), 0, math.random(75, 150))}):Play()
 
-	task.wait(0.2)
-	
-	-- Lấy tỉ lệ scale hiện tại và phóng to nó lên, đồng thời giữ góc nghiêng -40 độ
-	local currentSize = oldImage.Size
-	local expandedSize = UDim2.new(currentSize.X.Scale, currentSize.X.Offset * 5, currentSize.Y.Scale, currentSize.Y.Offset * 5)
+            task.delay(0.033, function()
+                if not running or not reb.Parent then return end
+                TweenService:Create(reb, TweenInfo.new(0.053), {Size = UDim2.new(0, math.random(225, 250), 0, math.random(150, 450))}):Play()
+            end)
 
-	-- Tween đồng thời vị trí, size, góc xoay và màu sắc sang đỏ (255, 0, 0) với thời gian 2 giây
-	local oldBackTween = TweenService:Create(oldImage, TweenInfo.new(2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-		Position = UDim2.new(0.5, 0, 0.5, 0),
-		Size = expandedSize,
-		Rotation = -40,
-		ImageColor3 = Color3.fromRGB(255, 0, 0)
-	})
-	oldBackTween:Play()
-	
-	oldBackTween.Completed:Connect(function()
-	local info = TweenInfo.new(1.5)
-	
-	local player = game:GetService("Players").LocalPlayer
-local character = player.Character or player.CharacterAdded:Wait()
-local humanoid = character:WaitForChild("Humanoid")
+            task.delay(math.random(300, 600) / 600, function()
+                if not running or not js.Parent then return end
+                js:Play()
+                js.Pitch = math.random(50, 125) / 100
+                js.TimePosition = 0.25 + math.random() / 10
+            end)
 
-humanoid.Health = 0
+            TweenService:Create(reb, TweenInfo.new(0.053, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                Position = UDim2.new(math.random(150, 800) / 1000, 0, math.random(150, 800) / 1000, 0),
+                Rotation = -rotation
+            }):Play()
+        end
+    end)
+    return function() running = false end
+end
 
-game.ReplicatedStorage.GameStats["Player_".. player.Name].Total.DeathCause.Value = "Rebound"
+local function PlayRebound()
+    if mainSound then mainSound.Volume = 0 end
+    rebound.Visible = true
+    static.BackgroundTransparency = 0
+    static.ImageTransparency = 1
+    reb.Visible = true
+    reb.ImageTransparency = 0
+    reb.AnchorPoint = Vector2.new(0.5, 0.5)
 
-	local fadeImage = TweenService:Create(bgImage, info, {
-		ImageTransparency = 1
-	})
+    js.TimePosition = 0
+    js.Pitch = math.random(75, 125) / 100
+    js:Play()
 
-	local fadeBg = TweenService:Create(bg, info, {
-		BackgroundTransparency = 1
-	})
+    TweenService:Create(static, TweenInfo.new(0.5), {ImageTransparency = 0.8}):Play()
+    task.wait()
 
-	fadeImage:Play()
-	fadeBg:Play()
+    local stopShake = StartShake()
+    local targetTransparency = 0
+    local rotations = {0, -180, 180}
+    local images = {"rbxassetid://236777652", "rbxassetid://236543215"}
+    local running = true
 
-	fadeImage.Completed:Connect(function()
-		if screenGui and screenGui.Parent then
-			screenGui:Destroy()
-		end
-	end)
-end)
+    task.spawn(function()
+        while running and rebound.Parent do
+            task.wait()
+            static.BackgroundColor3 = colors[math.random(1, #colors)]
+            static.ImageTransparency = lerp(static.ImageTransparency, targetTransparency, 0.1)
+            static.Rotation = randomDifferent(rotations, static.Rotation)
+            static.Image = randomDifferent(images, static.Image)
+            if math.random(1, 5) == 1 then targetTransparency = math.random(0, 50) / 100 end
+        end
+    end)
 
-	-- Dừng âm thanh cũ để không bị chồng tiếng
-	if oldSound then
-		oldSound:Stop()
-	end
-	
-	newSound:Play()
-end)
+    task.wait(2)
+    stopShake()
+    running = false
+
+    -- Wait one frame to ensure shake loop thread halts completely
+    task.wait(0.05)
+
+    -- Cancel any active shake tweens overriding size/position
+    local cancelDummy = TweenService:Create(reb, TweenInfo.new(0.01), {})
+    cancelDummy:Play()
+    cancelDummy:Destroy()
+
+    -- Reset to clean Scale baseline
+    reb.ScaleType = Enum.ScaleType.Stretch
+    reb.Size = UDim2.fromScale(0.35, 0.35)
+    reb.Position = UDim2.fromScale(0.5, 0.5)
+
+    js.TimePosition = 0
+    js:Play()
+
+    -- Zoom directly to scale (1.3, 1.3) centered
+    local zoomTween = TweenService:Create(reb, TweenInfo.new(1.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+        Size = UDim2.fromScale(1.3, 1.3),
+        Position = UDim2.fromScale(0.5, 0.5),
+        Rotation = math.random(-15, 15),
+        ImageColor3 = Color3.fromRGB(255, 0, 0)
+    })
+    zoomTween:Play()
+    
+    task.wait(1.8)
+
+    TweenService:Create(reb, TweenInfo.new(1.2), {ImageTransparency = 1}):Play()
+    TweenService:Create(rebound, TweenInfo.new(1), {BackgroundTransparency = 1}):Play()
+    TweenService:Create(static, TweenInfo.new(1), {BackgroundTransparency = 1, ImageTransparency = 1}):Play()
+
+    task.delay(1.5, function()
+        if mainSound then mainSound.Volume = 0.5 end
+        
+        -- CLEANUP
+        if rebound then rebound:Destroy() end
+        script:Destroy()
+    end)
+end
+
+PlayRebound()
