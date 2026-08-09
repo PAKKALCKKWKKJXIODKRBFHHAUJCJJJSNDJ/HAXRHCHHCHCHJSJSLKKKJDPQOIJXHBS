@@ -1,4 +1,4 @@
--- Cease
+-- Ceaej
 --[[
     __      __          _            _       ______       _   _ _            _____                                       __      _____  
     \ \    / /         (_)          ( )     |  ____|     | | (_) |          / ____|                                      \ \    / /__ \ 
@@ -833,7 +833,7 @@ Module.Run = function(self, entity: any, copyEntity: boolean)
     -- Tạo Hitbox Parts (OnChargingHitbox & OnCheckingHitbox) gắn vào model
     local chargingHitbox = model:FindFirstChild("OnChargingHitbox") or Instance.new("Part")
     chargingHitbox.Name = "OnChargingHitbox"
-    chargingHitbox.Size = Vector3.new(10, 10, 10) -- Có thể điều chỉnh kích thước tùy ý
+    chargingHitbox.Size = Vector3.new(100, 100, 100) -- Có thể điều chỉnh kích thước tùy ý
     chargingHitbox.Transparency = 1
     chargingHitbox.CanCollide = false
     chargingHitbox.Massless = true
@@ -842,7 +842,7 @@ Module.Run = function(self, entity: any, copyEntity: boolean)
 
     local checkingHitbox = model:FindFirstChild("OnCheckingHitbox") or Instance.new("Part")
     checkingHitbox.Name = "OnCheckingHitbox"
-    checkingHitbox.Size = Vector3.new(6, 6, 6) -- Có thể điều chỉnh kích thước tùy ý
+    checkingHitbox.Size = Vector3.new(60, 60, 60) -- Có thể điều chỉnh kích thước tùy ý
     checkingHitbox.Transparency = 1
     checkingHitbox.CanCollide = false
     checkingHitbox.Massless = true
@@ -865,7 +865,6 @@ Module.Run = function(self, entity: any, copyEntity: boolean)
         if triggeredCharging then return end
         if hit.Parent == Character and not model:GetAttribute("Paused") and not model:GetAttribute("BeingBanished") then
             triggeredCharging = true
-            model:SetAttribute("Paused", true)
             task.spawn(function()
                 entity:RunCallback("OnCharging")
             end)
