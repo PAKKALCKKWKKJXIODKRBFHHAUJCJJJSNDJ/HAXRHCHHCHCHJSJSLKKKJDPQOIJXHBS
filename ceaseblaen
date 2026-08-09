@@ -1,4 +1,4 @@
--- Cease
+-- Bl
 --[[
     __      __          _            _       ______       _   _ _            _____                                       __      _____  
     \ \    / /         (_)          ( )     |  ____|     | | (_) |          / ____|                                      \ \    / /__ \ 
@@ -936,37 +936,22 @@ Module.Run = function(self, entity: any, copyEntity: boolean)
                 end
             end
 
-            -- Damage & Behavior detection (Fixed for OnCharging & OnChecking)
+            -- Damage & Behavior detection (Fixed: Called once independently by distance)
             if not model:GetAttribute("Paused") and not usedCrucifix then
                 local mag = (charOrigin - origin).Magnitude
 
-                -- 1. Kiểm tra OnCharging (Tầm 100 studs)
-                if not checkedCharging and mag <= 100 and inSight then
-                    local rayParams = RaycastParams.new()
-                    rayParams.FilterType = Enum.RaycastFilterType.Exclude
-                    rayParams.FilterDescendantsInstances = {Character, model}
-                    local rayResult = workspace:Raycast(origin, charOrigin - origin, rayParams)
-                    
-                    if not rayResult then
-                        checkedCharging = true
-                        model:SetAttribute("Paused", true)
-                        task.spawn(entity.RunCallback, entity, "OnCharging")
-                    end
+                -- 1. OnCharging (Chỉ gọi 1 lần duy nhất khi <= 100 studs)
+                if not checkedCharging and mag == 100 then
+                    checkedCharging = true
+                    task.spawn(entity.RunCallback, entity, "OnCharging")
                 end
 
-                -- 2. Kiểm tra OnChecking (Tầm 60 studs)
-                if not checkedPlayer and mag <= 60 and inSight then
-                    local rayParams = RaycastParams.new()
-                    rayParams.FilterType = Enum.RaycastFilterType.Exclude
-                    rayParams.FilterDescendantsInstances = {Character, model}
-                    local rayResult = workspace:Raycast(origin, charOrigin - origin, rayParams)
-                    
-                    if not rayResult then
-                        checkedPlayer = true
-                        if math.random(1, 100) <= 30 then
-                            model:SetAttribute("Paused", true)
-                            task.spawn(entity.RunCallback, entity, "OnChecking")
-                        end
+                -- 2. OnChecking (Chỉ gọi 1 lần duy nhất khi <= 60 studs)
+                if not checkedPlayer and mag == 60 then
+                    checkedPlayer = true
+                    if math.random(1, 100) <= 30 then
+                        model:SetAttribute("Paused", true)
+                        task.spawn(entity.RunCallback, entity, "OnChecking")
                     end
                 end
 
