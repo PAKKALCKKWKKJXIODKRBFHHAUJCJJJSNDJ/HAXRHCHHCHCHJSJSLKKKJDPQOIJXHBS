@@ -1,4 +1,4 @@
--- Bl
+-- Cease
 --[[
     __      __          _            _       ______       _   _ _            _____                                       __      _____  
     \ \    / /         (_)          ( )     |  ____|     | | (_) |          / ____|                                      \ \    / /__ \ 
@@ -807,8 +807,6 @@ Module.Run = function(self, entity: any, copyEntity: boolean)
     local model = entity.Model
     local config = entity.Config
     local debug = entity.Debug
-    local checkedPlayer = false
-    local checkedCharging = false
     local resumeFromRoomStart = false
 
     model:SetAttribute("Running", true)
@@ -831,6 +829,61 @@ Module.Run = function(self, entity: any, copyEntity: boolean)
     model:PivotTo(spawnPoint.CFrame + Vector3.new(0, config.Entity.HeightOffset, 0))
     model.Parent = workspace
     task.spawn(entity.RunCallback, entity, "OnSpawned")
+
+    -- Tạo Hitbox Parts (OnChargingHitbox & OnCheckingHitbox) gắn vào model
+    local chargingHitbox = model:FindFirstChild("OnChargingHitbox") or Instance.new("Part")
+    chargingHitbox.Name = "OnChargingHitbox"
+    chargingHitbox.Size = Vector3.new(10, 10, 10) -- Có thể điều chỉnh kích thước tùy ý
+    chargingHitbox.Transparency = 1
+    chargingHitbox.CanCollide = false
+    chargingHitbox.Massless = true
+    chargingHitbox.Parent = model
+    chargingHitbox.CFrame = model:GetPrimaryPartCFrame()
+
+    local checkingHitbox = model:FindFirstChild("OnCheckingHitbox") or Instance.new("Part")
+    checkingHitbox.Name = "OnCheckingHitbox"
+    checkingHitbox.Size = Vector3.new(6, 6, 6) -- Có thể điều chỉnh kích thước tùy ý
+    checkingHitbox.Transparency = 1
+    checkingHitbox.CanCollide = false
+    checkingHitbox.Massless = true
+    checkingHitbox.Parent = model
+    checkingHitbox.CFrame = model:GetPrimaryPartCFrame()
+
+    -- Weld hoặc cập nhật vị trí hitbox theo model liên tục
+    local hitboxConn = RunService.Stepped:Connect(function()
+        if entity:IsAlive() then
+            local primaryCF = model:GetPrimaryPartCFrame()
+            chargingHitbox.CFrame = primaryCF
+            checkingHitbox.CFrame = primaryCF
+        end
+    end)
+
+    local triggeredCharging = false
+    local triggeredChecking = false
+
+    chargingHitbox.Touched:Connect(function(hit)
+        if triggeredCharging then return end
+        if hit.Parent == Character and not model:GetAttribute("Paused") and not model:GetAttribute("BeingBanished") then
+            triggeredCharging = true
+            model:SetAttribute("Paused", true)
+            task.spawn(function()
+                entity:RunCallback("OnCharging")
+            end)
+        end
+    end)
+
+    checkingHitbox.Touched:Connect(function(hit)
+        if triggeredChecking then return end
+        if hit.Parent == Character and not model:GetAttribute("Paused") and not model:GetAttribute("BeingBanished") then
+            triggeredChecking = true
+            if math.random(1, 100) <= 30 then
+                model:SetAttribute("Paused", true)
+                task.spawn(function()
+                    entity:RunCallback("OnChecking")
+                end)
+            end
+        end
+    end)
 
     local currentRoom = GetCurrentRoom(false)
     if currentRoom then
@@ -936,26 +989,9 @@ Module.Run = function(self, entity: any, copyEntity: boolean)
                 end
             end
 
-            -- Damage & Behavior detection (Fixed: Called once independently by distance)
+            -- Damage detection
             if not model:GetAttribute("Paused") and not usedCrucifix then
                 local mag = (charOrigin - origin).Magnitude
-
-                -- 1. OnCharging (Chỉ gọi 1 lần duy nhất khi <= 100 studs)
-                if not checkedCharging and mag == 100 then
-                    checkedCharging = true
-                    task.spawn(entity.RunCallback, entity, "OnCharging")
-                end
-
-                -- 2. OnChecking (Chỉ gọi 1 lần duy nhất khi <= 60 studs)
-                if not checkedPlayer and mag == 60 then
-                    checkedPlayer = true
-                    if math.random(1, 100) <= 30 then
-                        model:SetAttribute("Paused", true)
-                        task.spawn(entity.RunCallback, entity, "OnChecking")
-                    end
-                end
-
-                -- 3. Gây sát thương thực tế
                 local damage = config.Damage
                 if
                     damage.Enabled
@@ -1123,6 +1159,7 @@ Module.Run = function(self, entity: any, copyEntity: boolean)
         -- Despawning
         if not model:GetAttribute("Despawning") then
             model:SetAttribute("Despawning", true)
+            if hitboxConn then hitboxConn:Disconnect() end
             task.spawn(entity.RunCallback, entity, "OnDespawning")
             EntityMoveTo(model, model:GetPivot() - Vector3.new(0, 300, 0), config.Movement.Speed)
             entity:Despawn()
