@@ -1,5 +1,6 @@
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local blaSound
 
 function light(tim,color0,color1)
 	local tweenservice = game:GetService("TweenService")
@@ -139,7 +140,7 @@ end
 
 ---====== Load spawner ======---
 
-local Spawner = loadstring(game:HttpGet("https://raw.githubusercontent.com/RegularVynixu/DOORS-Entity-Spawner-V2/main/init.luau"))()
+local Spawner = loadstring(game:HttpGet("https://raw.githubusercontent.com/iccdjkkkkskskhdgdgegvbfbgncjjdudejdjvi/REBLAHARDCOREDI/refs/heads/main/eipperspawne"))()
 
 ---====== Create entity ======---
 
@@ -178,7 +179,7 @@ local entity = Spawner:Create({
 		Delay = 2
 	},
 	Damage = {
-		Enabled = false,
+		Enabled = true,
 		Range = 50,
 		Amount = 0.001
 	},
@@ -312,6 +313,19 @@ entity:SetCallback("OnStartMoving", function()
 		blueSound.Looped = true
 		blueSound.TimePosition = 8.868
 		blueSound.Volume = 0.733
+
+		gitSoundTemp:Destroy()
+		
+		local gitSoundTemp2 = GetGitSound("https://github.com/lynguyen26031993-design/-u/raw/refs/heads/main/XRecorder_Edited_20260810_01.mp3?raw=true", "jjcjfjjc")
+
+blaSound = Instance.new("Sound") 
+		blaSound.SoundId = gitSoundTemp2.SoundId
+		blaSound.PlaybackSpeed = 1
+		blaSound.Looped = false
+		blaSound.TimePosition = 0
+		blaSound.Volume = 1.5
+		blaSound.RollOffMaxDistance = 150
+		blaSound.Parent = workspace.RipperBla.Ripe
 
 		gitSoundTemp:Destroy()
 
@@ -590,7 +604,7 @@ end
 
 				else
 				
-				task.wait(2)
+				blaSound:Play() 
 				
 				local originalCFrame = entityRoot.CFrame				
 				
