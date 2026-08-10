@@ -637,6 +637,8 @@ local UserInputService = game:GetService("UserInputService")
 entity:SetCallback("OnDamagePlayer", function(newHealth)
 	if newHealth == 0 then
 		print("Entity has killed the player")
+		getgenv().MultiKilled = true
+		
 		local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
