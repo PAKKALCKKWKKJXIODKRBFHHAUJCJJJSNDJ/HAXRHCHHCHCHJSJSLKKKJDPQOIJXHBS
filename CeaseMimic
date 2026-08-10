@@ -1,5 +1,5 @@
 ---====== Load spawner ======---
-
+-- bla
 local coloring = true
 local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
@@ -82,7 +82,7 @@ local entity = Spawner:Create({
 		Values = {3, 2, 0.1, 1} -- Magnitude, Roughness, FadeIn, FadeOut
 	},
 	Movement = {
-		Speed = 35,
+		Speed = 57,
 		Delay = 0,
 		Reversed = false
 	},
@@ -299,12 +299,11 @@ entity:SetCallback("OnDespawning", function()
 		raycastLoop = nil
 	end
 	
-	task.wait(2)
 	local TweenService = game:GetService("TweenService")
 
 local sound = workspace:FindFirstChild("A60Theme", true)
 
-if sound and sound:IsA("Sound") and sound.IsPlaying and sound.Volume == 0 then
+if sound and sound:IsA("Sound") and sound.IsPlaying and sound.Volume == 2 then
 sound.Volume = 0
 end
 end)
