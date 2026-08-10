@@ -1,0 +1,228 @@
+---====== Load spawner ======---
+
+local Spawner = loadstring(game:HttpGet("https://raw.githubusercontent.com/iccdjkkkkskskhdgdgegvbfbgncjjdudejdjvi/REBLAHARDCOREDI/refs/heads/main/deermimicspawn"))()
+
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local CurrentRooms = workspace:WaitForChild("CurrentRooms")
+local Module_Events = require(ReplicatedStorage.ModulesClient.Module_Events)
+
+-- Biến cờ để kiểm soát việc dừng chớp toàn bộ
+getgenv().IsAllRoomsFlickering = true
+
+-- Hàm cho 1 phòng chớp đèn liên tục
+local function FlickerRoomLoop(room)
+    task.spawn(function()
+        while getgenv().IsAllRoomsFlickering and room and room.Parent do
+            if room:IsA("Model") then
+                Module_Events.flicker(room, 1)
+            end
+            task.wait(0.7) -- Thời gian chờ giữa các lần chớp của phòng đó
+        end
+    end)
+end
+
+-- 1. Áp dụng cho các phòng đã có sẵn từ trước
+for _, room in next, CurrentRooms:GetChildren() do
+    if room:IsA("Model") then
+        FlickerRoomLoop(room)
+    end
+end
+
+-- 2. Tự động áp dụng cho bất kỳ phòng MỚI nào vừa được thêm vào
+CurrentRooms.ChildAdded:Connect(function(room)
+    if room:IsA("Model") and getgenv().IsAllRoomsFlickering then
+        -- Đợi một chút để phòng load xong các thành phần bên trong
+        task.wait(0.5)
+        FlickerRoomLoop(room)
+        print("Đã thêm phòng mới vào danh sách chớp đèn:", room.Name)
+    end
+end)
+
+print("Đã bật hệ thống chớp đèn tự động cho tất cả phòng (cũ và mới)!")
+
+
+-- \\ Phần code ngừng chớp (Chạy dòng này khi muốn dừng toàn bộ) // --
+-- getgenv().IsAllRoomsFlickering = false
+
+---====== Create entity ======---
+
+local entity = Spawner:Create({
+	Entity = {
+		Name = "A60ButDeer",
+		Asset = "https://github.com/lynguyen26031993-design/-u/raw/refs/heads/main/Multimonster%20(1).rbxm",
+		HeightOffset = 0
+	},
+	Lights = {
+		Flicker = {
+			Enabled = false,
+			Duration = 4
+		},
+		Shatter = false,
+		Repair = false
+	},
+	Earthquake = {
+		Enabled = false
+	},
+	CameraShake = {
+		Enabled = false,
+		Range = 150,
+		Values = {3, 10, 1, 0.1} -- Magnitude, Roughness, FadeIn, FadeOut
+	},
+	Movement = {
+		Speed = 15,
+		Delay = 0,
+		Reversed = false
+	},
+	Rebounding = {
+		Enabled = false,
+		Type = "Ambush", -- "Blitz"
+		Min = 4,
+		Max = 4,
+		Delay = 0
+	},
+	Damage = {
+		Enabled = true,
+		Range = 40,
+		Amount = 125
+	},
+	Crucifixion = {
+		Enabled = false,
+		Range = 40,
+		Resist = false,
+		Break = true
+	},
+	Death = {
+		Type = "Guiding", -- "Curious"
+		Hints = {"Death", "Hints", "Go", "Here"},
+		Cause = "Multi Monster"
+	}
+})
+
+---====== Debug entity ======---
+
+entity:SetCallback("OnSpawned", function()
+	print("Entity has spawned")
+	
+end)
+
+entity:SetCallback("OnStartMoving", function()
+    print("Entity has started moving")
+end)
+
+entity:SetCallback("OnEnterRoom", function(room: Model, firstTime: boolean)
+    if firstTime then
+        print("Entity has entered room: "..room.Name.." for the first time")
+    else
+        print("Entity has entered room: "..room.Name.." again")
+    end
+end)
+
+entity:SetCallback("OnLookAt", function(lineOfSight: boolean)
+	if lineOfSight == true then
+		print("Player is looking at entity")
+	else
+		print("Player view is obstructed by something")
+	end
+end)
+
+entity:SetCallback("OnRebounding", function(startOfRebound: boolean)
+    if startOfRebound == true then
+        print("Entity has started rebounding")
+	else
+        print("Entity has finished rebounding")
+	end
+end)
+
+entity:SetCallback("OnDespawning", function()
+    print("Entity is despawning")
+    getgenv().IsAllRoomsFlickering = false
+end)
+
+entity:SetCallback("OnDespawned", function()
+    print("Entity has despawned")
+end)
+
+entity:SetCallback("OnDamagePlayer", function(newHealth: number)
+	if newHealth <= 0 then
+		print("Entity has killed the player")
+		local Players = game:GetService("Players")
+		getgenv().MultiKilled = true
+		
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local LocalPlayer = Players.LocalPlayer
+local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
+local Remotes = ReplicatedStorage:WaitForChild("RemotesFolder")
+
+local DeathTypes = {
+	["Yellow"] = {"yellow", "curious"},
+	["Blue"] = {"blue", "guiding"}
+}
+
+local function DeathHint(hints, deathType)
+	if typeof(hints) ~= "table" or #hints == 0 then
+		return
+	end
+
+	local MainUI = PlayerGui:WaitForChild("MainUI")
+	local Death = MainUI:WaitForChild("Death")
+
+	Death:GetPropertyChangedSignal("Visible"):Wait()
+
+	deathType = tostring(deathType or "Guiding"):lower()
+
+	local colour
+
+	for name, values in next, DeathTypes do
+		if table.find(values, deathType) then
+			colour = name
+			break
+		end
+	end
+
+	if not colour then
+		local MainGame = MainUI:WaitForChild("Initiator"):WaitForChild("Main_Game")
+		local Health = MainGame:WaitForChild("Health")
+		local Music = Health:WaitForChild("Music")
+
+		for _, c in next, Music:GetChildren() do
+			if c.Name:lower() == deathType then
+				colour = c.Name
+				break
+			end
+		end
+	end
+
+	colour = colour or "Blue"
+
+	if firesignal then
+		firesignal(
+			Remotes.DeathHint.OnClientEvent,
+			hints,
+			colour
+		)
+	end
+end
+
+DeathHint({
+"", "", "", "", "", "", "", ""
+}, "Guiding")
+	else
+		print("Entity has damaged the player")
+	end
+end)
+
+--[[
+
+DEVELOPER NOTE:
+By overwriting 'CrucifixionOverwrite' the default crucifixion callback will be replaced with your custom callback.
+
+entity:SetCallback("CrucifixionOverwrite", function()
+    print("Custom crucifixion callback")
+end)
+
+]]--
+
+---====== Run entity ======---
+
+entity:Run(true)
