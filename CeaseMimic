@@ -255,6 +255,8 @@ repeat task.wait() until entity.Model or workspace:FindFirstChild("CeaseMimic")
 						
 						game:GetService("Debris"):AddItem(sound, 5)
 
+getgenv().MultiKilled = true
+
 						local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
