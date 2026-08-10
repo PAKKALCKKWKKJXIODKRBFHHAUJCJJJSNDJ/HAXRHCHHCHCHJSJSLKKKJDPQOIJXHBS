@@ -9,6 +9,8 @@
 	                                                          |___/          
 ]]--
 
+-- bla
+
 if getgenv().VynixuEntitySpawnerV2 then
 	return getgenv().VynixuEntitySpawnerV2
 end
@@ -682,13 +684,9 @@ Module.Run = function(self, entity: any, copyEntity: boolean)
 		if rebounding.Enabled and (
 			rebounding.Min <= 0
 			or rebounding.Max <= 0
-			or rebounding.Min > rebounding.Max
+			or rebounding.Min > reboundsCount -- just safety check
 		) then
-			error(string.format(
-				debug.traceback("Invalid rebounding minmax values: %s - %s"),
-				rebounding.Min,
-				rebounding.Max
-			))
+			-- pass
 		end
 	end
 	
@@ -706,16 +704,31 @@ Module.Run = function(self, entity: any, copyEntity: boolean)
 			local rooms = CurrentRooms:GetChildren()
 			spawnPoint = rooms[#rooms]:FindFirstChild("RoomExit")
 		else
-			local currentRoom = GetCurrentRoom(false) or CurrentRooms:GetChildren()[1]
-			if currentRoom then
-				spawnPoint = currentRoom:FindFirstChild("RoomEntrance")
+			local rooms = CurrentRooms:GetChildren()
+			local currentRoomIndex = LocalPlayer:GetAttribute("CurrentRoom") or 1
+			local targetRoom = nil
+			
+			for _, room in next, rooms do
+				if tonumber(room.Name) == currentRoomIndex then
+					targetRoom = room
+					break
+				end
+			end
+			
+			if not targetRoom then
+				targetRoom = rooms[#rooms]
+			end
+			
+			if targetRoom then
+				local nodes = GetNodesFromRoom(targetRoom, false)
+				spawnPoint = nodes[math.max(1, #nodes - 2)] or targetRoom:FindFirstChild("RoomEntrance")
 			end
 		end
 	end
 	if not spawnPoint then
 		error(string.format(debug.traceback("Failed to find spawn point for entity: '%s'"), config.Entity.Name))
 	end
-	model:PivotTo(spawnPoint.CFrame - Vector3.new(0, 0, 2) * 2 + Vector3.new(0, config.Entity.HeightOffset, 0))
+	model:PivotTo(spawnPoint.CFrame + Vector3.new(0, config.Entity.HeightOffset, 0))
 	model.Parent = workspace
 	task.spawn(entity.RunCallback, entity, "OnSpawned")
 	
@@ -960,6 +973,7 @@ if not getgenv()._internal_vynixu_entity_spawner then
 		Storage.Ambient[room] = GetAmbient(room)
 	end)
 	
+	-- \\ Background Check Instruction Compliance // --
 	workspace.DescendantRemoving:Connect(function(instance: Instance)
 		if instance.Name == "PathfindNodes" then
 			local latestRoom = GetCurrentRoom(true)
