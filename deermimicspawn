@@ -9,8 +9,6 @@
 	                                                          |___/          
 ]]--
 
--- bla
-
 if getgenv().VynixuEntitySpawnerV2 then
 	return getgenv().VynixuEntitySpawnerV2
 end
@@ -706,22 +704,28 @@ Module.Run = function(self, entity: any, copyEntity: boolean)
 		else
 			local rooms = CurrentRooms:GetChildren()
 			local currentRoomIndex = LocalPlayer:GetAttribute("CurrentRoom") or 1
-			local targetRoom = nil
 			
-			for _, room in next, rooms do
-				if tonumber(room.Name) == currentRoomIndex then
-					targetRoom = room
+			-- Sắp xếp lại danh sách phòng theo thứ tự số phòng tăng dần chính xác
+			table.sort(rooms, function(a, b)
+				return tonumber(a.Name) and tonumber(b.Name) and tonumber(a.Name) < tonumber(b.Name)
+			end)
+			
+			-- Tìm index của phòng hiện tại
+			local currentIndex = 1
+			for i, room in next, rooms do
+				if tonumber(room.Name) == tonumber(currentRoomIndex) then
+					currentIndex = i
 					break
 				end
 			end
 			
-			if not targetRoom then
-				targetRoom = rooms[#rooms]
-			end
+			-- Lùi lại 2 phòng phía sau để entity có khoảng chạy đà hợp lý (tối thiểu là phòng số 1)
+			local spawnRoomIndex = math.max(1, currentIndex - 2)
+			local targetRoom = rooms[spawnRoomIndex]
 			
 			if targetRoom then
 				local nodes = GetNodesFromRoom(targetRoom, false)
-				spawnPoint = nodes[math.max(1, #nodes - 2)] or targetRoom:FindFirstChild("RoomEntrance")
+				spawnPoint = nodes[1] or targetRoom:FindFirstChild("RoomEntrance")
 			end
 		end
 	end
