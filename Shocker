@@ -1,146 +1,299 @@
--- ts file was generated at discord.gg/25ms
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
 
-local _LocalPlayer = game.Players.LocalPlayer
-local u2 = _LocalPlayer.Character or _LocalPlayer.CharacterAdded:Wait()
-local _CurrentCamera = workspace.CurrentCamera
-local _TweenService = game:GetService('TweenService')
-local _Debris = game:GetService('Debris')
-local u6 = game:GetObjects('rbxassetid://90250291645240')[1]
+local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
 
-u6.Parent = workspace
+local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
 
-local u7 = u6:FindFirstChildWhichIsA('BasePart') or u6:FindFirstChildWhichIsA('Part')
+local function GetGitSound(GithubSnd, SoundName)
+					local url = GithubSnd
+					if not isfile(SoundName .. ".mp3") then
+						writefile(SoundName .. ".mp3", game:HttpGet(url))
+					end
+					local sound = Instance.new("Sound")
+					sound.SoundId = (getcustomasset or getsynasset)(SoundName .. ".mp3")
+					return sound
+				end
 
-u7.CFrame = u2.HumanoidRootPart.CFrame * CFrame.new(0, 0, -7)
-u7.CanCollide = false
-u7.Anchored = true
+local Github = GetGitSound("https://github.com/lynguyen26031993-design/-u/raw/refs/heads/main/XRecorder_Edited_20260810_02.mp3?raw=true", "kcjjdjjjlla")
+local breaking
 
-local u9 = u7:WaitForChild('HORROR SCREAM 15')
+local Github2 = GetGitSound("https://github.com/lynguyen26031993-design/-u/raw/refs/heads/main/XRecorder_Edited_20260810_03.mp3?raw=true", "jcjjjdjjjjjxdd")
+local breaking2
 
-u9.Parent = workspace
-u9.Looped = false
-
-local u10 = 2
-local u11 = 0
-local u12 = tick()
-local u13 = tick()
-local u14 = true
-
-for _, v in ipairs(u6:GetDescendants()) do
-	if v:IsA("Sound") then
-		v.Playing = false
-
-		if v.Name == "PlaySound" then
-			v.Playing = true
-		end
-	end
-end
-
-local function u17()
-    local success, v15 = pcall(function()
-        return loadstring(game:HttpGet('https://raw.githubusercontent.com/RegularVynixu/Utilities/main/Doors/Custom%20Achievements/Source.lua'))()
+local function spawnCustomModel()
+    local success, assets = pcall(function()
+        return game:GetObjects("rbxassetid://90250291645240")
     end)
 
-    if success and v15 then
-        if not game:GetService('ReplicatedStorage'):FindFirstChild('shock') then
-            local _Part = Instance.new('Part')
-
-            _Part.Name = 'shock'
-            _Part.Parent = game:GetService('ReplicatedStorage')
-
-            v15({
-                Title = 'Shocking Experience',
-                Desc = 'Look at me.',
-                Reason = 'Encounter Shocker.',
-                Image = 'rbxassetid://17857830685',
-            })
-        end
+    if not success or #assets == 0 then
+        warn("Không thể load model.")
+        return
     end
-end
 
-local function u24()
-
-    local _Humanoid = u2:FindFirstChild('Humanoid')
-
-    if _Humanoid then
-        _Humanoid:TakeDamage(30)
+    local model = assets[1]
+    if not model:IsA("Model") then
+        local newModel = Instance.new("Model")
+        model.Parent = newModel
+        model = newModel
     end
     
-    u9:Play()
-    _Debris:AddItem(u9, u9.TimeLength)
+    breaking = Instance.new("Sound")
+breaking.SoundId = Github.SoundId
+breaking.PlaybackSpeed = 1
+breaking.Parent = model.Base
+breaking.Looped = false
+breaking.RollOffMaxDistance = 100
+breaking.Volume = 1
 
-    if _Humanoid and _Humanoid.Health <= 0 then
-        local gameStats = game:GetService('ReplicatedStorage'):FindFirstChild('GameStats')
-        local playerStat = gameStats and gameStats:FindFirstChild('Player_' .. _LocalPlayer.Name)
-        local deathCause = playerStat and playerStat:FindFirstChild('Total') and playerStat.Total:FindFirstChild('DeathCause')
+Github:Destroy()
+
+breaking2 = Instance.new("Sound")
+breaking2.SoundId = Github2.SoundId
+breaking2.PlaybackSpeed = 1
+breaking2.Parent = model.Base
+breaking2.Looped = false
+breaking2.RollOffMaxDistance = 50
+breaking2.Volume = 1.5
+
+Github2:Destroy()
+    
+    -- Lưu lại playback speed gốc của từng sound trước khi can thiệp
+    local originalPlaybackSpeeds = {}
+    
+    for _, v in ipairs(model:GetDescendants()) do
+        if v:IsA("Sound") then
+            originalPlaybackSpeeds[v] = v.PlaybackSpeed
+            v:Stop()
+
+            -- Chỉ play các âm thanh cũ theo logic ban đầu
+            if v.Name == "PlaySound" and not v.Parent:IsA("Model") then
+                v:Play()
+            end
+        end
+    end
+
+    -- 1. Lưu lại tọa độ spawn dựa trên LookVector tại thời điểm gọi (khóa Y)
+    local lookVector = humanoidRootPart.CFrame.LookVector
+    local flatLookVector = Vector3.new(lookVector.X, 0, lookVector.Z).Unit
+    if flatLookVector.Magnitude == 0 then
+        flatLookVector = Vector3.new(0, 0, -1)
+    end
+    
+    local initialSpawnPos = humanoidRootPart.Position + (flatLookVector * 20)
+    initialSpawnPos = Vector3.new(initialSpawnPos.X, humanoidRootPart.Position.Y, initialSpawnPos.Z)
+
+    -- Lưu vị trí ban đầu của HumanoidRootPart để tính độ dịch chuyển (movement)
+    local initialRootPos = humanoidRootPart.Position
+
+    local primaryPart = model:FindFirstChild("Base")
+    if not primaryPart or not primaryPart:IsA("BasePart") then
+        return
+    end
+
+    model.PrimaryPart = primaryPart
+    model:SetPrimaryPartCFrame(CFrame.new(initialSpawnPos))
+    model.Parent = workspace
+
+    -- Biến kiểm soát trạng thái bám theo movement
+    local isFollowingMovement = true
+
+    -- Cập nhật liên tục để model dịch chuyển theo delta movement của HumanoidRootPart
+    local connection
+    connection = RunService.RenderStepped:Connect(function()
+        if not isFollowingMovement or not model.Parent or not humanoidRootPart then
+            if connection then connection:Disconnect() end
+            return
+        end
+
+        local currentRootPos = humanoidRootPart.Position
+        local movementDelta = currentRootPos - initialRootPos
+
+        local newPos = Vector3.new(
+            initialSpawnPos.X + movementDelta.X,
+            initialSpawnPos.Y,
+            initialSpawnPos.Z + movementDelta.Z
+        )
+
+        primaryPart.CFrame = CFrame.new(newPos)
+    end)
+    
+    -- 2. Sau 1.3 giây, tween các sound tồn tại trong model lên playback 3
+    task.delay(1.3, function()
+        for _, obj in ipairs(model:GetDescendants()) do
+            if obj:IsA("Sound") then
+                local tweenInfo = TweenInfo.new(2, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
+                local speedTween = TweenService:Create(obj, tweenInfo, {PlaybackSpeed = 3})
+                speedTween:Play()
+                
+                task.spawn(function() 
+                    task.wait(1.5)
+                    speedTween:Cancel() 
+                end) 
+            end
+        end
         
-        if deathCause then
-            deathCause.Value = 'Shocker'
+        task.wait(1.5)
+        
+        for _, obj in ipairs(model:GetDescendants()) do
+            if obj:IsA("Sound") then
+                if originalPlaybackSpeeds[obj] then
+                    obj.PlaybackSpeed = originalPlaybackSpeeds[obj]
+                end
+            end
         end
-    end
-end
+        
+        -- Stop tất cả sound và play HORROR SCREAM 15 khi va chạm/kết thúc giai đoạn bám theo
+        for _, obj in ipairs(model:GetDescendants()) do
+            if obj:IsA("Sound") then
+                obj:Stop()
 
-local function u25()
-    if u7 and u7.Parent then
-        return (u7.Position - _CurrentCamera.CFrame.Position).Unit:Dot(_CurrentCamera.CFrame.LookVector) > 0.75
-    else
-        return false
-    end
-end
+                if obj.Name == "HORROR SCREAM 15" then
+                    obj.TimePosition = 0
+                    
+                    
+                    
+                   
+                    obj:Play()
+                end
+            end
+        end
+        
+        breaking:Play() 
+        
+        -- Dừng việc bám theo movement của player
+        isFollowingMovement = false
 
-local function u29(p26, p27)
-    if u7 and u7.Parent then
-        local v28 = _TweenService:Create(u7, TweenInfo.new(p27, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {CFrame = p26})
+        if connection then
+            connection:Disconnect()
+        end
 
-        v28:Play()
-        v28.Completed:Wait()
-    end
-end
+        if not model.Parent then
+            return
+        end
 
-task.spawn(function()
-    while u14 do
-        task.wait(0.1)
+        -- Bay thẳng theo hướng HumanoidRootPart tại thời điểm bắt đầu
+        local flyDirection = (humanoidRootPart.Position - primaryPart.Position).Unit
+        local flySpeed = 30
+        local flying = true
+        local hitCharacter = false
+        local canHitObjects = false
 
-        if u25() then
-            if u10 <= tick() - u12 then
-                u14 = false
+        task.delay(0.4, function()
+            canHitObjects = true
+        end)
 
-                u24()
-                u29(u2.HumanoidRootPart.CFrame, 0.4)
-                u29(u7.CFrame * CFrame.new(0, -100, 0), 5)
-                u6:Destroy()
+        local overlapParams = OverlapParams.new()
+        overlapParams.FilterType = Enum.RaycastFilterType.Exclude
+        overlapParams.FilterDescendantsInstances = {model}
 
+        local flyConnection
+        flyConnection = RunService.Heartbeat:Connect(function(dt)
+            if not flying or not model.Parent then
+                if flyConnection then
+                    flyConnection:Disconnect()
+                end
                 return
             end
 
-            u13 = tick()
-        else
-            u12 = tick()
+            local currentCFrame = primaryPart.CFrame
+            local nextCFrame = currentCFrame + flyDirection * flySpeed * dt
 
-            if u11 <= tick() - u13 then
-                print('Not looking for ' .. u11 .. ' seconds. Shocker despawning.')
+            local parts = workspace:GetPartBoundsInBox(
+                nextCFrame,
+                primaryPart.Size,
+                overlapParams
+            )
 
-                u14 = false
+            for _, part in ipairs(parts) do
+                if part:IsA("BasePart") then
+                    if part:IsDescendantOf(character) then
+                        if not hitCharacter then
+                            hitCharacter = true
 
-                u29(u7.CFrame * CFrame.new(0, -100, 0), 5)
-                u6:Destroy()
-                _Debris:AddItem(u9, 1)
-                u17()
+                            local humanoid = character:FindFirstChildOfClass("Humanoid")
+                            if humanoid then
+                                humanoid:TakeDamage(20)
+                            end
+                        end
 
-                return
+                        flying = false
+                        break
+                    elseif canHitObjects then
+                        flying = false
+                        break
+                    end
+                end
             end
-        end
-    end
-end)
 
-task.spawn(function()
-    while u6 and u6.Parent do
-        local playSound = u6:FindFirstChild('PlaySound')
-        if playSound then
-            playSound.Volume = 0
-            playSound:Destroy()
-            break
-        end
-        task.wait(0.1)
+            if not flying then
+                if flyConnection then
+                    flyConnection:Disconnect()
+                end
+                
+                breaking2:Play() 
+
+                -- Light Range x2 rồi tween về 0
+                for _, obj in ipairs(model:GetDescendants()) do
+                    if obj:IsA("PointLight") or obj:IsA("SpotLight") or obj:IsA("SurfaceLight") then
+                        obj.Range = obj.Range * 2
+                        TweenService:Create(
+                            obj,
+                            TweenInfo.new(0.5, Enum.EasingStyle.Linear),
+                            {Range = 0}
+                        ):Play()
+                    end
+                end
+
+                -- Fade ParticleEmitter trong 1s
+                for _, obj in ipairs(model:GetDescendants()) do
+    if obj:IsA("ParticleEmitter") then
+        local original = obj.Transparency
+
+        task.spawn(function()
+            local start = tick()
+
+            while obj.Parent do
+                local alpha = math.clamp((tick() - start) / 1, 0, 1)
+                local keypoints = {}
+
+                for _, keypoint in ipairs(original.Keypoints) do
+                    table.insert(keypoints, NumberSequenceKeypoint.new(
+                        keypoint.Time,
+                        keypoint.Value + (1 - keypoint.Value) * alpha,
+                        keypoint.Envelope
+                    ))
+                end
+
+                obj.Transparency = NumberSequence.new(keypoints)
+
+                if alpha >= 1 then
+                    break
+                end
+
+                RunService.Heartbeat:Wait()
+            end
+        end)
     end
-end)
+end
+
+                -- Chỉ destroy khi HORROR SCREAM 15 phát xong
+                local horrorScream = model:FindFirstChild("HORROR SCREAM 15", true)
+                if horrorScream and horrorScream:IsA("Sound") then
+                    horrorScream.Looped = false
+                    horrorScream.Ended:Wait()
+                end
+
+                if model.Parent then
+                    model:Destroy()
+                end
+            else
+                primaryPart.CFrame = nextCFrame
+            end
+        end)
+    end)
+end
+
+spawnCustomModel()
