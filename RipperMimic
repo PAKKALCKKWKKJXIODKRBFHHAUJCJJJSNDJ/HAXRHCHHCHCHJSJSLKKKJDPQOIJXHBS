@@ -89,7 +89,7 @@ end
 
 ---====== Load spawner ======---
 
-local Spawner = loadstring(game:HttpGet("https://raw.githubusercontent.com/RegularVynixu/DOORS-Entity-Spawner-V2/main/init.luau"))()
+local Spawner = loadstring(game:HttpGet("https://raw.githubusercontent.com/iccdjkkkkskskhdgdgegvbfbgncjjdudejdjvi/REBLAHARDCOREDI/refs/heads/main/rippermimicspa"))()
 
 ---====== Create entity ======---
 
@@ -636,6 +636,66 @@ local UserInputService = game:GetService("UserInputService")
 entity:SetCallback("OnDamagePlayer", function(newHealth)
 	if newHealth == 0 then
 		print("Entity has killed the player")
+		local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local LocalPlayer = Players.LocalPlayer
+local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
+local Remotes = ReplicatedStorage:WaitForChild("RemotesFolder")
+
+local DeathTypes = {
+	["Yellow"] = {"yellow", "curious"},
+	["Blue"] = {"blue", "guiding"}
+}
+
+local function DeathHint(hints, deathType)
+	if typeof(hints) ~= "table" or #hints == 0 then
+		return
+	end
+
+	local MainUI = PlayerGui:WaitForChild("MainUI")
+	local Death = MainUI:WaitForChild("Death")
+
+	Death:GetPropertyChangedSignal("Visible"):Wait()
+
+	deathType = tostring(deathType or "Guiding"):lower()
+
+	local colour
+
+	for name, values in next, DeathTypes do
+		if table.find(values, deathType) then
+			colour = name
+			break
+		end
+	end
+
+	if not colour then
+		local MainGame = MainUI:WaitForChild("Initiator"):WaitForChild("Main_Game")
+		local Health = MainGame:WaitForChild("Health")
+		local Music = Health:WaitForChild("Music")
+
+		for _, c in next, Music:GetChildren() do
+			if c.Name:lower() == deathType then
+				colour = c.Name
+				break
+			end
+		end
+	end
+
+	colour = colour or "Blue"
+
+	if firesignal then
+		firesignal(
+			Remotes.DeathHint.OnClientEvent,
+			hints,
+			colour
+		)
+	end
+end
+
+DeathHint({
+"", "", "", "", "", "", "", ""
+}, "Guiding")
 	else
 		print("Entity has damaged the player")
 	end
