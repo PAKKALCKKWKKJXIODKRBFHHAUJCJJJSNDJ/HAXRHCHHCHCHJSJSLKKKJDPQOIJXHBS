@@ -1,0 +1,291 @@
+function light(tim,color0,color1)
+	local tweenservice = game:GetService("TweenService")
+	local info = TweenInfo.new(tim,Enum.EasingStyle.Linear)
+	for _ , light in pairs(game.Workspace.CurrentRooms:GetDescendants()) do
+		if light:IsA("Light") or light:IsA("SurfaceLight") or light:IsA("SpotLight") then
+			local target = {Color = color1}
+			local anim = tweenservice:Create(light,info,target)
+			anim:Play()
+		end
+		if light:IsA("MeshPart") and light.Material == Enum.Material.Neon  and light.Name ~= "Skybox" then
+			local target1 = {Color = color0}
+			local anim2 = tweenservice:Create(light,info,target1)
+			anim2:Play()
+		end
+	end
+end
+
+local Reboundcolor = Instance.new("ColorCorrectionEffect",game.Lighting) game.Debris:AddItem(Reboundcolor,24)
+Reboundcolor.Name = "Bla"
+Reboundcolor.TintColor = Color3.fromRGB(65, 138, 255) Reboundcolor.Saturation = -0.7 Reboundcolor.Contrast = 0.2
+game.TweenService:Create(Reboundcolor,TweenInfo.new(15),{TintColor = Color3.fromRGB(255, 255, 255),Saturation = 0, Contrast = 0}):Play()
+local TweenService = game:GetService("TweenService")
+local TW = TweenService:Create(game.Lighting.MainColorCorrection, TweenInfo.new(5),{TintColor = Color3.fromRGB(255, 255, 255)})
+TW:Play()
+local function GetGitSound(GithubSnd, SoundName)
+					local url = GithubSnd
+					if not isfile(SoundName .. ".mp3") then
+						writefile(SoundName .. ".mp3", game:HttpGet(url))
+					end
+					local sound = Instance.new("Sound")
+					sound.SoundId = (getcustomasset or getsynasset)(SoundName .. ".mp3")
+					return sound
+				end
+				
+				local Github = GetGitSound("https://github.com/lynguyen26031993-design/-u/raw/refs/heads/main/Lhouijie%20Almendras%20-%20Rebound_glitched_multimonster%20-%201786119912767%202026-08-07%2020_25.mp3?raw=true", "jcjjjfjjjnsoa")
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+
+local breaking = Instance.new("Sound")
+breaking.SoundId = Github.SoundId
+breaking.PlaybackSpeed = 1
+breaking.Parent = workspace
+breaking.Looped = false
+breaking.RollOffMaxDistance = 1000000000
+breaking.Volume = 4
+breaking:Play() 
+
+local CameraShaker = require(game.ReplicatedStorage.CameraShaker)
+local camara = game.Workspace.CurrentCamera
+local camShake = CameraShaker.new(Enum.RenderPriority.Camera.Value, function(shakeCf)
+	camara.CFrame = camara.CFrame * shakeCf
+end)
+camShake:Start()
+camShake:ShakeOnce(13,4,0.1,6,2,0.5)
+
+task.spawn(function() 
+light(2,Color3.fromRGB(127, 212, 255),Color3.fromRGB(0, 138, 255))
+end) 
+
+---====== Load spawner ======---
+
+local Spawner = loadstring(game:HttpGet("https://raw.githubusercontent.com/iccdjkkkkskskhdgdgegvbfbgncjjdudejdjvi/REBLAHARDCOREDI/refs/heads/main/NODEATHHINTSPAWNE"))()
+
+---====== Create entity ======---
+
+local entity = Spawner:Create({
+	Entity = {
+		Name = "A60ButRebound",
+		Asset = "https://github.com/lynguyen26031993-design/-u/raw/refs/heads/main/MultimonsterFace%20(1).rbxm?raw=true",
+		HeightOffset = 3
+	},
+	Lights = {
+		Flicker = {
+			Enabled = false,
+			Duration = 1
+		},
+		Shatter = false,
+		Repair = false
+	},
+	Earthquake = {
+		Enabled = false
+	},
+	CameraShake = {
+		Enabled = true,
+		Range = 100,
+		Values = {7.5, 15, 0.1, 2} -- Magnitude, Roughness, FadeIn, FadeOut
+	},
+	Movement = {
+		Speed = 180,
+		Delay = 5,
+		Reversed = true
+	},
+	Rebounding = {
+		Enabled = true,
+		Type = "Ambush", -- "Blitz"
+		Min = 1,
+		Max = 1,
+		Delay = 0
+	},
+	Damage = {
+		Enabled = true,
+		Range = 40,
+		Amount = 100
+	},
+	Crucifixion = {
+		Enabled = true,
+		Range = 40,
+		Resist = false,
+		Break = true
+	},
+	Death = {
+		Type = "Guiding", -- "Curious"
+		Hints = {"Death", "Hints", "Go", "Here"},
+		Cause = ""
+	}
+})
+
+---====== Debug entity ======---
+
+entity:SetCallback("OnSpawned", function()
+	print("Entity has spawned")
+end)
+
+entity:SetCallback("OnStartMoving", function()
+	print("Entity has started moving")
+end)
+
+entity:SetCallback("OnEnterRoom", function(room: Model, firstTime: boolean)
+	if firstTime == true then
+		print("Entity has entered room: ".. room.Name.. " for the first time")
+		entity.Config.Movement.Speed = entity.Config.Movement.Speed * 1.1
+		print("New Speed:", entity.Config.Movement.Speed)
+	else
+		print("Entity has entered room: ".. room.Name.. " again")
+	end
+end)
+
+entity:SetCallback("OnLookAt", function(lineOfSight: boolean)
+	if lineOfSight == true then
+		print("Player is looking at entity")
+	else
+		print("Player view is obstructed by something")
+	end
+end)
+
+entity:SetCallback("OnRebounding", function(startOfRebound: boolean)
+	if startOfRebound == true then
+		print("Entity has started rebounding")
+		entity.Config.Movement.Speed = entity.Config.Movement.Speed + 50
+		local player = game.Players.LocalPlayer
+		if player and player:FindFirstChild("PlayerGui") then
+			local flashGui = Instance.new("ScreenGui")
+			flashGui.Name = "ReboundDoorFlash"
+			flashGui.IgnoreGuiInset = true
+			flashGui.DisplayOrder = 999998
+			flashGui.Parent = player.PlayerGui
+
+			local flashFrame = Instance.new("Frame")
+			flashFrame.Size = UDim2.new(1, 0, 1, 0)
+			flashFrame.BackgroundColor3 = Color3.fromRGB(0, 102, 255) -- Vibrant Blue
+			flashFrame.BackgroundTransparency = 0 -- Full visibility instantly
+			flashFrame.BorderSizePixel = 0
+			flashFrame.Parent = flashGui
+
+			-- Smoothly fade out the flash frame
+			local tweenInfo = TweenInfo.new(0.6, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out)
+			local fadeTween = game:GetService("TweenService"):Create(flashFrame, tweenInfo, {BackgroundTransparency = 1})
+			fadeTween:Play()
+
+			fadeTween.Completed:Wait()
+			flashGui:Destroy()
+		end
+	else
+		print("Entity has finished rebounding")
+		local player = game.Players.LocalPlayer
+		if player and player:FindFirstChild("PlayerGui") then
+			local flashGui = Instance.new("ScreenGui")
+			flashGui.Name = "ReboundDoorFlash"
+			flashGui.IgnoreGuiInset = true
+			flashGui.DisplayOrder = 999998
+			flashGui.Parent = player.PlayerGui
+
+			local flashFrame = Instance.new("Frame")
+			flashFrame.Size = UDim2.new(1, 0, 1, 0)
+			flashFrame.BackgroundColor3 = Color3.fromRGB(0, 102, 255) -- Vibrant Blue
+			flashFrame.BackgroundTransparency = 0 -- Full visibility instantly
+			flashFrame.BorderSizePixel = 0
+			flashFrame.Parent = flashGui
+
+			-- Smoothly fade out the flash frame
+			local tweenInfo = TweenInfo.new(0.6, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out)
+			local fadeTween = game:GetService("TweenService"):Create(flashFrame, tweenInfo, {BackgroundTransparency = 1})
+			fadeTween:Play()
+
+			fadeTween.Completed:Wait()
+			flashGui:Destroy()
+		end
+	end
+end)
+
+entity:SetCallback("OnDespawning", function()
+	print("Entity is despawning")
+end)
+
+entity:SetCallback("OnDespawned", function()
+	print("Entity has despawned")
+end)
+
+entity:SetCallback("OnDamagePlayer", function(newHealth: number)
+	if newHealth <= 0 then
+		print("Entity has killed the player")
+		local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local LocalPlayer = Players.LocalPlayer
+local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
+local Remotes = ReplicatedStorage:WaitForChild("RemotesFolder")
+
+local DeathTypes = {
+	["Yellow"] = {"yellow", "curious"},
+	["Blue"] = {"blue", "guiding"}
+}
+
+local function DeathHint(hints, deathType)
+	if typeof(hints) ~= "table" or #hints == 0 then
+		return
+	end
+
+	local MainUI = PlayerGui:WaitForChild("MainUI")
+	local Death = MainUI:WaitForChild("Death")
+
+	Death:GetPropertyChangedSignal("Visible"):Wait()
+
+	deathType = tostring(deathType or "Guiding"):lower()
+
+	local colour
+
+	for name, values in next, DeathTypes do
+		if table.find(values, deathType) then
+			colour = name
+			break
+		end
+	end
+
+	if not colour then
+		local MainGame = MainUI:WaitForChild("Initiator"):WaitForChild("Main_Game")
+		local Health = MainGame:WaitForChild("Health")
+		local Music = Health:WaitForChild("Music")
+
+		for _, c in next, Music:GetChildren() do
+			if c.Name:lower() == deathType then
+				colour = c.Name
+				break
+			end
+		end
+	end
+
+	colour = colour or "Blue"
+
+	if firesignal then
+		firesignal(
+			Remotes.DeathHint.OnClientEvent,
+			hints,
+			colour
+		)
+	end
+end
+
+DeathHint({
+"", "", "", "", "", "", "", ""
+}, "Guiding")
+	else
+
+	end
+end)
+
+--[[
+
+DEVELOPER NOTE:
+By overwriting 'CrucifixionOverwrite' the default crucifixion callback will be replaced with your custom callback.
+
+entity:SetCallback("CrucifixionOverwrite", function()
+    print("Custom crucifixion callback")
+end)
+
+]]--
+
+---====== Run entity ======---
+
+entity:Run(true)
