@@ -129,7 +129,7 @@ local entity = Spawner:Create({
 	Damage = {
 		Enabled = true,
 		Range = 50,
-		Amount = 50
+		Amount = 0.0000000000000001
 	},
 	Crucifixion = {
 		Enabled = true,
@@ -613,7 +613,27 @@ end)
 entity:SetCallback("OnDamagePlayer", function(newHealth)
 	if newHealth == 0 then
 		print("Entity has killed the player")
-		getgenv().MultiKilled = true
+		
+	else
+		print("Entity has damaged the player")
+		local Players = game:GetService("Players")
+
+local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+
+if character:GetAttribute("Hiding") ~= true then
+	-- kích họa
+	print("Hiding detected!")
+	
+	getgenv().MultiKilled = true
+	
+	local Players = game:GetService("Players")
+
+local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoid = character:WaitForChild("Humanoid")
+
+humanoid.Health = 0
 		
 		local Players = game:GetService("Players")
 		local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -675,8 +695,7 @@ entity:SetCallback("OnDamagePlayer", function(newHealth)
 		DeathHint({
 			"", "", "", "", "", "", "", ""
 		}, "Guiding")
-	else
-		print("Entity has damaged the player")
+end
 	end
 end)
 
