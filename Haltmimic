@@ -1,0 +1,491 @@
+local RunService = game:GetService("RunService")
+local SoundService = game:GetService("SoundService")
+local Lighting = game:GetService("Lighting")
+local Players = game:GetService("Players")
+local Workspace = game:GetService("Workspace")
+local TweenService = game:GetService("TweenService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local LocalPlayer = Players.LocalPlayer
+local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
+local character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+local humanoid = character:WaitForChild("Humanoid")
+local hrp = character:WaitForChild("HumanoidRootPart")
+local Camera = Workspace.CurrentCamera
+
+-- Lưu lại giá trị Fog gốc để khôi phục
+local originalFogStart = Lighting.FogStart
+local originalFogEnd = Lighting.FogEnd
+
+-- ==========================================
+-- HỆ THỐNG QUẢN LÝ DỌN DẸP (CLEANUP SYSTEM)
+-- ==========================================
+local isCleanedUp = false
+local activeTasks = {}
+local connections = {}
+
+-- Forward declaration cho các object cần xóa
+local s1_gui, haltMimicSound
+local s2_gui, model, s2_breaking, s2_breaking2
+
+local function trackTask(thread)
+	table.insert(activeTasks, thread)
+	return thread
+end
+
+local function cleanup()
+	if isCleanedUp then return end
+	isCleanedUp = true
+	print("Đang tiến hành dọn dẹp toàn bộ dữ liệu của cả 2 scripts...")
+
+	-- 1. Hủy toàn bộ task và vòng lặp
+	for _, thread in ipairs(activeTasks) do
+		if coroutine.status(thread) == "suspended" or coroutine.status(thread) == "running" then
+			task.cancel(thread)
+		end
+	end
+
+	-- 2. Ngắt toàn bộ kết nối (Events)
+	for _, conn in ipairs(connections) do
+		if conn and conn.Connected then
+			conn:Disconnect()
+		end
+	end
+
+	-- 3. Dọn dẹp của Script 1
+	RunService:UnbindFromRenderStep("StrongSlowWave")
+	Workspace.CurrentCamera.CameraType = Enum.CameraType.Custom
+
+	local envEffects = PlayerGui:FindFirstChild("EnvironmentEffects")
+	if envEffects then envEffects:Destroy() end
+
+	Lighting.FogStart = originalFogStart
+	Lighting.FogEnd = originalFogEnd
+
+	local hMimic = Workspace:FindFirstChild("HaltMimic")
+	if hMimic then hMimic:Destroy() end
+
+	local muffledGroup = SoundService:FindFirstChild("MuffledGroup")
+	if muffledGroup then muffledGroup:Destroy() end
+
+	-- 4. Dọn dẹp của Script 2
+	if model and model.Parent then model:Destroy() end
+	if s2_gui and s2_gui.Parent then s2_gui:Destroy() end
+	if s2_breaking then s2_breaking:Stop(); s2_breaking:Destroy() end
+	if s2_breaking2 then s2_breaking2:Stop(); s2_breaking2:Destroy() end
+
+	-- 5. Dừng bản thân script (nếu chạy dạng LocalScript)
+	if script then script.Disabled = true end
+end
+
+-- Dọn dẹp khi nhân vật chết hoặc rời game
+humanoid.Died:Connect(cleanup)
+LocalPlayer.CharacterRemoving:Connect(cleanup)
+
+local function GetGitSound(GithubSnd, SoundName)
+	local url = GithubSnd
+	if not isfile(SoundName .. ".mp3") then
+		writefile(SoundName .. ".mp3", game:HttpGet(url))
+	end
+	local sound = Instance.new("Sound")
+	sound.SoundId = (getcustomasset or getsynasset)(SoundName .. ".mp3")
+	return sound
+end
+
+-- ==========================================
+-- SCRIPT 1: LOGIC & MÔI TRƯỜNG (ENVIRONMENT)
+-- ==========================================
+local currentRooms = Workspace:WaitForChild("CurrentRooms", 5)
+if currentRooms then
+	local tempValue = 0
+	local targetValue = 2
+
+	local roomConnection
+	roomConnection = currentRooms.ChildAdded:Connect(function(child)
+		if child:IsA("Model") then
+			tempValue = tempValue + 1
+			print("Model mới được tạo. Value hiện tại: " .. tempValue)
+
+			-- ĐẠT ĐIỀU KIỆN SCRIPT 1 -> KẾT THÚC CẢ 2
+			if tempValue >= targetValue then
+				print("Đã đủ " .. targetValue .. " model mới.")
+				cleanup()
+			end
+		end
+	end)
+	table.insert(connections, roomConnection)
+end
+
+-- Âm thanh Script 1
+local s1_Github = GetGitSound("https://github.com/lynguyen26031993-design/-u/raw/refs/heads/main/lv_0_20260810234726.mp3?raw=true", "jvjjdjjjjxss")
+haltMimicSound = Instance.new("Sound")
+haltMimicSound.SoundId = s1_Github.SoundId
+haltMimicSound.PlaybackSpeed = 1
+haltMimicSound.Parent = Workspace
+haltMimicSound.Looped = true
+haltMimicSound.Name = "HaltMimic" 
+haltMimicSound.RollOffMaxDistance = 1000000000
+haltMimicSound.Volume = 0.4
+haltMimicSound:Play() 
+
+-- Xử lý muffle
+local group = SoundService:FindFirstChild("MuffledGroup")
+if not group then
+	group = Instance.new("SoundGroup")
+	group.Name = "MuffledGroup"
+	group.Parent = SoundService
+end
+
+local eq = group:FindFirstChild("Muffle")
+if not eq then
+	eq = Instance.new("EqualizerSoundEffect")
+	eq.Name = "Muffle"
+	eq.Parent = group
+end
+eq.HighGain = -25
+eq.MidGain = -10
+eq.LowGain = 0
+
+local function Apply(sound)
+	if sound:IsA("Sound") and sound.Name ~= "HaltMimic" then
+		sound.SoundGroup = group
+	end
+end
+
+for _, v in ipairs(Workspace:GetDescendants()) do
+	Apply(v)
+end
+local workspaceDescConn = Workspace.DescendantAdded:Connect(Apply)
+table.insert(connections, workspaceDescConn)
+
+-- Hiệu ứng Camera (Script 1)
+local t = 0
+local yawRange = math.rad(35)
+local pitchRange = math.rad(25)
+local rollRange = math.rad(12)
+local camSpeed = 0.5
+local shakeAngle = math.rad(0.8)
+local shakeSpeed = 7
+
+RunService:BindToRenderStep("StrongSlowWave", Enum.RenderPriority.Camera.Value + 1, function(dt)
+	t += dt
+	local yaw = math.sin(t * camSpeed) * 0.7 + math.sin(t * camSpeed * 0.47 + 2) * 0.3 + math.noise(t * 0.16, 10, 0) * 0.35
+	local pitch = math.sin(t * camSpeed * 0.73 + 1.7) * 0.65 + math.sin(t * camSpeed * 0.31 + 4) * 0.35 + math.noise(t * 0.13, 30, 0) * 0.3
+	local roll = math.sin(t * camSpeed * 0.51 + 3) * 0.65 + math.sin(t * camSpeed * 0.27) * 0.35 + math.noise(t * 0.11, 50, 0) * 0.25
+
+	local shakeX = math.noise(t * shakeSpeed, 100, 0) * shakeAngle
+	local shakeY = math.noise(t * shakeSpeed, 200, 0) * shakeAngle
+	local shakeZ = math.noise(t * shakeSpeed, 300, 0) * shakeAngle
+
+	Camera.CFrame = Camera.CFrame * CFrame.Angles(pitch * pitchRange + shakeX, yaw * yawRange + shakeY, roll * rollRange + shakeZ)
+end)
+
+-- Hiệu ứng màu phòng
+local function Process(v)
+	if v:IsA("BasePart") and v.Material == Enum.Material.Neon and not (v.Color.R <= 50 / 255 and v.Color.G <= 50 / 255 and v.Color.B <= 50 / 255) then
+		v.Color = Color3.fromRGB(255, 112, 112)
+	elseif v:IsA("PointLight") or v:IsA("SpotLight") or v:IsA("SurfaceLight") then
+		v.Color = Color3.fromRGB(255, 112, 112)
+	end
+end
+
+if currentRooms then
+	for _, v in ipairs(currentRooms:GetDescendants()) do Process(v) end
+	local roomsDescConn = currentRooms.DescendantAdded:Connect(Process)
+	table.insert(connections, roomsDescConn)
+end
+
+Lighting.FogStart = 0
+Lighting.FogEnd = 10
+
+-- GUI của Script 1 (Gộp chung ScreenGui để sắp xếp layer chuẩn xác)
+s1_gui = Instance.new("ScreenGui")
+s1_gui.Name = "EnvironmentEffects"
+s1_gui.IgnoreGuiInset = true
+s1_gui.ResetOnSpawn = false
+s1_gui.Parent = PlayerGui
+
+-- 1. ImageOverlay (Layer dưới: ZIndex = 1)
+local s1_overlayImage = Instance.new("ImageLabel")
+s1_overlayImage.Name = "ImageOverlay"
+s1_overlayImage.Size = UDim2.fromScale(1, 1)
+s1_overlayImage.Position = UDim2.fromScale(0, 0)
+s1_overlayImage.BackgroundTransparency = 1
+s1_overlayImage.Image = "rbxassetid://114521939028108"
+s1_overlayImage.ImageTransparency = 0.2
+s1_overlayImage.ZIndex = 1
+s1_overlayImage.Parent = s1_gui
+
+-- 2. BlackFade Frame (Layer trên: ZIndex = 2)
+local frame = Instance.new("Frame")
+frame.Name = "BlackFade"
+frame.Size = UDim2.fromScale(1, 1)
+frame.Position = UDim2.fromScale(0, 0)
+frame.BackgroundColor3 = Color3.new(0, 0, 0)
+frame.BorderSizePixel = 0
+frame.ZIndex = 2
+frame.Parent = s1_gui
+
+-- Gói phần chờ và tween vào spawn để không chặn vòng đời script 2
+trackTask(task.spawn(function()
+	task.wait(0.5)
+	if isCleanedUp then return end
+	local tween = TweenService:Create(frame, TweenInfo.new(1.2, Enum.EasingStyle.Linear), {BackgroundTransparency = 1})
+	tween:Play()
+	tween.Completed:Wait()
+	
+	if not isCleanedUp then
+		frame:Destroy() -- Xóa riêng khung đen sau khi mờ dần, giữ lại overlayImage bên dưới
+		TweenService:Create(Lighting, TweenInfo.new(4, Enum.EasingStyle.Linear), {FogStart = 40, FogEnd = 60}):Play()
+	end
+end))
+
+-- ==========================================
+-- SCRIPT 2: QUÁI VẬT & JUMPSCARE
+-- ==========================================
+local s2_Github = GetGitSound("https://github.com/lynguyen26031993-design/-u/raw/refs/heads/main/Turn.ogg%20(1).mp3?raw=true", "gfghgvvfdeddee")
+s2_breaking = Instance.new("Sound")
+s2_breaking.SoundId = s2_Github.SoundId
+s2_breaking.PlaybackSpeed = 0.6
+s2_breaking.Parent = Workspace
+s2_breaking.Looped = false
+s2_breaking.RollOffMaxDistance = 1000000000
+s2_breaking.Volume = 1
+s2_Github:Destroy()
+
+local s2_Github2 = GetGitSound("https://github.com/lynguyen26031993-design/-u/raw/refs/heads/main/Gethalted.mp3.mpeg%20(1).mp3?raw=true", "bjcjsjjjjaaa")
+s2_breaking2 = Instance.new("Sound")
+s2_breaking2.SoundId = s2_Github2.SoundId
+s2_breaking2.PlaybackSpeed = 0.9
+s2_breaking2.Parent = Workspace
+s2_breaking2.Looped = false
+s2_breaking2.RollOffMaxDistance = 1000000000
+s2_breaking2.Volume = 1
+s2_Github2:Destroy()
+
+local url = "https://github.com/lynguyen26031993-design/-u/raw/refs/heads/main/Multimonster%20(1).rbxm"
+local file = "Multimonster (1).rbxm"
+local guiUrl = "https://raw.githubusercontent.com/lynguyen26031993-design/-u/refs/heads/main/Place_6839171747_Frame_Jumpscare_ShadeMimic_1786382647.txt"
+local guiFile = "Jumpscare_ShadeMimic.txt"
+
+if not isfile(guiFile) then writefile(guiFile, game:HttpGet(guiUrl)) end
+s2_gui = game:GetObjects(getcustomasset(guiFile))[1]
+
+if s2_gui then
+	local jumpscareFolder = PlayerGui:FindFirstChild("MainUI") and PlayerGui.MainUI:FindFirstChild("Jumpscare")
+	s2_gui.Parent = jumpscareFolder or PlayerGui 
+end
+
+local overlay = s2_gui and s2_gui:FindFirstChild("OverlayTurn", true)
+local icon = overlay and overlay:FindFirstChild("Icon", true)
+
+local overlayImage = s2_gui and s2_gui:FindFirstChild("Overlay", true)
+local static = s2_gui and s2_gui:FindFirstChild("Static", true)
+local static2 = s2_gui and s2_gui:FindFirstChild("Static2", true)
+local eyes = s2_gui and s2_gui:FindFirstChild("Eyes", true)
+
+if overlayImage then overlayImage.Visible = false end
+if static then static.Visible = false end
+if static2 then static2.Visible = false end
+if eyes then eyes.Visible = false end
+
+-- Các hiệu ứng chớp tắt GUI
+trackTask(task.spawn(function()
+	while not isCleanedUp and s2_gui and s2_gui.Parent do
+		task.wait(math.random(3, 6))
+		if overlayImage and not isCleanedUp then
+			overlayImage.Visible = true
+			task.wait(0.06)
+			if not isCleanedUp then overlayImage.Visible = false end
+		end
+	end
+end))
+
+trackTask(task.spawn(function()
+	while not isCleanedUp and s2_gui and s2_gui.Parent do
+		task.wait(math.random(4, 8))
+		if isCleanedUp then break end
+		if static then static.Visible = true end
+		if static2 then static2.Visible = true end
+		task.wait(0.06)
+		if isCleanedUp then break end
+		if static then static.Visible = false end
+		if static2 then static2.Visible = false end
+	end
+end))
+
+trackTask(task.spawn(function()
+	while not isCleanedUp and s2_gui and s2_gui.Parent do
+		task.wait(math.random(8, 12))
+		if isCleanedUp then break end
+		if eyes then
+			for i = 1, 3 do
+				if isCleanedUp then break end
+				eyes.Visible = true
+				task.wait(0.06)
+				if isCleanedUp then break end
+				eyes.Visible = false
+				task.wait(0.06)
+			end
+			if not isCleanedUp then eyes.Visible = false end
+		end
+	end
+end))
+
+local jumpscare
+local function playJumpscare()
+	if isCleanedUp or not overlay or not icon or not icon:IsA("ImageLabel") then return end
+	local originalPosition = icon.Position
+	overlay.Visible = true
+
+	trackTask(task.spawn(function()
+		local startTime = os.clock()
+		while not isCleanedUp and os.clock() - startTime < 0.45 do
+			icon.Position = UDim2.new(originalPosition.X.Scale, originalPosition.X.Offset + math.random(-10, 10), originalPosition.Y.Scale, originalPosition.Y.Offset + math.random(-10, 10))
+			task.wait(0.07)
+		end
+		if not isCleanedUp then
+			icon.Position = originalPosition
+			overlay.Visible = false
+		end
+	end))
+end
+
+if not isfile(file) then writefile(file, game:HttpGet(url)) end
+model = game:GetObjects(getcustomasset(file))[1]
+
+if model then
+	model.Parent = Workspace
+	for _, v in ipairs(model:GetDescendants()) do
+		if v:IsA("PointLight") then
+			v.Enabled = false
+		elseif v:IsA("Sound") then
+			v.Volume = 0
+		end
+	end
+
+	local multi = model:FindFirstChild("Multi", true)
+	if multi and multi:IsA("BasePart") then
+		multi.Size = multi.Size * 2
+		multi.CanCollide = false
+		multi.Massless = true
+	end
+end
+
+local directions = {Vector3.new(0, 0, -1), Vector3.new(1, 0, 0), Vector3.new(0, 0, 1), Vector3.new(-1, 0, 0)}
+local distance = 60
+local speed = 12
+local flyDirection
+
+local function reposition()
+	if isCleanedUp then return false end
+	local multi = model and model:FindFirstChild("Multi", true)
+	if not multi or not multi:IsA("BasePart") then return false end
+
+	local playerPosition = hrp.Position
+	local direction = directions[math.random(1, #directions)]
+	speed = math.random(10, 19)
+
+	local spawnPosition = Vector3.new(playerPosition.X + direction.X * distance, playerPosition.Y, playerPosition.Z + direction.Z * distance)
+	local pivot = model:GetPivot()
+	local multiOffset = pivot:ToObjectSpace(multi.CFrame)
+
+	model:PivotTo(CFrame.new(spawnPosition) * multiOffset:Inverse())
+	flyDirection = (playerPosition - spawnPosition).Unit
+
+	if not jumpscare then
+		s2_breaking.PlaybackSpeed = math.random(60, 90) / 100
+		s2_breaking:Play() 
+	else
+		s2_breaking2:Play() 
+		jumpscare = false
+	end
+
+	if math.random(1, 2) == 1 then playJumpscare() end
+	return true
+end
+
+local hitDebounce = false
+local function playHitEffect()
+	if isCleanedUp or hitDebounce or not overlayImage or not eyes then return end
+	hitDebounce = true
+
+	local hum = character:FindFirstChildOfClass("Humanoid")
+	if hum then
+		hum:TakeDamage(20)
+		if hum.Health <= 0 then
+			task.spawn(function() 
+				getgenv().MultiKilled = true
+				local Remotes = ReplicatedStorage:WaitForChild("RemotesFolder", 3)
+				
+				if Remotes and firesignal then
+					local DeathTypes = { ["Yellow"] = {"yellow", "curious"}, ["Blue"] = {"blue", "guiding"} }
+					local hints = {"", "", "", "", "", "", "", ""}
+					local colour = "Blue"
+					firesignal(Remotes.DeathHint.OnClientEvent, hints, colour)
+				end
+			end) 
+		end
+	end
+
+	local hitOverlay = overlayImage:Clone()
+	local hitEyes = eyes:Clone()
+	hitOverlay.Name = "HitOverlay"
+	hitEyes.Name = "HitEyes"
+	hitOverlay.Parent = overlayImage.Parent
+	hitEyes.Parent = eyes.Parent
+	hitOverlay.Visible = true
+	hitEyes.Visible = true
+
+	local originalPosition = hitEyes.Position
+	jumpscare = true
+	reposition()
+
+	trackTask(task.spawn(function()
+		local startTime = os.clock()
+		while not isCleanedUp and os.clock() - startTime < 0.78 do
+			hitEyes.Position = UDim2.new(originalPosition.X.Scale, originalPosition.X.Offset + math.random(-13, 13), originalPosition.Y.Scale, originalPosition.Y.Offset + math.random(-13, 13))
+			task.wait(0.07)
+		end
+		if not isCleanedUp then
+			hitEyes.Position = originalPosition
+			hitEyes.Visible = false
+			hitOverlay.Visible = false
+			hitEyes:Destroy()
+			hitOverlay:Destroy()
+		end
+		hitDebounce = false
+	end))
+end
+
+if model then
+	if reposition() then
+		trackTask(task.spawn(function()
+			while not isCleanedUp and model.Parent and character.Parent and hrp.Parent do
+				task.wait(math.random(8, 10))
+				if isCleanedUp or not model.Parent or not character.Parent or not hrp.Parent then break end
+				reposition()
+			end
+		end))
+
+		trackTask(task.spawn(function()
+			while not isCleanedUp and model.Parent and character.Parent and hrp.Parent do
+				local multi = model:FindFirstChild("Multi", true)
+				if not multi or not multi:IsA("BasePart") then break end
+
+				local dt = RunService.Heartbeat:Wait()
+				if isCleanedUp then break end
+
+				local newPosition = multi.Position + flyDirection * speed * dt
+				local currentPivot = model:GetPivot()
+				local offset = currentPivot:ToObjectSpace(multi.CFrame)
+
+				model:PivotTo(CFrame.new(newPosition) * offset:Inverse())
+
+				if (multi.Position - hrp.Position).Magnitude < 3.5 then
+					playHitEffect()
+				end
+			end
+		end))
+	end
+end
