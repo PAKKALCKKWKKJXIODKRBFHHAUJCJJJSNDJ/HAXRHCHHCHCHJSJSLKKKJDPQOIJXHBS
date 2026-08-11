@@ -531,6 +531,8 @@ entity:SetCallback("OnEnterRoom", function(room: Model, firstTime: boolean)
 							break
 						end
 					end
+					
+					doorModel:SetAttribute("Broken", true) 
 
 					if not doorModel then
 						return
