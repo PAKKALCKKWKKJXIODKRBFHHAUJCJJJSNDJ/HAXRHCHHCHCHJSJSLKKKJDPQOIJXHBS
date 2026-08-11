@@ -128,7 +128,6 @@ local entity = Spawner:Create({
 	},
 	Damage = {
 		Enabled = true,
-		IgnoreHiding = false, -- Đã sửa thành false để entity không thể giết player khi đang ở trong tủ
 		Range = 50,
 		Amount = 100
 	},
