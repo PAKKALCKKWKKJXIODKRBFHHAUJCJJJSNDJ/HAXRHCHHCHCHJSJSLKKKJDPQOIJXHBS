@@ -88,7 +88,7 @@ end
 
 ---====== Load spawner ======---
 
-local Spawner = loadstring(game:HttpGet("https://raw.githubusercontent.com/iccdjkkkkskskhdgdgegvbfbgncjjdudejdjvi/REBLAHARDCOREDI/refs/heads/main/rippermimicspa"))()
+local Spawner = loadstring(game:HttpGet("https://raw.githubusercontent.com/iccdjkkkkskskhdgdgegvbfbgncjjdudejdjvi/REBLAHARDCOREDI/refs/heads/main/NODEATHHINTSPAWNE"))()
 
 ---====== Create entity ======---
 
@@ -140,7 +140,7 @@ local entity = Spawner:Create({
 	},
 	Death = {
 		Type = "Guiding", -- "Curious"
-		Hints = {" ", "", "", ""},
+		Hints = {"hb ", "", "", ""},
 		Cause = "Multi Monster"
 	}
 })
