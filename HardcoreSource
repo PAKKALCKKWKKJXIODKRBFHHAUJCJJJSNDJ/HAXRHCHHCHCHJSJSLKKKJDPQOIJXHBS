@@ -1,6 +1,6 @@
 game:GetService("TextChatService").TextChannels.RBXGeneral:DisplaySystemMessage("<font color='#f22800'>[Hardcore Mode Reignited (Recreated)]: Script Succesfully Executed/Loaded.</font>")
 local TweenService = game:GetService("TweenService")
-
+-- bla
 -- Bộ nhớ cache tạm thời trong RAM (không lưu vào ổ cứng / file)
 local MEMORY_CACHE = {}
 
@@ -427,7 +427,8 @@ local SharedState = {
 	DescLabel = nil,
 	TaglineLabel = nil,
 	TitleLabel = nil,
-	CurrentSelectedCharm = nil
+	CurrentSelectedCharm = nil,
+	OriginalMouseBehavior = nil
 }
 
 -- Forward declaration of RefreshCharmListUI function
@@ -810,11 +811,21 @@ local function InitializeGui()
 		local popDown = SetupTextPopAnimation(SharedState.DownsidesLabel, 0.1)
 
 		SharedState.CharmsFolder:GetPropertyChangedSignal("Visible"):Connect(function()
-			if SharedState.CharmsFolder.Visible then
-				popUp()
-				popDown()
-			end
-		end)
+	if SharedState.CharmsFolder.Visible then
+		if UserInputService.MouseEnabled then
+			SharedState.OriginalMouseBehavior = UserInputService.MouseBehavior
+			UserInputService.MouseBehavior = Enum.MouseBehavior.Default
+		end
+
+		popUp()
+		popDown()
+	else
+		if SharedState.OriginalMouseBehavior then
+			UserInputService.MouseBehavior = SharedState.OriginalMouseBehavior
+			SharedState.OriginalMouseBehavior = nil
+		end
+	end
+end)
 
 		SetupButtonInteractions()
 		
