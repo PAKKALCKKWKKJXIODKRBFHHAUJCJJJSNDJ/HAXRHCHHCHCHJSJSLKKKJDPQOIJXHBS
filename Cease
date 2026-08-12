@@ -163,56 +163,111 @@ v4:Shake(v1.Presets.Earthquake)
 local CurrentRooms = workspace:WaitForChild("CurrentRooms")
 
 local Color = Color3.fromRGB(133, 149, 255)
+local FlashColor = Color3.fromRGB(43, 128, 255)
+
 local TWEEN_INFO = TweenInfo.new(2, Enum.EasingStyle.Sine, Enum.EasingDirection.Out)
+local connections = {}
 
 local function ApplyColorToLightOrPart(v, useTween)
-	if v:IsA("PointLight") or v:IsA("SpotLight") or v:IsA("SurfaceLight") or (v:IsA("BasePart") and v.Material == Enum.Material.Neon) then
-		if v.Color ~= Color then -- Tránh tween lại nếu đã đổi màu rồi
-			if useTween then
-				TweenService:Create(v, TWEEN_INFO, {Color = Color}):Play()
-			else
-				v.Color = Color
-			end
+	if v:IsA("PointLight")
+		or v:IsA("SpotLight")
+		or v:IsA("SurfaceLight")
+		or (v:IsA("BasePart") and v.Material == Enum.Material.Neon) then
+
+		if useTween then
+			TweenService:Create(v, TWEEN_INFO, {
+				Color = Color
+			}):Play()
+		else
+			v.Color = Color
+		end
+	end
+end
+
+local function FlashModel(model)
+	if not model:IsA("Model") then
+		return
+	end
+
+	if model.Name ~= "LightStand" and model.Name ~= "Chandelier" then
+		return
+	end
+
+	for _, v in ipairs(model:GetDescendants()) do
+		if v:IsA("PointLight")
+			or v:IsA("SpotLight")
+			or v:IsA("SurfaceLight")
+			or (v:IsA("BasePart") and v.Material == Enum.Material.Neon) then
+
+			v.Color = FlashColor
+
+			task.delay(1.5, function()
+				if v and v.Parent then
+					TweenService:Create(v, TWEEN_INFO, {
+						Color = Color
+					}):Play()
+				end
+			end)
 		end
 	end
 end
 
 local function SetupTargetModel(model, useTween)
-	if not model:IsA("Model") or (model.Name ~= "LightStand" and model.Name ~= "Chandelier") then
+	if not model:IsA("Model") then
 		return
 	end
 
-	-- Quét toàn bộ những gì đang có sẵn trong Model ngay lúc này
+	if model.Name ~= "LightStand" and model.Name ~= "Chandelier" then
+		return
+	end
+
+	if connections[model] then
+		return
+	end
+
 	for _, v in ipairs(model:GetDescendants()) do
 		ApplyColorToLightOrPart(v, useTween)
 	end
 
-	-- Lắng nghe nếu có bất kỳ Light hoặc Part nào được add vào model này sau đó
-	model.DescendantAdded:Connect(function(descendant)
+	connections[model] = model.DescendantAdded:Connect(function(descendant)
 		task.defer(function()
 			ApplyColorToLightOrPart(descendant, false)
 		end)
 	end)
 end
 
--- Quét toàn bộ các đối tượng hiện tại trong CurrentRooms
 for _, v in ipairs(CurrentRooms:GetDescendants()) do
 	if v:IsA("Model") then
 		SetupTargetModel(v, true)
 	end
 end
 
--- Lắng nghe mọi thứ mới sinh ra trong CurrentRooms
 CurrentRooms.DescendantAdded:Connect(function(obj)
-if coloring then
+	if not coloring then
+		return
+	end
+
 	if obj:IsA("Model") then
-		-- Đợi 1 nhịp ngắn để đảm bảo các thành phần bên trong model kịp load đầy đủ
 		task.defer(function()
 			SetupTargetModel(obj, false)
 		end)
 	end
-	end
 end)
+
+local function FlashAllLights()
+	for _, v in ipairs(CurrentRooms:GetDescendants()) do
+		if v:IsA("Model")
+			and (v.Name == "LightStand" or v.Name == "Chandelier") then
+
+			FlashModel(v)
+		end
+	end
+end
+
+task.spawn(function() 
+-- Khi cần kích hoạt:
+FlashAllLights()
+end) 
 
 repeat task.wait() until entity.Model or workspace:FindFirstChild("CeaseBla")
 	local ceaseModel = entity.Model or workspace:FindFirstChild("CeaseBla")
