@@ -163,6 +163,16 @@ Github2:Destroy()
         
         breaking:Play() 
         
+        for _, v in ipairs(model:GetDescendants()) do
+	if v:IsA("ParticleEmitter") and (
+		(v.Parent:IsA("Attachment") and v.Parent.Name == "Faces")
+		or
+		(v.Parent:IsA("BasePart") and v.Parent.Name == "Face2")
+	) then
+		v.Texture = "rbxassetid://140603766411805"
+	end
+end
+        
         -- Dừng việc bám theo movement của player
         isFollowingMovement = false
 
@@ -175,124 +185,127 @@ Github2:Destroy()
         end
 
         -- Bay thẳng theo hướng HumanoidRootPart tại thời điểm bắt đầu
-        local flyDirection = (humanoidRootPart.Position - primaryPart.Position).Unit
-        local flySpeed = 30
-        local flying = true
-        local hitCharacter = false
-        local canHitObjects = false
+local flyDirection = (humanoidRootPart.Position - primaryPart.Position).Unit
+local flySpeed = 30
+local flying = true
+local hitCharacter = false
+local canHitObjects = false
+local flyStartTime = tick()
 
-        task.delay(0.4, function()
-            canHitObjects = true
-        end)
+task.delay(0.4, function()
+	canHitObjects = true
+end)
 
-        local overlapParams = OverlapParams.new()
-        overlapParams.FilterType = Enum.RaycastFilterType.Exclude
-        overlapParams.FilterDescendantsInstances = {model}
+local overlapParams = OverlapParams.new()
+overlapParams.FilterType = Enum.RaycastFilterType.Exclude
+overlapParams.FilterDescendantsInstances = {model}
 
-        local flyConnection
-        flyConnection = RunService.Heartbeat:Connect(function(dt)
-            if not flying or not model.Parent then
-                if flyConnection then
-                    flyConnection:Disconnect()
-                end
-                return
-            end
+local flyConnection
+flyConnection = RunService.Heartbeat:Connect(function(dt)
+	if not flying or not model.Parent then
+		if flyConnection then
+			flyConnection:Disconnect()
+		end
+		return
+	end
 
-            local currentCFrame = primaryPart.CFrame
-            local nextCFrame = currentCFrame + flyDirection * flySpeed * dt
+	local elapsed = tick() - flyStartTime
 
-            local parts = workspace:GetPartBoundsInBox(
-                nextCFrame,
-                primaryPart.Size,
-                overlapParams
-            )
+local alpha = math.clamp(elapsed / 1.5, 0, 1)
+local speed = flySpeed * (1 + 2 * (alpha ^ 3))
 
-            for _, part in ipairs(parts) do
-                if part:IsA("BasePart") then
-                    if part:IsDescendantOf(character) then
-                        if not hitCharacter then
-                            hitCharacter = true
+	local currentCFrame = primaryPart.CFrame
+	local nextCFrame = currentCFrame + flyDirection * speed * dt
 
-                            local humanoid = character:FindFirstChildOfClass("Humanoid")
-                            if humanoid then
-                                humanoid:TakeDamage(20)
-                            end
-                        end
+	local parts = workspace:GetPartBoundsInBox(
+		nextCFrame,
+		primaryPart.Size,
+		overlapParams
+	)
 
-                        flying = false
-                        break
-                    elseif canHitObjects then
-                        flying = false
-                        break
-                    end
-                end
-            end
+	for _, part in ipairs(parts) do
+		if part:IsA("BasePart") then
+			if part:IsDescendantOf(character) then
+				if not hitCharacter then
+					hitCharacter = true
 
-            if not flying then
-                if flyConnection then
-                    flyConnection:Disconnect()
-                end
-                
-                breaking2:Play() 
+					local humanoid = character:FindFirstChildOfClass("Humanoid")
+					if humanoid then
+						humanoid:TakeDamage(20)
+					end
+				end
 
-                -- Light Range x2 rồi tween về 0
-                for _, obj in ipairs(model:GetDescendants()) do
-                    if obj:IsA("PointLight") or obj:IsA("SpotLight") or obj:IsA("SurfaceLight") then
-                        obj.Range = obj.Range * 2
-                        TweenService:Create(
-                            obj,
-                            TweenInfo.new(0.5, Enum.EasingStyle.Linear),
-                            {Range = 0}
-                        ):Play()
-                    end
-                end
+				flying = false
+				break
+			elseif canHitObjects then
+				flying = false
+				break
+			end
+		end
+	end
 
-                -- Fade ParticleEmitter trong 1s
-                for _, obj in ipairs(model:GetDescendants()) do
-    if obj:IsA("ParticleEmitter") then
-        local original = obj.Transparency
+	if not flying then
+		if flyConnection then
+			flyConnection:Disconnect()
+		end
 
-        task.spawn(function()
-            local start = tick()
+		breaking2:Play()
 
-            while obj.Parent do
-                local alpha = math.clamp((tick() - start) / 1, 0, 1)
-                local keypoints = {}
+		for _, obj in ipairs(model:GetDescendants()) do
+			if obj:IsA("PointLight") or obj:IsA("SpotLight") or obj:IsA("SurfaceLight") then
+				obj.Range = obj.Range * 2
+				TweenService:Create(
+					obj,
+					TweenInfo.new(0.5, Enum.EasingStyle.Linear),
+					{Range = 0}
+				):Play()
+			end
+		end
 
-                for _, keypoint in ipairs(original.Keypoints) do
-                    table.insert(keypoints, NumberSequenceKeypoint.new(
-                        keypoint.Time,
-                        keypoint.Value + (1 - keypoint.Value) * alpha,
-                        keypoint.Envelope
-                    ))
-                end
+		for _, obj in ipairs(model:GetDescendants()) do
+			if obj:IsA("ParticleEmitter") then
+				local original = obj.Transparency
 
-                obj.Transparency = NumberSequence.new(keypoints)
+				task.spawn(function()
+					local start = tick()
 
-                if alpha >= 1 then
-                    break
-                end
+					while obj.Parent do
+						local alpha = math.clamp((tick() - start) / 1, 0, 1)
+						local keypoints = {}
 
-                RunService.Heartbeat:Wait()
-            end
-        end)
-    end
-end
+						for _, keypoint in ipairs(original.Keypoints) do
+							table.insert(keypoints, NumberSequenceKeypoint.new(
+								keypoint.Time,
+								keypoint.Value + (1 - keypoint.Value) * alpha,
+								keypoint.Envelope
+							))
+						end
 
-                -- Chỉ destroy khi HORROR SCREAM 15 phát xong
-                local horrorScream = model:FindFirstChild("HORROR SCREAM 15", true)
-                if horrorScream and horrorScream:IsA("Sound") then
-                    horrorScream.Looped = false
-                    horrorScream.Ended:Wait()
-                end
+						obj.Transparency = NumberSequence.new(keypoints)
 
-                if model.Parent then
-                    model:Destroy()
-                end
-            else
-                primaryPart.CFrame = nextCFrame
-            end
-        end)
+						if alpha >= 1 then
+							break
+						end
+
+						RunService.Heartbeat:Wait()
+					end
+				end)
+			end
+		end
+
+		local horrorScream = model:FindFirstChild("HORROR SCREAM 15", true)
+		if horrorScream and horrorScream:IsA("Sound") then
+			horrorScream.Looped = false
+			horrorScream.Ended:Wait()
+		end
+
+		if model.Parent then
+			model:Destroy()
+		end
+	else
+		primaryPart.CFrame = nextCFrame
+	end
+end)
     end)
 end
 
