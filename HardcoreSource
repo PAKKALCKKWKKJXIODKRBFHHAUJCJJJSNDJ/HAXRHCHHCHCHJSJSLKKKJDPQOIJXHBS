@@ -1271,10 +1271,10 @@ local TimeEntities = {
     { Name = "Limbo",      Interval = 150, Chance = 40, Url = "https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/Limbo" },
     { Name = "Silence",    Interval = 220, Chance = 55, Url = "https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/Silence" },
     { Name = "Deer God",   Interval = 300, Chance = 20, Url = "https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/DeerGod" },
+    { Name = "Cease",       Interval = 110, Chance = 60, Url = "https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/Cease" },
 }
 
 local RoomEntities = {
-    { Name = "Cease",       Interval = 110, Chance = 60, Url = "https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/Cease" },
     { Name = "Ripper",      Interval = 120, Chance = 70, Url = "https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/Ripper" },
     { Name = "Singularity", Interval = 80,  Chance = 60, Url = "https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/Singularity-1" },
     { Name = "Rebound",     Interval = 185, Chance = 40, Url = "https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/Rebound" },
