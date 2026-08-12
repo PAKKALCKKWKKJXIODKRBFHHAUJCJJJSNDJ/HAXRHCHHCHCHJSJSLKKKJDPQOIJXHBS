@@ -284,6 +284,40 @@ local speed = startSpeed + (endSpeed - startSpeed) * easedAlpha
 				end
 
 				if equippedTool and equippedTool.Name == "Crucifix" then
+				for _, v in ipairs(model:GetDescendants()) do
+	if v:IsA("ParticleEmitter") then
+		-- Tốc độ particle
+		v.Speed = NumberRange.new(
+			v.Speed.Min * 2,
+			v.Speed.Max * 2
+		)
+
+		-- Thời gian animation/lifetime
+		v.Lifetime = NumberRange.new(
+			v.Lifetime.Min / 2,
+			v.Lifetime.Max / 2
+		)
+
+		-- Tốc độ xoay
+		v.RotSpeed = NumberRange.new(
+			v.RotSpeed.Min * 2,
+			v.RotSpeed.Max * 2
+		)
+
+		-- Độ lệch hướng / spread
+		v.SpreadAngle = Vector2.new(
+			v.SpreadAngle.X * 2,
+			v.SpreadAngle.Y * 2
+		)
+
+		-- Lực tác động lên particle
+		v.Acceleration *= 2
+
+		-- Độ rung/ngẫu nhiên của hướng
+		v.Drag *= 2
+	end
+end
+
 	local entity = model
 
 	if entity then
