@@ -1,3 +1,5 @@
+local testmode = false -- Bật/tắt chế độ test (true: bỏ qua điều kiện, false: giữ nguyên điều kiện cũ)
+
 local function GetRoom()
 	local currentRooms = workspace:FindFirstChild("CurrentRooms")
 	if not currentRooms then return nil end
@@ -10,6 +12,9 @@ local function GetRoom()
 	end
 	return nil
 end
+
+local victimScream
+local lastPullFinished = Instance.new("BindableEvent")
 
 local TweenService = game:GetService("TweenService")
 
@@ -117,14 +122,19 @@ while true do
 	
 	for _, v in ipairs(room:GetDescendants()) do
 		if v:IsA("Model") and v.Name == "DoorNormal" then
-			-- Chấp nhận nếu CÓ attribute "Singular" VÀ KHÔNG CÓ attribute "Singulared"
-			local hasSingular = v:GetAttribute("Singular")
-			local hasSingulared = v:GetAttribute("Singulared")
-			
-			if hasSingular and (not hasSingulared) then
-				local doorPart = v:FindFirstChild("Hidden")
-				if doorPart and doorPart:IsA("BasePart") then
+			local doorPart = v:FindFirstChild("Hidden")
+			if doorPart and doorPart:IsA("BasePart") then
+				if testmode then
+					-- Testmode: Bỏ qua mọi điều kiện attribute, chỉ cần là DoorNormal có phần Hidden
 					table.insert(validDoorNormals, v)
+				else
+					-- Chế độ thường: Chấp nhận nếu CÓ attribute "Singular" VÀ KHÔNG CÓ attribute "Singulared"
+					local hasSingular = v:GetAttribute("Singular")
+					local hasSingulared = v:GetAttribute("Singulared")
+					
+					if hasSingular and (not hasSingulared) then
+						table.insert(validDoorNormals, v)
+					end
 				end
 			end
 		end
@@ -361,7 +371,14 @@ end
 		return a.distance < b.distance
 	end)
 
-	local maxPull = math.min(#targets, 6)
+	local maxPull = math.min(#targets, math.random(2, 4))
+
+local totalPullWindow = 1.5
+
+local pullDelay = maxPull > 1
+	and totalPullWindow / (maxPull - 1)
+	or 0
+	
 	local instancesToDestroy = {}
 
 	-- Tìm 2 Chain gốc trong Entity
@@ -448,41 +465,52 @@ table.insert(createdAttachments, fakeAtt)
 			beamToUse.Enabled = true
 			
 			local chainTime = math.clamp(target.distance / 30, 0.3, 0.8)
-			
-			TweenService:Create(
-    fakePart,
-    TweenInfo.new(chainTime, Enum.EasingStyle.Linear),
-    {CFrame = targetAtt.WorldCFrame}
-):Play()
 
-task.delay(chainTime, function()
+local chainTween = TweenService:Create(
+	fakePart,
+	TweenInfo.new(chainTime, Enum.EasingStyle.Linear),
+	{CFrame = targetAtt.WorldCFrame}
+)
+
+chainTween:Play()
+
+task.spawn(function()
+	chainTween.Completed:Wait()
+
 	if beamToUse.Parent then
 		beamToUse.Attachment1 = targetAtt
 		playSound("Chained")
 
 		spawnShake:ShakeOnce(
-			3,    -- Magnitude
-			5,    -- Roughness
-			0.02, -- FadeIn
-			0.18, -- FadeOut
-			0,    -- PositionInfluence
-			0.25  -- RotationInfluence
+			3,
+			5,
+			0.02,
+			0.18,
+			0,
+			0.25
 		)
 
 		if fakePart.Parent then
 			fakePart:Destroy()
 		end
 	end
+
+	if i == maxPull then
+		lastPullFinished:Fire()
+	end
 end)
 
-			-- Phát âm thanh "Chained" trong Model/Asset
-		end
+			end
 
-		task.wait(0.5)
-	end
+		if i < maxPull then
+	task.wait(pullDelay)
+end
+end
 
-	-- 4. ĐỜI 1.2 GIÂY SAU KHI ĐỦ XÍCH RỒI MỚI BẮT ĐẦU KÉO VỀ
-	task.wait(0.2)
+lastPullFinished.Event:Wait()
+lastPullFinished:Destroy()
+
+task.wait(0.2)
 
 local rangeTween = TweenService:Create(
 	light,
@@ -552,6 +580,18 @@ end
 
 if playerChained and hum then
 	hum.Health = math.max(0, hum.Health - 60)
+
+	for _, v in ipairs(entity:GetDescendants()) do
+		if v:IsA("Sound") and v.Name == "VictimScream" then
+			victimScream = v
+			break
+		end
+	end
+
+	if victimScream then
+		victimScream.TimePosition = 0
+		victimScream:Play()
+	end
 
 	if hum.Health <= 0 then
 		game.ReplicatedStorage.GameStats['Player_' .. game.Players.LocalPlayer.Name].Total.DeathCause.Value = 'Singularity'
@@ -627,7 +667,7 @@ end)
 
 	if entity:FindFirstChild("Blood", true) then
 		entity.Blood.Enabled = true
-		task.wait(0.9)
+		task.wait(2)
 		entity.Blood.Enabled = false
 	end
 end
@@ -656,5 +696,9 @@ if face and face:IsA("ParticleEmitter") then
 	end
 end
 
+if victimScream and victimScream.IsPlaying then
+	victimScream.Ended:Wait()
+end
+
 s:Destroy()
-Gui:Destroy() 
+Gui:Destroy()
