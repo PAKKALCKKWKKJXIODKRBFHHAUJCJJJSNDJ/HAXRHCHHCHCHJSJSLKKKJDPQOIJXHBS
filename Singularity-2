@@ -1,5 +1,8 @@
 local testmode = true -- Bật chế độ test
 
+local victimScream
+local lastPullFinished = Instance.new("BindableEvent")
+
 local function GetRoom()
 	local currentRooms = workspace:FindFirstChild("CurrentRooms")
 	if not currentRooms then return nil end
@@ -368,7 +371,14 @@ task.wait(1.5)
 			return a.distance < b.distance
 		end)
 
-		local maxPull = math.min(#targets, 6)
+		local maxPull = math.min(#targets, math.random(2, 4))
+
+local totalPullWindow = 1.5
+
+local pullDelay = maxPull > 1
+	and totalPullWindow / (maxPull - 1)
+	or 0
+	
 		local instancesToDestroy = {}
 
 		local chainStart1 = entity:FindFirstChild("ChainStart1", true)
@@ -391,11 +401,13 @@ task.wait(1.5)
 			local targetPart = nil
 
 			if target.isPlayer then
-				targetPart = target.instance
-			else
-				targetPart = target.instance
-				table.insert(instancesToDestroy, target.instance)
-			end
+	playerChained = true
+	targetPart = target.instance
+	targetPart.Anchored = true
+else
+	targetPart = target.instance
+	table.insert(instancesToDestroy, target.instance)
+end
 
 			if targetPart and #templateChains > 0 then
 				local template = templateChains[((i - 1) % #templateChains) + 1]
@@ -445,38 +457,53 @@ task.wait(1.5)
 				beamToUse.Enabled = true
 				
 				local chainTime = math.clamp(target.distance / 30, 0.3, 0.8)
-				
-				TweenService:Create(
-					fakePart,
-					TweenInfo.new(chainTime, Enum.EasingStyle.Linear),
-					{CFrame = targetAtt.WorldCFrame}
-				):Play()
 
-				task.delay(chainTime, function()
-					if beamToUse.Parent then
-						beamToUse.Attachment1 = targetAtt
-						playSound("Chained")
+local chainTween = TweenService:Create(
+	fakePart,
+	TweenInfo.new(chainTime, Enum.EasingStyle.Linear),
+	{CFrame = targetAtt.WorldCFrame}
+)
 
-						if target.isPlayer then
-							playerChained = true
-							if hrp and hrp.Parent then
-								hrp.Anchored = true
-							end
-						end
+chainTween:Play()
 
-						spawnShake:ShakeOnce(3, 5, 0.02, 0.18, 0, 0.25)
+task.spawn(function()
+	chainTween.Completed:Wait()
 
-						if fakePart.Parent then
-							fakePart:Destroy()
-						end
-					end
-				end)
-			end
+	if beamToUse.Parent then
+		beamToUse.Attachment1 = targetAtt
+		playSound("Chained")
 
-			task.wait(0.5)
+		spawnShake:ShakeOnce(
+			3,
+			5,
+			0.02,
+			0.18,
+			0,
+			0.25
+		)
+
+		if fakePart.Parent then
+			fakePart:Destroy()
+		end
+	end
+
+	if i == maxPull then
+		lastPullFinished:Fire()
+	end
+end)
+
+			-- Phát âm thanh "Chained" trong Model/Asset
 		end
 
-		task.wait(0.2)
+		if i < maxPull then
+	task.wait(pullDelay)
+end
+end
+
+lastPullFinished.Event:Wait()
+lastPullFinished:Destroy()
+
+task.wait(0.2)
 
 		local rangeTween = TweenService:Create(
 			light,
@@ -540,14 +567,24 @@ task.wait(1.5)
 		end
 
 		if playerChained and hum then
-			hum.Health = math.max(0, hum.Health - 60)
-			if hum.Health <= 0 then
-				local stat = game.ReplicatedStorage.GameStats:FindFirstChild('Player_' .. game.Players.LocalPlayer.Name)
-				if stat then
-					stat.Total.DeathCause.Value = 'Singularity'
-				end
-			end
+	hum.Health = math.max(0, hum.Health - 60)
+
+	for _, v in ipairs(entity:GetDescendants()) do
+		if v:IsA("Sound") and v.Name == "VictimScream" then
+			victimScream = v
+			break
 		end
+	end
+
+	if victimScream then
+		victimScream.TimePosition = 0
+		victimScream:Play()
+	end
+
+	if hum.Health <= 0 then
+		game.ReplicatedStorage.GameStats['Player_' .. game.Players.LocalPlayer.Name].Total.DeathCause.Value = 'Singularity'
+	end
+end
 
 		for _, beam in ipairs(createdBeams) do
 			if beam and beam.Parent then beam:Destroy() end
@@ -635,8 +672,12 @@ task.wait(1.5)
 				end
 			end
 
-			Gui:Destroy() 
-			s:Destroy()
+			if victimScream and victimScream.IsPlaying then
+	victimScream.Ended:Wait()
+end
+
+s:Destroy()
+Gui:Destroy()
 		end
 	end
 end
