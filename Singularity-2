@@ -644,7 +644,7 @@ end
 
 		if entity:FindFirstChild("Blood", true) then
 			entity.Blood.Enabled = true
-			task.wait(0.9)
+			task.wait(2)
 			entity.Blood.Enabled = false
 		end
 
