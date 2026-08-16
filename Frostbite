@@ -2,11 +2,9 @@ local http_request = (syn and syn.request) or (http and http.request) or http_re
 local getasset = getcustomasset or getsynasset
 
 if not (writefile and getasset and http_request) then
-    warn("[Frostbite]: Executor cÃ¡Â»Â§a bÃ¡ÂºÂ¡n khÃƒÂ´ng hÃ¡Â»â€” trÃ¡Â»Â£ writefile/getcustomasset/request!")
+    warn("[Frostbite]: Executor cá»§a báº¡n khÃ´ng há»— trá»£ writefile/getcustomasset/request!")
     return
 end
-
-getgenv().Frostbite = true
 
 local Players = game:GetService("Players")
 local Lighting = game:GetService("Lighting")
@@ -312,7 +310,7 @@ local function GetGitSound(GithubSnd, SoundName)
         if success and response then
             writefile(fileName, response)
         else
-            warn("[Frostbite]: KhÃƒÂ´ng thÃ¡Â»Æ’ tÃ¡ÂºÂ£i ÃƒÂ¢m thanh: " .. SoundName)
+            warn("[Frostbite]: KhÃ´ng thá»ƒ táº£i Ã¢m thanh: " .. SoundName)
             return nil
         end
     end
@@ -322,25 +320,25 @@ local function GetGitSound(GithubSnd, SoundName)
 end
 
 local function GetGithubModel(url, fileName)
-	if not isfile(fileName) then
-		local response = http_request({
-			Url = url,
-			Method = "GET"
-		})
+    if not isfile(fileName) then
+        local response = http_request({
+            Url = url,
+            Method = "GET"
+        })
 
-		if response and response.StatusCode == 200 then
-			writefile(fileName, response.Body)
-		else
-			warn("[Frostbite]: KhÃ´ng thá»ƒ táº£i Model tá»« GitHub!")
-			return nil
-		end
-	end
+        if response and response.StatusCode == 200 then
+            writefile(fileName, response.Body)
+        else
+            warn("[Frostbite]: KhÃ´ng thá»ƒ táº£i Model tá»« GitHub!")
+            return nil
+        end
+    end
 
-	local success, result = pcall(function()
-		return game:GetObjects(getcustomasset(fileName))[1]
-	end)
+    local success, result = pcall(function()
+        return game:GetObjects(getcustomasset(fileName))[1]
+    end)
 
-	return success and result or nil
+    return success and result or nil
 end
 
 local Phase1Sound = GetGitSound("https://github.com/vuivuiviu2/Doors-Hardcore-Reignited-/raw/refs/heads/main/THE%20FIRST%20PHASE.mp3", "FrostbitePhase1")
@@ -355,9 +353,9 @@ end
 
 local Phase2Sound = GetGitSound("https://github.com/vuivuiviu2/Doors-Hardcore-Reignited-/raw/refs/heads/main/THE%20LAST%20PHASE.mp3", "FrostbitePhase2")
 
-local modelTemplate = GetGithubModel("https://raw.githubusercontent.com/lynguyen26031993-design/-u/refs/heads/main/Place_6839171747_Model_Frostbite_Nnnnns1786783152.txt", "Frosbtitiejcdd")
+local modelTemplate = GetGithubModel("https://github.com/reboundplayz/hardcore-reignited/raw/refs/heads/main/okbrofrostbite.rbxm", "vjjjdjssssww")
 if not modelTemplate then
-    warn("[Frostbite]: KhÃƒÂ´ng thÃ¡Â»Æ’ khÃ¡Â»Å¸i tÃ¡ÂºÂ¡o Model, Ã„â€˜ÃƒÂ£ dÃ¡Â»Â«ng script.")
+    warn("[Frostbite]: KhÃ´ng thá»ƒ khá»Ÿi táº¡o Model, Ä‘Ã£ dá»«ng script.")
     return
 end
 
@@ -432,15 +430,15 @@ local function CreateColdBarUI()
     outerBar.Parent = frostbar
     
     local stroke = Instance.new("UIStroke")
-stroke.Color = Color3.fromRGB(134, 202, 250)
-stroke.Thickness = 4
-stroke.Transparency = 0
-stroke.Enabled = true
-stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-stroke.LineJoinMode = Enum.LineJoinMode.Round
-stroke.BorderStrokePosition = Enum.BorderStrokePosition.Outer
-stroke.BorderOffset = UDim.new(0, 0)
-stroke.Parent = outerBar
+    stroke.Color = Color3.fromRGB(134, 202, 250)
+    stroke.Thickness = 4
+    stroke.Transparency = 0
+    stroke.Enabled = true
+    stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+    stroke.LineJoinMode = Enum.LineJoinMode.Round
+    stroke.BorderStrokePosition = Enum.BorderStrokePosition.Outer
+    stroke.BorderOffset = UDim.new(0, 0)
+    stroke.Parent = outerBar
 
     local barPadding = Instance.new("UIPadding")
     barPadding.PaddingBottom = UDim.new(0, 4)
@@ -614,38 +612,44 @@ for i = 1, attackWaves do
     s.Parent = workspace
     s.Name = "Frostyma5n"
 
-    local entityLightsList = {}
-    for _, l in ipairs(s:GetDescendants()) do
-        if l:IsA("Light") then
-            local targetB = l.Brightness * 0.8
-            table.insert(entityLightsList, {light = l, targetBrightness = targetB})
-            l.Brightness = targetB * 0.05
+    -- Configure all BaseParts and special elements inside the model
+    for _, desc in ipairs(s:GetDescendants()) do
+        if desc:IsA("BasePart") then
+            desc.Anchored = true
+            desc.CanCollide = false
+        elseif desc:IsA("ParticleEmitter") then
+            if desc.Name == "E2" then
+                desc.Shape = Enum.ParticleEmitterShape.Sphere
+            end
+            desc.Enabled = true
+        elseif desc:IsA("Fire") then
+            desc.Enabled = true
+        elseif desc:IsA("Sound") then
+            desc:Play()
         end
     end
 
-    local entity = s:FindFirstChildWhichIsA("BasePart") or s.PrimaryPart or s:FindFirstChild("FrostyNew")
+    EnsurePrimary(s)
+
+    local entity = s:FindFirstChild("RushNew") or s:FindFirstChildWhichIsA("BasePart") or s.PrimaryPart or s:FindFirstChild("FrostyNew")
     if not entity then 
         s:Destroy() 
         break 
     end
-    entity.CanCollide = false
 
     local entrance = currentRoom:FindFirstChild("RoomEntrance")
     local exit = currentRoom:FindFirstChild("RoomExit")
+    local targetCFrame
+
     if entrance and exit then
-        entity.CFrame = CFrame.new((entrance.Position + exit.Position) / 2)
+        local pos = (entrance.Position + exit.Position) / 2
+        targetCFrame = CFrame.new(pos + Vector3.new(0, 3, 0))
     elseif entrance then
-        entity.CFrame = entrance.CFrame * CFrame.new(0, 0, -15)
+        targetCFrame = entrance.CFrame * CFrame.new(0, 3, -15)
     end
 
-    for _, item in ipairs(entityLightsList) do
-        if item.light and item.light.Parent then
-            TweenService:Create(
-                item.light, 
-                TweenInfo.new(6.5, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), 
-                {Brightness = item.targetBrightness}
-            ):Play()
-        end
+    if targetCFrame then
+        s:PivotTo(targetCFrame)
     end
 
     if frost4 then
@@ -663,64 +667,50 @@ for i = 1, attackWaves do
 
     local attacking = true
 
-task.spawn(function()
-    pcall(function()
-        local CameraShaker = require(ReplicatedStorage:WaitForChild("CameraShaker", 2))
-        if not CameraShaker then return end
+    task.spawn(function()
+        pcall(function()
+            local CameraShaker = require(ReplicatedStorage:WaitForChild("CameraShaker", 2))
+            if not CameraShaker then return end
 
-        local camShake = CameraShaker.new(Enum.RenderPriority.Camera.Value, function(shakeCf)
-            camera.CFrame = camera.CFrame * shakeCf
-        end)
+            local camShake = CameraShaker.new(Enum.RenderPriority.Camera.Value, function(shakeCf)
+                camera.CFrame = camera.CFrame * shakeCf
+            end)
 
-        camShake:Start()
+            camShake:Start()
 
-        while attacking and s and s.Parent do
-            if isPhase2 then
-                camShake:ShakeOnce(30, 25, 0.15, 0.3, 3, 1)
-            else
-                camShake:ShakeOnce(30, 25, 0.2, 0.3, 2, 0.5)
+            while attacking and s and s.Parent do
+                if isPhase2 then
+                    camShake:ShakeOnce(30, 25, 0.15, 0.3, 3, 1)
+                else
+                    camShake:ShakeOnce(30, 25, 0.2, 0.3, 2, 0.5)
+                end
+
+                task.wait(0.15)
             end
-
-            task.wait(0.15)
-        end
+        end)
     end)
-end)
-
-if attachment then
-    for _, v in ipairs(attachment:GetDescendants()) do
-        if v:IsA("ParticleEmitter") then
-            v.Enabled = true
-        end
-    end
-end
-
-local roomConnection
-roomConnection = workspace.CurrentRooms.ChildAdded:Connect(function()
-    if not attacking then return end
-
-    attacking = false
-
-    if roomConnection then
-        roomConnection:Disconnect()
-    end
-
-    if s and s.Parent then
-        s:Destroy()
-    end
-end)
 
     if attachment then
         for _, v in ipairs(attachment:GetDescendants()) do
-            if v:IsA("ParticleEmitter") then v.Enabled = true end
+            if v:IsA("ParticleEmitter") then
+                v.Enabled = true
+            end
         end
     end
-    
+
     local roomConnection
     roomConnection = workspace.CurrentRooms.ChildAdded:Connect(function()
         if not attacking then return end
+
         attacking = false
-        if roomConnection then roomConnection:Disconnect() end
-        if s and s.Parent then s:Destroy() end
+
+        if roomConnection then
+            roomConnection:Disconnect()
+        end
+
+        if s and s.Parent then
+            s:Destroy()
+        end
     end)
 
     task.spawn(function()
@@ -843,11 +833,6 @@ if Ahoi then
     Ahoi:Play()
     Debris:AddItem(Ahoi, 10)
 end
-
-task.spawn(function() 
-task.wait(5)
-getgenv().Frostbite = nil
-end) 
 
 local cac = Instance.new("Sound")
 cac.SoundId = "rbxassetid://9125402735"
