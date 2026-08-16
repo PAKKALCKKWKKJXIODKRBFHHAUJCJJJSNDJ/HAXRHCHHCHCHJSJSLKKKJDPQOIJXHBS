@@ -1,6 +1,6 @@
 game:GetService("TextChatService").TextChannels.RBXGeneral:DisplaySystemMessage("<font color='#f22800'>[Hardcore Mode Reignited (Recreated)]: Script Succesfully Executed/Loaded.</font>")
 local TweenService = game:GetService("TweenService")
--- bla
+
 -- Bộ nhớ cache tạm thời trong RAM (không lưu vào ổ cứng / file)
 local MEMORY_CACHE = {}
 
@@ -91,13 +91,11 @@ roomsFolder.ChildRemoved:Connect(function(room)
     removeClone(room)
 end)
 
-getgenv().DeerGodStillThere = false
-
 local CooldownPaused = false
 
 local function WaitCooldown()
 	while CooldownPaused do
-		task.wait(0.1)
+		task.wait(1)
 	end
 end
 
@@ -1279,10 +1277,11 @@ end
 
 local TimeEntities = {
     { Name = "Shocker",    Interval = 35,  Chance = 100, Url = "https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/Shocker" },
-    { Name = "Limbo",      Interval = 150, Chance = 40, Url = "https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/Limbo" },
+    { Name = "Limbo",      Interval = 170, Chance = 55, Url = "https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/Limbo" },
     { Name = "Silence",    Interval = 220, Chance = 55, Url = "https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/Silence" },
-    { Name = "Deer God",   Interval = 300, Chance = 20, Url = "https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/DeerGod" },
-    { Name = "Cease",       Interval = 110, Chance = 60, Url = "https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/Cease" },
+    { Name = "Deer God",   Interval = 300, Chance = 50, Url = "https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/DeerGod" },
+    { Name = "Cease",       Interval = 110, Chance = 80, Url = "https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/Cease" },
+    { Name = "Frostbite",       Interval = 10, Chance = 2, Url = "https://raw.githubusercontent.com/iccdjkkkkskskhdgdgegvbfbgncjjdudejdjvi/REBLAHARDCOREDI/refs/heads/main/Frostbite" },
 }
 
 local RoomEntities = {
@@ -1340,9 +1339,8 @@ for _, entity in ipairs(TimeEntities) do
 
 				local roll = GetSyncedRoll(entity.Name .. "_" .. cycle)
 				if roll <= entity.Chance then
-					if entity.Name == "Deer God" then
+					if entity.Name == "Frostbite" then
 						CooldownPaused = true
-						getgenv().DeerGodStillThere = true
 						
 						task.spawn(function()
 							SafeLoadFileCached(entity.Url)
@@ -1350,7 +1348,7 @@ for _, entity in ipairs(TimeEntities) do
 						
 						repeat
 							task.wait(0.2)
-						until getgenv().DeerGodStillThere == false
+						until getgenv().Frostbite == false
 						
 						CooldownPaused = false
 					else
