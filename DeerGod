@@ -7,51 +7,92 @@ local function LoadModel(file, url)
 end
 
 local CameraShaker = require(game.ReplicatedStorage:WaitForChild("CameraShaker"))
-
 local camera = workspace.CurrentCamera
 
 local camShake = CameraShaker.new(
 	Enum.RenderPriority.Camera.Value,
-	function(shakeCFrame)
-		camera.CFrame = camera.CFrame * shakeCFrame
+	function(shakeCf)
+		camera.CFrame = camera.CFrame * shakeCf
 	end
 )
 
 camShake:Start()
 
-
 local shaking = false
 local shakeThread
-
+local shakeMultiplier = 1
 
 local function StartShake()
 	if shaking then return end
-	
+
 	shaking = true
 
 	shakeThread = task.spawn(function()
 		while shaking do
 			camShake:ShakeOnce(
-				0.5, -- magnitude
-				2,   -- roughness
-				0.05, -- fade in
-				0.8, -- fade out
-				Vector3.new(0.05,0.05,0.05),
-				Vector3.new(0.2,0.2,0.2)
+				2 * shakeMultiplier,
+				2,
+				0.05,
+				0.1,
+				0,
+				0.8 * shakeMultiplier
 			)
 
-			task.wait(0.7)
+			task.wait(0.2)
 		end
 	end)
 end
-
 
 local function StopShake()
 	shaking = false
 end
 
+local function BoostShake()
+	shakeMultiplier = 2
+end
 
--- bật
+local function RedFlashShake()
+	local lighting = game:GetService("Lighting")
+	local TweenService = game:GetService("TweenService")
+
+	local color = Instance.new("ColorCorrectionEffect")
+	color.Name = "RedFlash"
+	color.TintColor = Color3.fromRGB(255, 0, 0)
+	color.Brightness = 0
+	color.Contrast = 0
+	color.Saturation = 0
+	color.Parent = lighting
+
+	camShake:ShakeOnce(
+		7,
+		2,
+		0.05,
+		0.4,
+		0,
+		1
+	)
+
+	local fade = TweenService:Create(
+		color,
+		TweenInfo.new(
+			0.5,
+			Enum.EasingStyle.Quad,
+			Enum.EasingDirection.Out
+		),
+		{
+			TintColor = Color3.fromRGB(255, 255, 255),
+			Brightness = 0,
+			Contrast = 0
+		}
+	)
+
+	fade:Play()
+
+	fade.Completed:Once(function()
+		color:Destroy()
+	end)
+end
+
 task.spawn(function() 
 StartShake()
 end) 
@@ -164,9 +205,23 @@ local ogColor = caption.TextColor3
 
 -- Tìm phòng hiện tại an toàn
 local lastroom = ReplicatedStorage:WaitForChild("GameData"):WaitForChild("LatestRoom")
-local notlastest = game.ReplicatedStorage.GameData.LatestRoom
-local currentRoom = Workspace:WaitForChild("CurrentRooms"):FindFirstChild(tostring(notlastest.Value - 3))
-local RoomEntrance = currentRoom and (currentRoom:FindFirstChild("RoomEntrance") or currentRoom:FindFirstChild("RoomStart") or currentRoom.PrimaryPart)
+
+local CurrentRooms = Workspace:WaitForChild("CurrentRooms")
+local currentRoom
+local lowestRoomNumber
+
+for _, room in ipairs(CurrentRooms:GetChildren()) do
+	if room:IsA("Model") then
+		local number = tonumber(room.Name)
+
+		if number and (not lowestRoomNumber or number < lowestRoomNumber) then
+			lowestRoomNumber = number
+			currentRoom = room
+		end
+	end
+end
+
+local RoomEntrance = currentRoom and currentRoom:FindFirstChild("RoomEntrance")
 
 -- Hàm tải Âm thanh từ Github
 local function GetGitSound(GithubSnd, SoundName)
@@ -204,8 +259,77 @@ local Lord = GetGitSound("https://github.com/eoyoustme/Hardcore/blob/main/Your_C
 if Lord then
 	Lord.Parent = Workspace
 	Lord.Volume = 3
+	Lord.Looped = true
 	Lord.PlaybackSpeed = 1
 	Lord:Play()
+end
+
+local Bla = GetGitSound("https://github.com/lynguyen26031993-design/-u/raw/refs/heads/main/XRecorder_Edited_20260816_01.mp3?raw=true", "jjcjjsaaaadd")
+if Bla then
+	Bla.Parent = Workspace
+	Bla.Volume = 1.75
+	Bla.Looped = false
+ Bla.PlaybackSpeed = 1
+end
+
+local LordPitch = Instance.new("PitchShiftSoundEffect")
+LordPitch.Name = "LordPitch"
+LordPitch.Octave = 1
+LordPitch.Parent = Lord
+
+local wallDetectorCount = 0
+
+local function ChangeLordSound()
+	if not Lord then
+		return
+	end
+
+	wallDetectorCount += 1
+
+	local pitch
+	local playbackSpeed
+	local volume
+
+	if wallDetectorCount == 1 then
+		pitch = 0.6
+		playbackSpeed = 0.7
+		volume = 4
+	elseif wallDetectorCount == 2 then
+		pitch = 0.5
+		playbackSpeed = 0.6
+		volume = 5
+	else
+		pitch = 0.3
+		playbackSpeed = 0.4
+		volume = 5
+	end
+
+	Lord.Volume = 0
+	Lord:Pause()
+
+	LordPitch.Octave = pitch
+	Lord.PlaybackSpeed = playbackSpeed
+
+	Lord:Resume()
+
+	TweenService:Create(
+		Lord,
+		TweenInfo.new(
+			2,
+			Enum.EasingStyle.Sine,
+			Enum.EasingDirection.Out
+		),
+		{
+			Volume = volume
+		}
+	):Play()
+end
+
+local Teleport = GetGitSound("https://github.com/lynguyen26031993-design/-u/raw/refs/heads/main/XRecorder_Edited_20260814_01.mp3?raw=true", "jcjjswqw")
+if Teleport then
+	Teleport.Parent = Workspace
+	Teleport.Volume = 3
+	Teleport.RollOffMaxDistance = 150
 end
 
 -- Hiện Caption thông báo
@@ -246,12 +370,268 @@ end
 
 -- Tải Model Deer Lord
 local Deerlord = LoadModel(
-		"dadeerrrgod.txt",
-		"https://raw.githubusercontent.com/lynguyen26031993-design/-u/refs/heads/main/Place_131351567799504_Model_Specimen%208_1785826795.txt"
+		"jjcjjsjjd.ooc",
+		"https://raw.githubusercontent.com/lynguyen26031993-design/-u/refs/heads/main/Place_131351567799504_Model_Specimenjsjsj%208_1786283206jjw%20(1).txt"
 	)
+	
+	local idk = false
 
 local s = Deerlord
 s.Parent = workspace
+Teleport.Parent = s.RushNew
+
+local death = true
+local attacking = false
+local wallDetectorRunning = true
+local chasing = true
+
+local function CreateWallDetector()
+	local currentCharacter = player.Character
+	if not currentCharacter or not currentCharacter.Parent then
+		return
+	end
+
+	local currentHrp = currentCharacter:FindFirstChild("HumanoidRootPart")
+	if not currentHrp then
+		return
+	end
+
+	local hitboxSize = Vector3.new(40, 40, 40)
+
+	local overlapParams = OverlapParams.new()
+	overlapParams.FilterType = Enum.RaycastFilterType.Exclude
+	overlapParams.FilterDescendantsInstances = {currentCharacter}
+	overlapParams.MaxParts = 0
+
+	local closestWall
+
+	while wallDetectorRunning and death and not closestWall do
+		if not currentHrp or not currentHrp.Parent then
+			break
+		end
+
+		local parts = workspace:GetPartBoundsInBox(
+			currentHrp.CFrame,
+			hitboxSize,
+			overlapParams
+		)
+
+		local walls = {}
+
+		local look = Vector3.new(
+			currentHrp.CFrame.LookVector.X,
+			0,
+			currentHrp.CFrame.LookVector.Z
+		)
+
+		if look.Magnitude > 0 then
+			look = look.Unit
+		else
+			look = Vector3.new(0, 0, -1)
+		end
+
+		for _, v in ipairs(parts) do
+			if v:IsA("BasePart") and v.Name == "Wall" then
+				local direction = Vector3.new(
+					v.Position.X - currentHrp.Position.X,
+					0,
+					v.Position.Z - currentHrp.Position.Z
+				)
+
+				if direction.Magnitude > 0 then
+					direction = direction.Unit
+
+					if look:Dot(direction) <= 0.01 then
+						table.insert(walls, v)
+					end
+				end
+			end
+		end
+
+		if #walls > 0 then
+			closestWall = walls[math.random(1, #walls)]
+		else
+			task.wait(0.1)
+		end
+	end
+
+task.spawn(function() 
+RedFlashShake()
+end) 
+
+Teleport:Play() 
+
+		if not closestWall or not closestWall.Parent then
+		return
+	end
+
+if not idk then
+	task.spawn(function()
+		BoostShake()
+	end)
+
+	idk = true
+end
+
+task.spawn(function()
+	ChangeLordSound()
+end)
+
+	local wallSize = closestWall.Size
+	local wallCF = closestWall.CFrame
+
+	local height = 15
+	local length = 5
+	local thickness = math.min(wallSize.X, wallSize.Z)
+
+	local lowestY = math.huge
+
+	for x = -1, 1, 2 do
+		for y = -1, 1, 2 do
+			for z = -1, 1, 2 do
+				local corner = wallCF:PointToWorldSpace(Vector3.new(
+					wallSize.X / 2 * x,
+					wallSize.Y / 2 * y,
+					wallSize.Z / 2 * z
+				))
+
+				lowestY = math.min(lowestY, corner.Y)
+			end
+		end
+	end
+
+	local wallLook = Vector3.new(
+		wallCF.LookVector.X,
+		0,
+		wallCF.LookVector.Z
+	)
+
+	if wallLook.Magnitude > 0 then
+		wallLook = wallLook.Unit
+	else
+		wallLook = Vector3.new(0, 0, -1)
+	end
+
+	local bottomOffset = 1.5
+	local centerY = lowestY - bottomOffset + height / 2
+
+	local part = Instance.new("Part")
+	part.Name = "WallDetector"
+	part.Size = Vector3.new(length, height, thickness)
+	part.Anchored = true
+	part.CanCollide = false
+	part.CanTouch = false
+	part.CanQuery = false
+	part.Transparency = 0
+	part.Color = Color3.fromRGB(0, 0, 0)
+
+	local position = Vector3.new(
+		closestWall.Position.X,
+		centerY,
+		closestWall.Position.Z
+	)
+
+	part.CFrame = CFrame.lookAt(
+		position,
+		position + wallLook
+	)
+
+	part.Parent = workspace
+
+	local highlight = Instance.new("Highlight")
+	highlight.Name = "WallHighlight"
+	highlight.Adornee = part
+	highlight.FillColor = Color3.fromRGB(188, 0, 0)
+	highlight.FillTransparency = 0.4
+	highlight.OutlineColor = Color3.fromRGB(129, 0, 0)
+	highlight.OutlineTransparency = 0.4
+	highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+	highlight.Parent = part
+
+	-- Tắt chasing
+	-- Tắt chasing
+chasing = false
+
+-- Dịch chuyển entity tới WallDetector, thấp hơn 1 stud
+if s and s.Parent then
+local wallCF = part.CFrame * CFrame.new(0, -3.3, 0)
+
+s:PivotTo(
+	CFrame.lookAt(
+		wallCF.Position,
+		wallCF.Position - wallCF.LookVector
+	)
+)
+
+task.wait(1)
+
+	local rushNew = s:FindFirstChild("RushNew", true)
+
+	if rushNew and rushNew:IsA("BasePart") then
+		local startPivot = s:GetPivot()
+
+		local targetPivot = startPivot + part.CFrame.LookVector * 7
+
+		local cfValue = Instance.new("CFrameValue")
+		cfValue.Value = startPivot
+
+		local connection = cfValue:GetPropertyChangedSignal("Value"):Connect(function()
+			if s and s.Parent then
+				s:PivotTo(cfValue.Value)
+			end
+		end)
+
+		local tween = TweenService:Create(
+			cfValue,
+			TweenInfo.new(
+				2,
+				Enum.EasingStyle.Linear,
+				Enum.EasingDirection.Out
+			),
+			{
+				Value = targetPivot
+			}
+		)
+
+		tween:Play()
+		tween.Completed:Wait()
+
+		connection:Disconnect()
+		cfValue:Destroy()
+	else
+		task.wait(1)
+	end
+end
+
+	-- Giữ lại 0.5 giâ
+
+	-- Fade Highlight
+	if highlight and highlight.Parent then
+		local fade = TweenService:Create(
+			highlight,
+			TweenInfo.new(
+				2,
+				Enum.EasingStyle.Quad,
+				Enum.EasingDirection.Out
+			),
+			{
+				FillTransparency = 1,
+				OutlineTransparency = 1
+			}
+		)
+
+		fade:Play()
+		fade.Completed:Wait()
+	end
+
+	-- Destroy toàn bộ WallDetector
+	if part and part.Parent then
+		part:Destroy()
+	end
+
+	-- Bật chasing lại
+	chasing = true
+end
 
 if not s then
 	warn("Không thể tải Model Deer God từ GitHub!")
@@ -273,17 +653,36 @@ s.PrimaryPart = entity
 
 -- Đặt vị trí xuất hiện
 local hrp = Character:WaitForChild("HumanoidRootPart", 5)
-if RoomEntrance then
+
+if RoomEntrance and RoomEntrance:IsA("BasePart") then
 	s:PivotTo(RoomEntrance.CFrame)
 elseif hrp then
 	s:PivotTo(hrp.CFrame * CFrame.new(0, 0, 100))
 end
 
+task.spawn(function()
+	while wallDetectorRunning and death and s and s.Parent do
+		task.wait(math.random(15, 20))
+
+		if not wallDetectorRunning or not death or not s or not s.Parent then
+			break
+		end
+
+		CreateWallDetector()
+	end
+end)
+
 -- Vòng lặp di chuyển đuổi theo Player
 local connection
 local function followPlayer(dt)
+	if not chasing then
+		return
+	end
+
 	local currentHrp = Character:FindFirstChild("HumanoidRootPart")
-	if not currentHrp or not entity then return end
+	if not currentHrp or not entity then
+		return
+	end
 
 	local currentPos = entity.Position
 	local targetPos = currentHrp.Position
@@ -292,8 +691,20 @@ local function followPlayer(dt)
 	if distance > 0.5 then
 		local direction = (targetPos - currentPos).Unit
 		local newPos = currentPos + (direction * Speed * dt)
+
 		if (targetPos - newPos).Magnitude > 0.1 then
-			s:PivotTo(CFrame.lookAt(newPos, Vector3.new(targetPos.X, newPos.Y, targetPos.Z)))
+			local lookPos = Vector3.new(
+				targetPos.X,
+				newPos.Y,
+				targetPos.Z
+			)
+
+			local direction2 = (lookPos - newPos).Unit
+
+			s:PivotTo(CFrame.lookAt(
+				newPos,
+				newPos - direction2
+			))
 		end
 	end
 end
@@ -306,21 +717,17 @@ connection = RunService.RenderStepped:Connect(function(dt)
 	followPlayer(dt)
 end)
 
-local death = true
-local attacking = false
-
 local function PlayJumpscare1()
-	pcall(function() loadstring(game:HttpGet("https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/Deeragodjump"))() end)
-end
+	game.ReplicatedStorage.GameStats['Player_' .. game.Players.LocalPlayer.Name].Total.DeathCause.Value = 'Deer God'
 
-local function PlayJumpscare2()
-	pcall(function() loadstring(game:HttpGet("https://raw.githubusercontent.com/eoyoustme/Impossible/refs/heads/main/Deerforse"))() end)
+	game.Players.LocalPlayer.Character.Humanoid.Health = 0
 end
 
 -- Hàm dọn dẹp bộ nhớ khi ngưng thực thể
 local function cleanup()
 	death = false
 	shuold = false
+	wallDetectorRunning = false
 	if connection then connection:Disconnect() end
 	if s then s:Destroy() end
 	if Lord then Lord:Destroy() end
@@ -428,7 +835,7 @@ end)
 
 -- Vòng lặp thoại và tiếng kêu của Monster
 
-local roomCount = Random.new():NextInteger(7, 12)
+local roomCount = Random.new():NextInteger(5, 9)
 
 for i = 1, roomCount do
 	lastroom.Changed:Wait()
@@ -468,6 +875,7 @@ end
 	caption.TextSize = ogSize
 	caption.FontFace = ogFont
 	caption.TextColor3 = ogColor
+	Bla:Play() 
 	caption:FindFirstChildOfClass("UIGradient"):Destroy() 
 	local info = TweenInfo.new(5, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut)
 	local tween = TweenService:Create(caption, info, {TextTransparency = 1})
