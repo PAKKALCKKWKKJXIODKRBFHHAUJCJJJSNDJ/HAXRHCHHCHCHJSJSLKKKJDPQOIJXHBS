@@ -74,35 +74,19 @@ local function isBlacklisted(object)
 
 	if object:IsA("BasePart") then
 		if string.find(name, "book", 1, true) then
-			if hasAncestorContaining(object, "book") then
-				return false
-			end
-
-			return true
+			return not hasAncestorContaining(object, "book")
 		end
 
 		if string.find(name, "light", 1, true) then
-			if hasAncestorContaining(object, "book") then
-				return false
-			end
-
-			return true
+			return not hasAncestorContaining(object, "book")
 		end
 
 		if string.find(name, "wall", 1, true) then
-			if hasAncestorContaining(object, "pillar") then
-				return false
-			end
-
-			return true
+			return not hasAncestorContaining(object, "pillar")
 		end
 
 		if string.find(name, "board", 1, true) then
-			if hasAncestorContaining(object, "wooden") then
-				return false
-			end
-
-			return true
+			return not hasAncestorContaining(object, "wooden")
 		end
 	end
 
@@ -149,9 +133,7 @@ local function shakeCollision(collision)
 				math.random(-100, 100) / 100
 			).Unit
 
-			collision:ApplyImpulse(
-				direction * force
-			)
+			collision:ApplyImpulse(direction * force)
 
 			collision:ApplyAngularImpulse(
 				Vector3.new(
@@ -229,7 +211,6 @@ local function setupModel(model, room)
 	end
 
 	local cf, size = model:GetBoundingBox()
-
 	local volume = size.X * size.Y * size.Z
 
 	if volume <= 0 then
@@ -248,8 +229,8 @@ local function setupModel(model, room)
 	collision.Name = "Collision"
 	collision.Size = size
 	collision.CFrame = cf
-
 	collision.Transparency = 1
+
 	collision.CanCollide = true
 	collision.CanTouch = true
 	collision.CanQuery = true
@@ -333,26 +314,73 @@ local function activateTarget(collision)
 	collision.Anchored = false
 end
 
-local function processRipper(ripper)
-	local cf = ripper:GetBoundingBox()
+local function canSeeTarget(origin, targetModel, ignore)
+	local targetPart
 
-	local hitboxSize = Vector3.new(50, 50, 50)
+	if targetModel.PrimaryPart then
+		targetPart = targetModel.PrimaryPart
+	else
+		targetPart = targetModel:FindFirstChildWhichIsA("BasePart", true)
+	end
+
+	if not targetPart then
+		return false
+	end
+
+	local direction = targetPart.Position - origin
+
+	local params = RaycastParams.new()
+	params.FilterType = Enum.RaycastFilterType.Exclude
+	params.FilterDescendantsInstances = ignore
+	params.IgnoreWater = true
+
+	local result = workspace:Raycast(
+		origin,
+		direction,
+		params
+	)
+
+	if not result then
+		return true
+	end
+
+	return result.Instance:IsDescendantOf(targetModel)
+end
+
+local function processRipper(ripper)
+	local cf, size = ripper:GetBoundingBox()
+
+	local hitbox = Instance.new("Part")
+
+	hitbox.Name = "RipperHitbox"
+	hitbox.Size = Vector3.new(50, 50, 50)
+	hitbox.CFrame = cf
+
+	hitbox.Transparency = 1
+	hitbox.CanCollide = false
+	hitbox.CanTouch = true
+	hitbox.CanQuery = true
+	hitbox.Anchored = true
+	hitbox.CastShadow = false
+
+	hitbox.Parent = ripper
 
 	local overlapParams = OverlapParams.new()
+
 	overlapParams.FilterType = Enum.RaycastFilterType.Exclude
 	overlapParams.FilterDescendantsInstances = {
-		ripper
+		ripper,
+		hitbox
 	}
 
-	local parts = workspace:GetPartBoundsInBox(
-		cf,
-		hitboxSize,
+	local touching = workspace:GetPartsInPart(
+		hitbox,
 		overlapParams
 	)
 
 	local foundModels = {}
 
-	for _, part in ipairs(parts) do
+	for _, part in ipairs(touching) do
 		if part:IsA("BasePart") then
 			local model = part:FindFirstAncestorOfClass("Model")
 
@@ -365,7 +393,14 @@ local function processRipper(ripper)
 
 				local room = model.Parent
 
-				if room and room.Parent == CurrentRooms then
+				if room
+					and room.Parent == CurrentRooms
+					and canSeeTarget(
+						hitbox.Position,
+						model,
+						{ripper, hitbox, model}
+					) then
+
 					local collision = setupModel(model, room)
 
 					if collision then
