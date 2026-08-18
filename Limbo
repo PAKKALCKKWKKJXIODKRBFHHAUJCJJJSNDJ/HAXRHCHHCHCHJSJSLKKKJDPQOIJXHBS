@@ -1,33 +1,58 @@
 local RunService = game:GetService("RunService")
 local Camera = workspace.CurrentCamera
 
-local function Shake(duration, intensity, speed, roll)
-	local start = tick()
-	local conn
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local CameraShaker = require(
+	ReplicatedStorage:WaitForChild("CameraShaker")
+)
 
-	conn = RunService.RenderStepped:Connect(function(dt)
-		local t = tick() - start
+local WalkSpeedControl = true
 
-		if t >= duration then
-			conn:Disconnect()
-			return
-		end
+local Lighting = game:GetService("Lighting")
 
-		local fade = (1 - t / duration)^2
+local VignetteColor = Color3.fromRGB(96, 0, 150)
+local MaxBlur = 14
+local MaxSaturation = -0.45
 
-		local x = math.sin(t * speed) * intensity * fade
-		local y = math.cos(t * speed * 0.75) * intensity * 0.65 * fade
-		local r = math.sin(t * speed * 0.55) * math.rad(roll) * fade
+local ColorCorrection = Instance.new("ColorCorrectionEffect")
+ColorCorrection.Name = "LimboSickness"
+ColorCorrection.TintColor = Color3.fromRGB(255,255,255)
+ColorCorrection.Saturation = 0
+ColorCorrection.Parent = Lighting
 
-		Camera.CFrame *= CFrame.new(x, y, 0) * CFrame.Angles(0, 0, r)
-	end)
+local Blur = Instance.new("BlurEffect")
+Blur.Name = "LimboBlur"
+Blur.Size = 0
+Blur.Parent = Lighting
+
+local EffectTween
+
+local function UpdateEffect(value)
+	value = math.clamp(value, 0, 1)
+
+	ColorCorrection.TintColor =
+		Color3.fromRGB(255,255,255):Lerp(VignetteColor, value)
+
+	ColorCorrection.Saturation = MaxSaturation * value
+	Blur.Size = MaxBlur * value
 end
 
-Shake(
-	4,      -- thời gian
-	0.3,   -- độ mạnh
-	10,     -- tốc độ (thấp = chậm)
-	2       -- độ nghiêng (độ)
+local Camera = workspace.CurrentCamera
+
+local CameraShake = CameraShaker.new(
+	Enum.RenderPriority.Camera.Value,
+	function(cf)
+		Camera.CFrame *= cf
+	end
+)
+
+CameraShake:Start()
+
+CameraShake:ShakeOnce(
+	10,
+	2,
+	0.3,
+	3
 )
 
 local function GitAud(soundgit, filename)
@@ -82,6 +107,11 @@ local NeonOriginalColors = {}
 local HitboxDisabled = false
 local LightStandMap = {}
 local LightOriginalColors = {}
+
+local LightStandOriginalColors = {}
+local LightStandNeons = {}
+
+local DimNeonColor = Color3.fromRGB(127, 105, 92)
 local WindowParticles = {}
 local ParticleOriginalColors = {}
 local FixtureLights = {}
@@ -100,6 +130,50 @@ local t2 = {
 
 local StormParts = {}
 local NeonParts = {}
+
+local function ProcessLightStands(room)
+	for _, stand in ipairs(room:GetDescendants()) do
+		if stand:IsA("Model") and (stand.Name == "LightStand" or stand.Name == "Chandelier") then
+			for _, obj in ipairs(stand:GetDescendants()) do
+				if obj:IsA("BasePart") and obj.Name == "Neon" then
+					if not LightStandOriginalColors[obj] then
+						LightStandOriginalColors[obj] = obj.Color
+						LightStandNeons[#LightStandNeons + 1] = obj
+					end
+
+					TweenService:Create(
+						obj,
+						TweenInfo.new(
+							0.8,
+							Enum.EasingStyle.Quad,
+							Enum.EasingDirection.Out
+						),
+						{
+							Color = DimNeonColor
+						}
+					):Play()
+
+				elseif obj:IsA("PointLight") then
+					if not LightStandOriginalColors[obj] then
+						LightStandOriginalColors[obj] = obj.Color
+					end
+
+					TweenService:Create(
+						obj,
+						TweenInfo.new(
+							0.8,
+							Enum.EasingStyle.Quad,
+							Enum.EasingDirection.Out
+						),
+						{
+							Color = DimNeonColor
+						}
+					):Play()
+				end
+			end
+		end
+	end
+end
 
 local LimboBar = Instance.new("ScreenGui")
 LimboBar.Name = "LimboBar"
@@ -153,14 +227,6 @@ local UICorner2 = Instance.new("UICorner")
 UICorner2.CornerRadius = UDim.new(0,5)
 UICorner2.Parent = Fill
 
-local Overlay = Instance.new("Frame")
-Overlay.BackgroundColor3 = Color3.fromRGB(208,0,255)
-Overlay.BackgroundTransparency = 1
-Overlay.BorderSizePixel = 0
-Overlay.Size = UDim2.fromScale(1,1)
-Overlay.ZIndex = -1
-Overlay.Parent = LimboBar
-
 local OverlayTween
 
 
@@ -193,6 +259,13 @@ local MaxBar = 100
 local StormSpeed = 40 / 3.5
 local LightningRadius = 65
 local StormProgress = 0
+
+local BarDecayDelay = 10
+local BarDecaySpeed = 2.35
+local BarStableTime = 0
+local BarDecaying = false
+local LastBarProgress = 0
+
 
 local RayParams = RaycastParams.new()
 RayParams.FilterType = Enum.RaycastFilterType.Exclude
@@ -271,7 +344,7 @@ Storm = CustomGitSound(
 
 CustomGitSound(
 	"https://github.com/cakmay227-svg/random/raw/refs/heads/main/limbo%20ambience%20storm%205.mp3%20(1).mp3?raw=true",
-	2,
+	1,
 	10000000,
 	"jxjjxjjdoa",
 	"Theme",
@@ -384,31 +457,15 @@ task.spawn(function()
 					BlaBoomCooldown = 0
 					BlaBoomPlaying = true
 					BlaBoomCooldownRunning = false
-
+BlaBoom.Volume = 0
 					BlaBoom:Play()
+				
 					
-					local ReplicatedStorage = game:GetService("ReplicatedStorage")
-
-local CameraShaker = require(
-	ReplicatedStorage:WaitForChild("CameraShaker")
-)
-
-local camera = workspace.CurrentCamera
-
-local shaker = CameraShaker.new(
-	Enum.RenderPriority.Camera.Value,
-	function(cf)
-		camera.CFrame *= cf
-	end
-)
-
-shaker:Start()
-
-shaker:ShakeOnce(
-	10, -- magnitude
-	20, -- roughness
-	0.1, -- fade in
-	2 -- fade out
+					CameraShake:ShakeOnce(
+	10,
+	20,
+	0.1,
+	2
 )
 
 					BlaBoom.Ended:Once(function()
@@ -437,7 +494,15 @@ repeat
 	task.wait()
 until theme
 
-theme:Play() 
+local ThemeEndMode = math.random(1, 3)
+local ThemeSecondPlayed = false
+local ThemeShutdownScheduled = false
+
+if not theme.IsLoaded then
+	theme.Loaded:Wait()
+end
+
+theme:Play()
 
 local function TweenFade() 
 	local tween = TweenService:Create(
@@ -469,6 +534,16 @@ local function ShutdownStorm()
 		return
 	end
 	
+		WalkSpeedControl = false
+	
+	if ColorCorrection then
+	ColorCorrection:Destroy()
+end
+
+if Blur then
+	Blur:Destroy()
+end
+	
 	if BlaBoom then
 	BlaBoom:Stop()
 	BlaBoom:Destroy()
@@ -482,7 +557,7 @@ end
 	
 	task.spawn(function() 
 	CustomGitSound(
-	"https://github.com/cakmay227-svg/REBLAHARDCOREDI/raw/refs/heads/main/XRecorder_Edited_20260804_01.mp3?raw=true",
+	"https://github.com/lynguyen26031993-design/-u/raw/refs/heads/main/RBX5AE5DD518C784E99ADDB726A77ACB606.mp3.mp3?raw=true",
 	1.5,
 	10000000,
 	"kvosok",
@@ -559,6 +634,22 @@ end)
 			particle.Color = color
 		end
 	end
+	
+	for obj, color in pairs(LightStandOriginalColors) do
+	if obj and obj.Parent then
+		TweenService:Create(
+			obj,
+			TweenInfo.new(
+				0.8,
+				Enum.EasingStyle.Quad,
+				Enum.EasingDirection.Out
+			),
+			{
+				Color = color
+			}
+		):Play()
+	end
+end
 
 	table.clear(WindowLights)
 	table.clear(StormParts)
@@ -574,25 +665,89 @@ end
 
 
 theme.Ended:Connect(function()
-	ThemeEndedCount += 1
-
-	if ThemeEndedCount == 1 then
-		theme:Play()
+	if Shutdown then
 		return
 	end
 
-	if Flickering then
-		repeat
-			task.wait()
-		until not Flickering
+	ThemeEndedCount += 1
+
+	if ThemeEndedCount == 1 then
+		if ThemeEndMode == 1 then
+			if Flickering then
+				repeat
+					task.wait()
+				until not Flickering
+			end
+
+			if RoomConnection then
+				RoomConnection:Disconnect()
+				RoomConnection = nil
+			end
+
+			ShutdownStorm()
+			return
+		end
+
+		ThemeSecondPlayed = true
+
+		if not theme.IsLoaded then
+			theme.Loaded:Wait()
+		end
+
+		theme:Play()
+
+		if ThemeEndMode == 2 then
+			local length = theme.TimeLength
+
+			if length > 0 then
+				task.delay(length / 2, function()
+					if Shutdown or ThemeShutdownScheduled then
+						return
+					end
+
+					ThemeShutdownScheduled = true
+
+					if Flickering then
+						repeat
+							task.wait()
+						until not Flickering or Shutdown
+					end
+
+					if not Shutdown then
+						if RoomConnection then
+							RoomConnection:Disconnect()
+							RoomConnection = nil
+						end
+
+						ShutdownStorm()
+					end
+				end)
+			end
+		end
+
+		return
 	end
 
-	if RoomConnection then
-		RoomConnection:Disconnect()
-		RoomConnection = nil
-	end
+	if ThemeEndedCount == 2 then
+		if ThemeEndMode == 3 then
+			if Flickering then
+				repeat
+					task.wait()
+				until not Flickering or Shutdown
+			end
 
-	ShutdownStorm()
+			if Shutdown then
+				return
+			end
+
+			if RoomConnection then
+				RoomConnection:Disconnect()
+				RoomConnection = nil
+			end
+
+			ShutdownStorm()
+		end
+	end
 end)
 
 if not rooms then
@@ -635,12 +790,46 @@ task.spawn(function()
 	end
 end)
 
+local SkyBoxOriginalColors = {}
+
+local function FlashWindowSkyBoxes()
+	for _, window in ipairs(WindowModels) do
+		if window and window.Parent then
+			for _, obj in ipairs(window:GetDescendants()) do
+				if obj:IsA("BasePart") and obj.Name == "Skybox" then
+					if not SkyBoxOriginalColors[obj] then
+						SkyBoxOriginalColors[obj] = obj.Color
+					end
+
+					local originalColor = SkyBoxOriginalColors[obj]
+
+					obj.Color = Color3.new(1, 1, 1)
+
+					local tween = TweenService:Create(
+						obj,
+						TweenInfo.new(
+							0.1,
+							Enum.EasingStyle.Linear
+						),
+						{
+							Color = originalColor
+						}
+					)
+
+					tween:Play()
+				end
+			end
+		end
+	end
+end
+
 task.spawn(function()
 	while true do
 		if not Flickering then
 			task.wait()
 			continue
 		end
+	
 
 		for _, light in ipairs(WindowLights) do
 			if light.Parent then
@@ -649,15 +838,20 @@ task.spawn(function()
 		end
 
 		while Flickering do
-			if Shutdown then
-				return
-			end
+	if Shutdown then
+		return
+	end
+	
+	task.spawn(function() 
+	task.wait(0.1)
+	FlashWindowSkyBoxes()
+	end) 
 
-			for _, light in ipairs(WindowLights) do
-				if light.Parent then
-					light.Brightness = 5
-				end
-			end
+	for _, light in ipairs(WindowLights) do
+	if light.Parent then
+		light.Brightness = 5
+	end
+end
 
 			local tweens = {}
 
@@ -689,31 +883,47 @@ task.spawn(function()
 		end
 
 		for _, light in ipairs(WindowLights) do
-			if light.Parent then
-				light.Brightness = 5
-			end
-		end
+	if light.Parent then
+		light.Brightness = 5
+	end
+end
 
-		local fades = {}
+local fades = {}
 
-		for _, light in ipairs(WindowLights) do
-			if light.Parent then
-				local tween = TweenService:Create(
-					light,
-					TweenInfo.new(1, Enum.EasingStyle.Linear),
-					{
-						Brightness = 0
-					}
-				)
+for _, light in ipairs(WindowLights) do
+	if light.Parent then
+		local tween = TweenService:Create(
+			light,
+			TweenInfo.new(1, Enum.EasingStyle.Linear),
+			{
+				Brightness = 0
+			}
+		)
 
-				fades[#fades + 1] = tween
-				tween:Play()
-			end
-		end
+		fades[#fades + 1] = tween
+		tween:Play()
+	end
+end
 
-		if #fades > 0 then
-			fades[1].Completed:Wait()
-		end
+for obj, originalColor in pairs(SkyBoxOriginalColors) do
+	if obj and obj.Parent then
+		TweenService:Create(
+			obj,
+			TweenInfo.new(
+				1.5,
+				Enum.EasingStyle.Linear,
+				Enum.EasingDirection.Out
+			),
+			{
+				Color = originalColor
+			}
+		):Play()
+	end
+end
+
+if #fades > 0 then
+	fades[1].Completed:Wait()
+end
 
 		for _, light in ipairs(WindowLights) do
 			if light.Parent then
@@ -790,6 +1000,7 @@ local function ProcessRoom(room)
 						end)
 
 						table.insert(WindowLights, clone)
+LightOriginalColors[clone] = clone.Color
 					end
 				end
 			end
@@ -888,10 +1099,67 @@ end
 local function InitializeRooms()
 	for _, room in ipairs(rooms:GetChildren()) do
 		ProcessRoom(room)
+		ProcessLightStands(room)
 	end
 end
 
 InitializeRooms()
+
+task.spawn(function()
+	while not Shutdown do
+		task.wait(math.random(1, 3))
+
+		if Shutdown then
+			break
+		end
+
+		for _, light in ipairs(WindowLights) do
+			if light and light.Parent then
+				light.Enabled = true
+				light.Brightness = 5
+				light.Color = Color3.new(1, 1, 1)
+
+				TweenService:Create(
+					light,
+					TweenInfo.new(
+						0.55,
+						Enum.EasingStyle.Quad,
+						Enum.EasingDirection.Out
+					),
+					{
+						Brightness = 0
+					}
+				):Play()
+			end
+		end
+
+		for _, window in ipairs(WindowModels) do
+			if window and window.Parent then
+				for _, obj in ipairs(window:GetDescendants()) do
+					if obj:IsA("BasePart") and obj.Name == "Skybox" then
+						local original = SkyBoxOriginalColors[obj]
+
+						if original then
+							obj.Color = Color3.new(1, 1, 1)
+
+							TweenService:Create(
+								obj,
+								TweenInfo.new(
+									0.55,
+									Enum.EasingStyle.Quad,
+									Enum.EasingDirection.Out
+								),
+								{
+									Color = original
+								}
+							):Play()
+						end
+					end
+				end
+			end
+		end
+	end
+end)
 
 task.spawn(function()
 	while not Shutdown do
@@ -902,7 +1170,7 @@ task.spawn(function()
 		end
 
 		local chosen = {}
-		local amount = math.random(1,3)
+		local amount = math.random(2,4)
 
 		for i = 1, amount do
 			if Shutdown then
@@ -1006,6 +1274,33 @@ task.spawn(function()
 	end
 end)
 
+local LastShake = 0
+
+local BaseWalkSpeed = 15
+
+local function UpdateWalkSpeed(progress)
+	if not WalkSpeedControl then
+		return
+	end
+
+	local value = math.clamp(progress / 100, 0, 1)
+
+	local speed
+
+	if value <= 0.6 then
+		speed = BaseWalkSpeed - (value / 0.6) * 4
+	else
+		speed = 12 - ((value - 0.6) / 0.4) * 5
+	end
+
+	local char = LocalPlayer.Character
+	local humanoid = char and char:FindFirstChildOfClass("Humanoid")
+
+	if humanoid then
+		humanoid.WalkSpeed = speed
+	end
+end
+
 RunService.RenderStepped:Connect(function(dt)
 	local char = LocalPlayer.Character
 	local hrp = char and char:FindFirstChild("HumanoidRootPart")
@@ -1014,45 +1309,57 @@ RunService.RenderStepped:Connect(function(dt)
 		return
 	end
 
-	local InStorm = false
+		local InStorm = false
 
 	if Flickering and not char:GetAttribute("Hiding") then
 		InStorm = IsInStormRange(hrp)
 	end
 
+local PreviousProgress = StormProgress
+
+if InStorm then
+	StormProgress = math.clamp(
+		StormProgress + (dt * StormSpeed),
+		0,
+		MaxBar
+	)
+end
+
+local BarIncreased = StormProgress > PreviousProgress + 0.001
+
+if BarIncreased then
+	BarStableTime = 0
+	BarDecaying = false
+elseif StormProgress > 0 and not BarDecaying then
+	BarStableTime += dt
+
+	if BarStableTime >= BarDecayDelay then
+		BarDecaying = true
+	end
+end
+
+if BarDecaying then
 	if InStorm then
-		StormProgress = math.clamp(
-			(StormProgress or 0) + (dt * StormSpeed),
-			0,
-			MaxBar
-		)
-	end
-
-	if StormProgress >= 50 and InStorm then
-		if OverlayTween then
-			OverlayTween:Cancel()
-		end
-
-		local alpha = math.clamp((StormProgress - 50) / 50, 0, 1)
-
-		Overlay.BackgroundTransparency = 1 - (alpha * 0.7)
+		BarDecaying = false
+		BarStableTime = 0
 	else
-		if Overlay.BackgroundTransparency < 1 then
-			if OverlayTween then
-				OverlayTween:Cancel()
-			end
+		StormProgress = math.max(
+			0,
+			StormProgress - (BarDecaySpeed * dt)
+		)
 
-			OverlayTween = TweenService:Create(
-				Overlay,
-				TweenInfo.new(1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
-				{
-					BackgroundTransparency = 1
-				}
-			)
-
-			OverlayTween:Play()
+		if StormProgress <= 0 then
+			StormProgress = 0
+			BarDecaying = false
+			BarStableTime = 0
 		end
 	end
+end
+
+local effectValue = math.clamp(StormProgress / 100, 0, 1)
+
+UpdateEffect(effectValue)
+UpdateWalkSpeed(StormProgress)
 
 	if not BarDestroyed and StormProgress >= MaxBar then
 		BarDestroyed = true
@@ -1070,7 +1377,7 @@ RunService.RenderStepped:Connect(function(dt)
 
 		task.spawn(function()
 			CustomGitSound(
-				"https://github.com/cakmay227-svg/random/raw/refs/heads/main/XRecorder_Edited_20260730_01%20(1).mp3?raw=true",
+				"https://github.com/lynguyen26031993-design/-u/raw/refs/heads/main/Oblivion_Death.mp3?raw=true",
 				3,
 				10000000,
 				"klakx",
@@ -1130,46 +1437,29 @@ RunService.RenderStepped:Connect(function(dt)
 				local dist = (hrp.Position - part.Position).Magnitude
 
 				if dist <= MaxDist then
-					local strength = (1 - dist / MaxDist) * (light.Brightness / 5)
+					local strength =
+						(1 - dist / MaxDist) *
+						(light.Brightness / 5)
 
-					if strength > target then
-						target = strength
-					end
+					target = math.max(target, strength)
 				end
 			end
 		end
 	end
 
-	Shake += (target - Shake) * math.clamp(dt * 12, 0, 1)
+	if target > 0.01 then
+		local now = tick()
 
-	if Shake > 0.001 then
-		Camera.CFrame *=
-			CFrame.new(
-				(math.random() - 0.5) * Shake * 2.5,
-				(math.random() - 0.5) * Shake * 2.5,
-				(math.random() - 0.5) * Shake * 1.8
-			) *
-			CFrame.Angles(
-				math.rad((math.random() - 0.5) * Shake * 10),
-				math.rad((math.random() - 0.5) * Shake * 10),
-				math.rad((math.random() - 0.5) * Shake * 6)
+		if now - LastShake >= 0.12 then
+			LastShake = now
+
+			CameraShake:ShakeOnce(
+				target * 7,
+				12,
+				0.05,
+				0.03
 			)
-
-		local pos = Vector3.new(
-			(math.random() - 0.5) * Shake,
-			(math.random() - 0.5) * Shake,
-			(math.random() - 0.5) * Shake
-		)
-
-		local rot = Vector3.new(
-			math.rad((math.random() - 0.5) * Shake * 3),
-			math.rad((math.random() - 0.5) * Shake * 2),
-			math.rad((math.random() - 0.5) * Shake * 5)
-		)
-
-		Camera.CFrame *=
-			CFrame.new(pos) *
-			CFrame.Angles(rot.X, rot.Y, rot.Z)
+		end
 	end
 end)
 
@@ -1182,5 +1472,6 @@ RoomConnection = rooms.ChildAdded:Connect(function(room)
 		end
 
 		ProcessRoom(room)
+		ProcessLightStands(room)
 	end)
 end)
