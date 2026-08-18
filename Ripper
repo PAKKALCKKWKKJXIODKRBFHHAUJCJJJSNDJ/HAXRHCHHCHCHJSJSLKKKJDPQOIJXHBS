@@ -2,6 +2,30 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local blaSound
 
+local function GetGitSound(GithubSnd, SoundName)
+			local url = GithubSnd
+			if not isfile(SoundName .. ".mp3") then
+				writefile(SoundName .. ".mp3", game:HttpGet(url))
+			end
+			local sound = Instance.new("Sound")
+			sound.SoundId = (getcustomasset or getsynasset)(SoundName .. ".mp3")
+			return sound
+		end
+		
+		local gitSoundTemp2 = GetGitSound("https://github.com/lynguyen26031993-design/-u/raw/refs/heads/main/XRecorder_Edited_20260810_01.mp3?raw=true", "jjcjfjjc")
+
+blaSound = Instance.new("Sound") 
+		blaSound.SoundId = gitSoundTemp2.SoundId
+		blaSound.PlaybackSpeed = 1
+		blaSound.Looped = false
+		blaSound.TimePosition = 0
+		blaSound.Volume = 3.5
+		blaSound.RollOffMaxDistance = 150
+		
+		blaSound.Ended:Connect(function()
+		blaSound:Destroy() 
+		end) 
+
 function light(tim,color0,color1)
 	local tweenservice = game:GetService("TweenService")
 	local info = TweenInfo.new(tim,Enum.EasingStyle.Linear)
@@ -231,7 +255,7 @@ breaking.PlaybackSpeed = 1
 breaking.Parent = workspace
 breaking.Looped = false
 breaking.RollOffMaxDistance = 1000000000
-breaking.Volume = 4
+breaking.Volume = 8
 
 local player = Players.LocalPlayer
 
@@ -249,7 +273,7 @@ task.spawn(function()
 			return
 		end
 
-		local inRange = (ripe.Position - hrp.Position).Magnitude <= 150
+		local inRange = (ripe.Position - hrp.Position).Magnitude <= 100
 
 		if inRange then
 			if not breaking.IsPlaying then
@@ -272,14 +296,14 @@ end)
 	task.spawn(function()
 		local sound5 = Instance.new("Sound")
 		sound5.PlaybackSpeed = 1
-		sound5.Volume = 5
+		sound5.Volume = 2.5
 		sound5.SoundId = "rbxassetid://101665501585468"
 		sound5.Parent = workspace
 		sound5:Play()
 
 		local sound51 = Instance.new("Sound")
 		sound51.PlaybackSpeed = 1
-		sound51.Volume = 5
+		sound51.Volume = 2.5
 		sound51.SoundId = "rbxassetid://9125713501"
 		sound51.Parent = workspace
 		sound51:Play()
@@ -299,16 +323,6 @@ entity:SetCallback("OnStartMoving", function()
 	
 	task.spawn(function()
 
-		local function GetGitSound(GithubSnd, SoundName)
-			local url = GithubSnd
-			if not isfile(SoundName .. ".mp3") then
-				writefile(SoundName .. ".mp3", game:HttpGet(url))
-			end
-			local sound = Instance.new("Sound")
-			sound.SoundId = (getcustomasset or getsynasset)(SoundName .. ".mp3")
-			return sound
-		end
-
 		local blueSound = game.Workspace.RipperBla.Ripe.FarStatic
 
 		local gitSoundTemp = GetGitSound("https://github.com/eoyoustme/Hardcore/blob/main/ripper%20static%20final.mp3?raw=true", "Ripper")
@@ -320,17 +334,8 @@ entity:SetCallback("OnStartMoving", function()
 		blueSound.Volume = 0.733
 
 		gitSoundTemp:Destroy()
-		
-		local gitSoundTemp2 = GetGitSound("https://github.com/lynguyen26031993-design/-u/raw/refs/heads/main/XRecorder_Edited_20260810_01.mp3?raw=true", "jjcjfjjc")
 
-blaSound = Instance.new("Sound") 
-		blaSound.SoundId = gitSoundTemp2.SoundId
-		blaSound.PlaybackSpeed = 1
-		blaSound.Looped = false
-		blaSound.TimePosition = 0
-		blaSound.Volume = 2
-		blaSound.RollOffMaxDistance = 150
-		blaSound.Parent = workspace
+		blaSound.Parent = workspace.RipperBla
 
 		gitSoundTemp:Destroy()
 
@@ -430,6 +435,8 @@ end
 				task.wait(2)
 
 				else
+				
+				blaSound:Play() 
 				
 				local originalCFrame = entityRoot.CFrame				
 				
@@ -537,11 +544,10 @@ end
 HandleHidden(cloneModel)
 				end
 
-				if entityModel and entityModel.Parent then
+				blaSound.Ended:Wait()
 					FadeDestroy(entityModel)
-				end
 
-				task.wait(3)
+				task.wait(2)
 
 				hasTriggered = false 
 			end)
