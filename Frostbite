@@ -2,7 +2,7 @@ local http_request = (syn and syn.request) or (http and http.request) or http_re
 local getasset = getcustomasset or getsynasset
 
 if not (writefile and getasset and http_request) then
-    warn("[Frostbite]: Executor cá»§a báº¡n khÃ´ng há»— trá»£ writefile/getcustomasset/request!")
+    warn("[Frostbite]: Executor của bạn không hỗ trợ writefile/getcustomasset/request!")
     return
 end
 
@@ -15,32 +15,8 @@ local Debris = game:GetService("Debris")
 
 local LocalPlayer = Players.LocalPlayer
 
-local origAmbient = Lighting.Ambient
-local origBrightness = Lighting.Brightness
-local origFogEnd = Lighting.FogEnd
-local origFogStart = Lighting.FogStart
-local origFogColor = Lighting.FogColor
-
-local FULL_FROST = {
-    TintColor = Color3.fromRGB(100, 190, 255),
-    Saturation = -0.6,
-    Contrast = 0.25
-}
-
-local HALF_FROST = {
-    TintColor = Color3.fromRGB(177, 222, 255),
-    Saturation = -0.3,
-    Contrast = 0.125
-}
-
-local CLEAR_FROST = {
-    TintColor = Color3.fromRGB(255, 255, 255),
-    Saturation = 0,
-    Contrast = 0
-}
-
-local CYAN_COLOR = Color3.fromRGB(0, 180, 180)
-local DARK_CYAN = Color3.fromRGB(0, 80, 80)
+local CYAN_COLOR = Color3.fromRGB(156,194,255)
+local DARK_CYAN = Color3.fromRGB(84,150,255)
 local LIGHT_CYAN = Color3.fromRGB(160, 240, 240)
 local ORANGE_COLOR = Color3.fromRGB(255, 130, 30)
 
@@ -166,8 +142,8 @@ local function ProcessRandomLight(room)
         soundEmitter.Parent = workspace.Terrain
 
         local pointLight = Instance.new("PointLight")
-        pointLight.Color = LIGHT_CYAN
-        pointLight.Range = 10
+        pointLight.Color = Color3.fromRGB(255,255,255)
+        pointLight.Range = 20
         pointLight.Brightness = 0
         pointLight.Parent = lightPart
 
@@ -183,7 +159,7 @@ local function ProcessRandomLight(room)
 
             local tweenIn = TweenService:Create(
                 pointLight, 
-                TweenInfo.new(0.7, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), 
+                TweenInfo.new(1, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), 
                 {Brightness = 4}
             )
             tweenIn:Play()
@@ -298,11 +274,6 @@ local gameData = ReplicatedStorage:WaitForChild("GameData")
 local latestRoom = gameData:WaitForChild("LatestRoom")
 latestRoom.Changed:Wait()
 
-local frost = Instance.new("ColorCorrectionEffect")
-frost.Parent = Lighting
-frost.Name = "frost4"
-TweenService:Create(frost, TweenInfo.new(5), FULL_FROST):Play()
-
 local function GetGitSound(GithubSnd, SoundName)
     local fileName = SoundName .. ".mp3"
     if not isfile(fileName) then
@@ -310,7 +281,7 @@ local function GetGitSound(GithubSnd, SoundName)
         if success and response then
             writefile(fileName, response)
         else
-            warn("[Frostbite]: KhÃ´ng thá»ƒ táº£i Ã¢m thanh: " .. SoundName)
+            warn("[Frostbite]: Không thể tải âm thanh: " .. SoundName)
             return nil
         end
     end
@@ -320,25 +291,25 @@ local function GetGitSound(GithubSnd, SoundName)
 end
 
 local function GetGithubModel(url, fileName)
-    if not isfile(fileName) then
-        local response = http_request({
-            Url = url,
-            Method = "GET"
-        })
+	if not isfile(fileName) then
+		local response = http_request({
+			Url = url,
+			Method = "GET"
+		})
 
-        if response and response.StatusCode == 200 then
-            writefile(fileName, response.Body)
-        else
-            warn("[Frostbite]: KhÃ´ng thá»ƒ táº£i Model tá»« GitHub!")
-            return nil
-        end
-    end
+		if response and response.StatusCode == 200 then
+			writefile(fileName, response.Body)
+		else
+			warn("[Frostbite]: Không thể tải Model từ GitHub!")
+			return nil
+		end
+	end
 
-    local success, result = pcall(function()
-        return game:GetObjects(getcustomasset(fileName))[1]
-    end)
+	local success, result = pcall(function()
+		return game:GetObjects(getcustomasset(fileName))[1]
+	end)
 
-    return success and result or nil
+	return success and result or nil
 end
 
 local Phase1Sound = GetGitSound("https://github.com/vuivuiviu2/Doors-Hardcore-Reignited-/raw/refs/heads/main/THE%20FIRST%20PHASE.mp3", "FrostbitePhase1")
@@ -353,9 +324,9 @@ end
 
 local Phase2Sound = GetGitSound("https://github.com/vuivuiviu2/Doors-Hardcore-Reignited-/raw/refs/heads/main/THE%20LAST%20PHASE.mp3", "FrostbitePhase2")
 
-local modelTemplate = GetGithubModel("https://github.com/reboundplayz/hardcore-reignited/raw/refs/heads/main/okbrofrostbite.rbxm", "vjjjdjssssww")
+local modelTemplate = GetGithubModel("https://github.com/reboundplayz/hardcore-reignited/raw/refs/heads/main/frostbiteFINALDONE.rbxm", "vjjjdjssssww")
 if not modelTemplate then
-    warn("[Frostbite]: KhÃ´ng thá»ƒ khá»Ÿi táº¡o Model, Ä‘Ã£ dá»«ng script.")
+    warn("[Frostbite]: Không thể khởi tạo Model, đã dừng script.")
     return
 end
 
@@ -554,31 +525,368 @@ local phase2StartWave
 if attackWaves == 5 then
     phase2StartWave = 4
 elseif attackWaves == 6 then
-    if math.random(1, 100) <= 45 then
-        phase2StartWave = 5
-    else
-        phase2StartWave = 4
-    end
+    phase2StartWave = math.random(1, 100) <= 45 and 5 or 4
 elseif attackWaves == 7 then
-    if math.random(1, 100) <= 25 then
-        phase2StartWave = 6
-    else
-        phase2StartWave = 5
-    end
+    phase2StartWave = math.random(1, 100) <= 25 and 6 or 5
 end
 
 local isPhase2 = false
+local currentWave = 1
 
 local coldGui, coldContainer, fillBar = CreateColdBarUI()
-local currentColdValue = 1.0 
+local currentColdValue = 1
 
-for i = 1, attackWaves do
-    if i >= phase2StartWave and not isPhase2 then
+local camera = workspace.CurrentCamera
+
+local s = modelTemplate:Clone()
+s.Name = "Frostyma5n"
+s.Parent = workspace
+
+for _, v in ipairs(s:GetDescendants()) do
+    if v:IsA("Sound") then
+        v:Play()
+    elseif v:IsA("ParticleEmitter") then
+        v.Enabled = true
+    end
+end
+
+local entity = s:FindFirstChildWhichIsA("BasePart") or s.PrimaryPart or s:FindFirstChild("FrostyNew")
+
+if not entity then
+    s:Destroy()
+    return
+end
+
+entity.CanCollide = false
+
+local attachment = entity:FindFirstChild("Attachment")
+
+if attachment then
+    for _, v in ipairs(attachment:GetDescendants()) do
+        if v:IsA("ParticleEmitter") then
+            v.Enabled = false
+        end
+    end
+end
+
+local activeRoom
+local roomOriginalColors = {}
+
+local FROST_ROOM_COLOR = Color3.fromRGB(166, 196, 255)
+
+local function RestoreRoomColors()
+    for obj, color in pairs(roomOriginalColors) do
+        if obj and obj.Parent then
+            TweenService:Create(
+                obj,
+                TweenInfo.new(0.35, Enum.EasingStyle.Sine, Enum.EasingDirection.Out),
+                {Color = color}
+            ):Play()
+        end
+    end
+
+    table.clear(roomOriginalColors)
+    activeRoom = nil
+end
+
+local function ApplyRoomColors(room)
+    if not room or not room.Parent or activeRoom == room then
+        return
+    end
+
+    RestoreRoomColors()
+    activeRoom = room
+
+    for _, obj in ipairs(room:GetDescendants()) do
+        if obj:IsA("Light") then
+            roomOriginalColors[obj] = obj.Color
+
+            TweenService:Create(
+                obj,
+                TweenInfo.new(0.35, Enum.EasingStyle.Sine, Enum.EasingDirection.Out),
+                {Color = FROST_ROOM_COLOR}
+            ):Play()
+
+        elseif obj:IsA("BasePart") and obj.Material == Enum.Material.Neon then
+            roomOriginalColors[obj] = obj.Color
+
+            TweenService:Create(
+                obj,
+                TweenInfo.new(0.35, Enum.EasingStyle.Sine, Enum.EasingDirection.Out),
+                {Color = FROST_ROOM_COLOR}
+            ):Play()
+        end
+    end
+end
+
+local function GetRoomTarget(room)
+    if not room then return nil end
+
+    ApplyRoomColors(room)
+
+    local entrance = room:FindFirstChild("RoomEntrance")
+    local exit = room:FindFirstChild("RoomExit")
+
+    if entrance and exit then
+        local pos = (entrance.Position + exit.Position) / 2
+
+        return CFrame.new(
+            pos.X,
+            pos.Y + 1,
+            pos.Z
+        )
+    elseif entrance then
+        local pos = (entrance.CFrame * CFrame.new(0, 0, -15)).Position
+
+        return CFrame.new(
+            pos.X,
+            pos.Y + 1,
+            pos.Z
+        )
+    end
+
+    return nil
+end
+
+local movingTween
+
+local function MoveToRoom(room)
+    if not s or not s.Parent then return end
+
+    local target = GetRoomTarget(room)
+    if not target then return end
+
+    if movingTween then
+        movingTween:Cancel()
+        movingTween = nil
+    end
+
+    local cfValue = Instance.new("CFrameValue")
+    cfValue.Value = s:GetPivot()
+
+    local connection = cfValue:GetPropertyChangedSignal("Value"):Connect(function()
+        if s and s.Parent then
+            s:PivotTo(cfValue.Value)
+        end
+    end)
+
+    movingTween = TweenService:Create(
+        cfValue,
+        TweenInfo.new(
+            0.5,
+            Enum.EasingStyle.Linear,
+            Enum.EasingDirection.InOut
+        ),
+        {Value = target}
+    )
+
+    movingTween.Completed:Connect(function()
+        if connection then
+            connection:Disconnect()
+        end
+
+        cfValue:Destroy()
+
+        if movingTween then
+            movingTween = nil
+        end
+    end)
+
+    movingTween:Play()
+end
+
+local attacking = true
+
+task.spawn(function()
+    pcall(function()
+        local CameraShaker = require(
+            ReplicatedStorage:WaitForChild("CameraShaker", 2)
+        )
+
+        if not CameraShaker then return end
+
+        local camShake = CameraShaker.new(
+            Enum.RenderPriority.Camera.Value,
+            function(shakeCf)
+                camera.CFrame = camera.CFrame * shakeCf
+            end
+        )
+
+        camShake:Start()
+
+        while attacking and s and s.Parent do
+            if isPhase2 then
+                camShake:ShakeOnce(
+                    15,
+                    25,
+                    0.15,
+                    0.3,
+                    3,
+                    1
+                )
+            else
+                camShake:ShakeOnce(
+                    20,
+                    25,
+                    0.2,
+                    0.3,
+                    2,
+                    0.5
+                )
+            end
+
+            task.wait(0.15)
+        end
+    end)
+end)
+
+if attachment then
+    for _, v in ipairs(attachment:GetDescendants()) do
+        if v:IsA("ParticleEmitter") then
+            v.Enabled = true
+        end
+    end
+end
+
+task.spawn(function()
+    local screenGui = Instance.new("ScreenGui")
+    screenGui.Name = "Aihoi"
+    screenGui.IgnoreGuiInset = true
+    screenGui.DisplayOrder = 999999
+    screenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+
+    local imageLabel = Instance.new("ImageLabel")
+    imageLabel.BackgroundTransparency = 1
+    imageLabel.Size = UDim2.new(1, 0, 1, 0)
+    imageLabel.Image = "rbxassetid://10344339712"
+    imageLabel.ImageTransparency = 1
+    imageLabel.Parent = screenGui
+
+    local blur = Lighting:FindFirstChild("Blur5")
+
+    if not blur then
+        blur = Instance.new("BlurEffect")
+        blur.Name = "Blur5"
+        blur.Size = 4
+        blur.Parent = Lighting
+    else
+        blur.Size = 4
+        blur.Enabled = true
+    end
+
+    local renderConn
+
+    renderConn = RunService.RenderStepped:Connect(function(dt)
+        if not attacking or not entity or not entity.Parent then
+            renderConn:Disconnect()
+
+            if screenGui then
+                screenGui:Destroy()
+            end
+
+            return
+        end
+
+        local character = LocalPlayer.Character
+
+        if character then
+            if IsNearWarmSource(character) then
+                currentColdValue = math.min(
+                    1,
+                    currentColdValue + (0.08 * dt)
+                )
+            else
+                local coldRate = isPhase2 and (2 / 13) or (1 / 13)
+
+                currentColdValue = math.max(
+                    0,
+                    currentColdValue - (coldRate * dt)
+                )
+            end
+        end
+
+        if fillBar and fillBar.Parent then
+            fillBar.Size = UDim2.new(
+                currentColdValue,
+                0,
+                1,
+                0
+            )
+        end
+
+        if currentColdValue <= 0 then
+            imageLabel.ImageTransparency = 0.2
+            blur.Enabled = true
+        else
+            imageLabel.ImageTransparency = math.clamp(
+                0.2 + currentColdValue * 0.8,
+                0.2,
+                1
+            )
+
+            blur.Enabled = currentColdValue < 0.35
+        end
+    end)
+
+    while attacking and s and s.Parent do
+        task.wait(0.1)
+
+        local character = LocalPlayer.Character
+        if not character then continue end
+
+        local humanoid = character:FindFirstChildOfClass("Humanoid")
+
+        if not humanoid or humanoid.Health <= 0 then
+            break
+        end
+
+        if currentColdValue <= 0 then
+            pcall(function()
+                local damageAmount = isPhase2 and 2 or 1
+
+                humanoid.Health = math.max(
+                    0,
+                    humanoid.Health - damageAmount
+                )
+
+                local statsFolder = ReplicatedStorage:FindFirstChild("GameStats")
+
+                if statsFolder then
+                    local playerStats = statsFolder:FindFirstChild(
+                        "Player_" .. LocalPlayer.Name
+                    )
+
+                    if playerStats
+                    and playerStats:FindFirstChild("Total")
+                    and playerStats.Total:FindFirstChild("DeathCause") then
+
+                        playerStats.Total.DeathCause.Value = "Frostbite"
+                    end
+                end
+            end)
+        end
+    end
+end)
+
+local processedRooms = {}
+
+local function ProcessEntityRoom(room)
+    if not room or processedRooms[room] then
+        return
+    end
+
+    processedRooms[room] = true
+
+    ProcessRandomLight(room)
+    MoveToRoom(room)
+
+    if currentWave >= phase2StartWave and not isPhase2 then
         isPhase2 = true
-        
+
         if Phase1Sound then
             Phase1Sound:Stop()
         end
+
         if Phase2Sound then
             Phase2Sound.Parent = workspace
             Phase2Sound.Volume = 6
@@ -588,212 +896,79 @@ for i = 1, attackWaves do
             Phase2Sound:Play()
         end
     end
+end
 
-    local roomToProcess = GetPreviousRoom()
-    local currentRoom = GetCurrentHighestRoom()
-    
-    if not currentRoom then break end
+local firstRoom = GetCurrentHighestRoom()
 
-    local frost4 = Lighting:FindFirstChild("frost4")
-    if frost4 then
-        TweenService:Create(frost4, TweenInfo.new(1, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), HALF_FROST):Play()
+if firstRoom then
+    local entrance = firstRoom:FindFirstChild("RoomEntrance")
+
+    if entrance then
+        s:PivotTo(
+            entrance.CFrame * CFrame.new(0, 0, -15)
+        )
+    else
+        s:PivotTo(firstRoom:GetPivot())
     end
 
-    if roomToProcess then
-        ProcessRandomLight(roomToProcess)
+    ProcessEntityRoom(firstRoom)
+end
+
+local roomConnection
+
+roomConnection = latestRoom.Changed:Connect(function()
+    if not attacking or not s or not s.Parent then
+        return
     end
 
-    if i > 1 then
-        task.wait(1.5)
-    end
-
-    local camera = workspace.CurrentCamera
-    local s = modelTemplate:Clone()
-    s.Parent = workspace
-    s.Name = "Frostyma5n"
-
-    -- Configure all BaseParts and special elements inside the model
-    for _, desc in ipairs(s:GetDescendants()) do
-        if desc:IsA("BasePart") then
-            desc.Anchored = true
-            desc.CanCollide = false
-        elseif desc:IsA("ParticleEmitter") then
-            if desc.Name == "E2" then
-                desc.Shape = Enum.ParticleEmitterShape.Sphere
-            end
-            desc.Enabled = true
-        elseif desc:IsA("Fire") then
-            desc.Enabled = true
-        elseif desc:IsA("Sound") then
-            desc:Play()
-        end
-    end
-
-    EnsurePrimary(s)
-
-    local entity = s:FindFirstChild("RushNew") or s:FindFirstChildWhichIsA("BasePart") or s.PrimaryPart or s:FindFirstChild("FrostyNew")
-    if not entity then 
-        s:Destroy() 
-        break 
-    end
-
-    local entrance = currentRoom:FindFirstChild("RoomEntrance")
-    local exit = currentRoom:FindFirstChild("RoomExit")
-    local targetCFrame
-
-    if entrance and exit then
-        local pos = (entrance.Position + exit.Position) / 2
-        targetCFrame = CFrame.new(pos + Vector3.new(0, 3, 0))
-    elseif entrance then
-        targetCFrame = entrance.CFrame * CFrame.new(0, 3, -15)
-    end
-
-    if targetCFrame then
-        s:PivotTo(targetCFrame)
-    end
-
-    if frost4 then
-        TweenService:Create(frost4, TweenInfo.new(2, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), FULL_FROST):Play()
-    end
-
-    local attachment = entity:FindFirstChild("Attachment")
-    if attachment then
-        for _, v in ipairs(attachment:GetDescendants()) do
-            if v:IsA("ParticleEmitter") then v.Enabled = false end
-        end
-    end
-
-    task.wait(0.5)
-
-    local attacking = true
-
-    task.spawn(function()
-        pcall(function()
-            local CameraShaker = require(ReplicatedStorage:WaitForChild("CameraShaker", 2))
-            if not CameraShaker then return end
-
-            local camShake = CameraShaker.new(Enum.RenderPriority.Camera.Value, function(shakeCf)
-                camera.CFrame = camera.CFrame * shakeCf
-            end)
-
-            camShake:Start()
-
-            while attacking and s and s.Parent do
-                if isPhase2 then
-                    camShake:ShakeOnce(30, 25, 0.15, 0.3, 3, 1)
-                else
-                    camShake:ShakeOnce(30, 25, 0.2, 0.3, 2, 0.5)
-                end
-
-                task.wait(0.15)
-            end
-        end)
-    end)
-
-    if attachment then
-        for _, v in ipairs(attachment:GetDescendants()) do
-            if v:IsA("ParticleEmitter") then
-                v.Enabled = true
-            end
-        end
-    end
-
-    local roomConnection
-    roomConnection = workspace.CurrentRooms.ChildAdded:Connect(function()
-        if not attacking then return end
-
+    if currentWave >= attackWaves then
         attacking = false
+        return
+    end
 
-        if roomConnection then
-            roomConnection:Disconnect()
-        end
+    currentWave += 1
 
-        if s and s.Parent then
-            s:Destroy()
-        end
-    end)
+    local rooms = workspace:FindFirstChild("CurrentRooms")
+    if not rooms then return end
 
     task.spawn(function()
-        local screenGui = Instance.new("ScreenGui")
-        screenGui.Name = "Aihoi"
-        screenGui.IgnoreGuiInset = true
-        screenGui.DisplayOrder = 999999
-        screenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+        local room = rooms:WaitForChild(
+            tostring(latestRoom.Value),
+            2
+        )
 
-        local imageLabel = Instance.new("ImageLabel")
-        imageLabel.BackgroundTransparency = 1
-        imageLabel.Size = UDim2.new(1, 0, 1, 0)
-        imageLabel.Image = "rbxassetid://10344339712"
-        imageLabel.ImageTransparency = 1
-        imageLabel.Parent = screenGui
-
-        local blur = Lighting:FindFirstChild("Blur5")
-        if not blur then
-            blur = Instance.new("BlurEffect")
-            blur.Name = "Blur5"
-            blur.Size = 4
-            blur.Parent = Lighting
-        else
-            blur.Size = 4
-            blur.Enabled = true
+        if not room or not attacking then
+            return
         end
 
-        local renderConn
-        renderConn = RunService.RenderStepped:Connect(function(dt)
-            if not attacking or not entity or not entity.Parent then
-                renderConn:Disconnect()
-                if screenGui then screenGui:Destroy() end
-                return
-            end
+        room:WaitForChild("RoomEntrance", 2)
+        room:WaitForChild("RoomExit", 2)
 
-            local character = LocalPlayer.Character
-            if character then
-                if IsNearWarmSource(character) then
-                    currentColdValue = math.min(1, currentColdValue + (0.08 * dt))
-                else
-                    local coldRate = isPhase2 and (2 / 13) or (1 / 13)
-                    currentColdValue = math.max(0, currentColdValue - (coldRate * dt))
-                end
-            end
-
-            if fillBar and fillBar.Parent then
-                fillBar.Size = UDim2.new(currentColdValue, 0, 1, 0)
-            end
-
-            if currentColdValue <= 0 then
-                imageLabel.ImageTransparency = 0.2
-                blur.Enabled = true
-            else
-                imageLabel.ImageTransparency = math.clamp(0.2 + (currentColdValue * 0.8), 0.2, 1)
-                blur.Enabled = (currentColdValue < 0.35)
-            end
-        end)
-
-        while attacking and entity and entity.Parent do
-            task.wait(0.1)
-            local character = LocalPlayer.Character
-            if not character then continue end
-            local humanoid = character:FindFirstChildOfClass("Humanoid")
-            if not humanoid or humanoid.Health <= 0 then break end
-
-            if currentColdValue <= 0 then
-                pcall(function()
-                    local damageAmount = isPhase2 and 2 or 1
-                    humanoid.Health = math.max(0, humanoid.Health - damageAmount)
-                    
-                    local statsFolder = ReplicatedStorage:FindFirstChild("GameStats")
-                    if statsFolder then
-                        local playerStats = statsFolder:FindFirstChild("Player_" .. LocalPlayer.Name)
-                        if playerStats and playerStats:FindFirstChild("Total") and playerStats.Total:FindFirstChild("DeathCause") then
-                            playerStats.Total.DeathCause.Value = "Frostbite"
-                        end
-                    end
-                end)
-            end
-        end
+        ProcessEntityRoom(room)
     end)
+end)
 
-    repeat task.wait(0.1) until not attacking
+while attacking and s and s.Parent do
+    task.wait(0.1)
+
+    if currentWave >= attackWaves then
+        attacking = false
+        break
+    end
+end
+
+if roomConnection then
+    roomConnection:Disconnect()
+end
+
+if movingTween then
+    movingTween:Cancel()
+end
+
+RestoreRoomColors()
+
+if s and s.Parent then
+    s:Destroy()
 end
 
 isEntityActive = false
@@ -841,15 +1016,3 @@ cac.Parent = workspace
 cac.PlaybackSpeed = 0.7
 cac:Play()
 Debris:AddItem(cac, 3.6)
-
-local frost4 = Lighting:FindFirstChild("frost4")
-if frost4 and frost4.Parent then
-    local tweenFrostOut = TweenService:Create(
-        frost4, 
-        TweenInfo.new(8, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), 
-        CLEAR_FROST
-    )
-    tweenFrostOut:Play()
-    tweenFrostOut.Completed:Wait()
-    frost4:Destroy()
-end
