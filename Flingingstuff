@@ -6,9 +6,9 @@ local LatestRoom = ReplicatedStorage:WaitForChild("GameData"):WaitForChild("Late
 
 local TARGET_MASS = 0
 
-local WIND_RADIUS = 30
-local WIND_FORCE = 35
-local WIND_COOLDOWN = 0.12
+local WIND_RADIUS = 40
+local WIND_FORCE = 50
+local WIND_COOLDOWN = 1
 local MAX_IMPULSE = 180
 
 local blacklist = {
