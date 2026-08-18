@@ -1,4 +1,3 @@
-
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local CurrentRooms = workspace:WaitForChild("CurrentRooms")
@@ -7,297 +6,333 @@ local LatestRoom = ReplicatedStorage:WaitForChild("GameData"):WaitForChild("Late
 local TARGET_MASS = 0
 
 local blacklist = {
-"wardrobe",
-"rafter",
-"bed",
-"rug",
-"carpet",
-"sideroom",
-"key",
-"drawer",
-"breaker",
-"table",
-"desk",
-"gold",
-"dresser",
-"floor",
-"wall",
-"door",
-"ceiling",
-"light",
-"beam",
-"window",
-"curtain",
-"gate",
-"stairs",
-"vent",
-"lattice",
-"barrelstack",
-"smoothie",
-"rolltop",
-"dupe",
-"boards",
-"crucifix",
-"flashlight",
-"moonfloat",
-"lockpick",
-"candle",
-"skeleton key", 
-"fireplace" 
+	"wardrobe",
+	"rafter",
+	"bed",
+	"rug",
+	"carpet",
+	"sideroom",
+	"key",
+	"drawer",
+	"breaker",
+	"table",
+	"desk",
+	"gold",
+	"dresser",
+	"floor",
+	"wall",
+	"door",
+	"ceiling",
+	"light",
+	"beam",
+	"window",
+	"curtain",
+	"gate",
+	"stairs",
+	"vent",
+	"lattice",
+	"barrelstack",
+	"smoothie",
+	"rolltop",
+	"dupe",
+	"boards",
+	"crucifix",
+	"flashlight",
+	"moonfloat",
+	"lockpick",
+	"candle",
+	"skeleton key",
+	"fireplace"
 }
 
 local function hasAncestorContaining(object, text)
-local parent = object.Parent
+	local parent = object.Parent
 
-while parent do  
-	if parent:IsA("Model") then  
-		if string.find(  
-			string.lower(parent.Name),  
-			text,  
-			1,  
-			true  
-		) then  
-			return true  
-		end  
-	end  
+	while parent do
+		if parent:IsA("Model") then
+			if string.find(
+				string.lower(parent.Name),
+				text,
+				1,
+				true
+			) then
+				return true
+			end
+		end
 
-	if parent == CurrentRooms then  
-		break  
-	end  
+		if parent == CurrentRooms then
+			break
+		end
 
-	parent = parent.Parent  
-end  
+		parent = parent.Parent
+	end
 
-return false
-
+	return false
 end
 
 local function isBlacklisted(object)
-local name = string.lower(object.Name)
+	local name = string.lower(object.Name)
 
-if object:IsA("BasePart") then  
-	if string.find(name, "book", 1, true) then  
-		if hasAncestorContaining(object, "book") then  
-			return false  
-		end  
+	if object:IsA("BasePart") then
+		if string.find(name, "book", 1, true) then
+			if hasAncestorContaining(object, "book") then
+				return false
+			end
 
-		return true  
-	end  
+			return true
+		end
 
-	if string.find(name, "light", 1, true) then  
-		if hasAncestorContaining(object, "book") then  
-			return false  
-		end  
+		if string.find(name, "light", 1, true) then
+			if hasAncestorContaining(object, "book") then
+				return false
+			end
 
-		return true  
-	end  
-	  
-	if string.find(name, "wall", 1, true) then  
-		if hasAncestorContaining(object, "pillar") then  
-			return false  
-		end  
+			return true
+		end
 
-		return true  
-	end  
-	  
-	if string.find(name, "board", 1, true) then  
-		if hasAncestorContaining(object, "wooden") then  
-			return false  
-		end  
+		if string.find(name, "wall", 1, true) then
+			if hasAncestorContaining(object, "pillar") then
+				return false
+			end
 
-		return true  
-	end  
-end  
+			return true
+		end
 
-for _, blacklistName in ipairs(blacklist) do  
-	if string.find(name, blacklistName, 1, true) then  
-		return true  
-	end  
-end  
+		if string.find(name, "board", 1, true) then
+			if hasAncestorContaining(object, "wooden") then
+				return false
+			end
 
-return false
+			return true
+		end
+	end
 
+	for _, blacklistName in ipairs(blacklist) do
+		if string.find(name, blacklistName, 1, true) then
+			return true
+		end
+	end
+
+	return false
 end
 
 local function isInside(instance, model)
-return instance == model or instance:IsDescendantOf(model)
+	return instance == model or instance:IsDescendantOf(model)
 end
 
 local function hasTargetParent(model, room)
-local parent = model.Parent
+	local parent = model.Parent
 
-while parent and parent ~= room do  
-	if parent:IsA("Model") and not isBlacklisted(parent) then  
-		return true  
-	end  
+	while parent and parent ~= room do
+		if parent:IsA("Model") and not isBlacklisted(parent) then
+			return true
+		end
 
-	parent = parent.Parent  
-end  
+		parent = parent.Parent
+	end
 
-return false
-
+	return false
 end
 
 local function shakeCollision(collision)
-if not collision or collision.Anchored then
-return
-end
+	if not collision or collision.Anchored then
+		return
+	end
 
-local mass = collision.AssemblyMass  
-local force = mass * 35  
+	local mass = collision.AssemblyMass
+	local force = mass * 35
 
-for i = 1, 8 do  
-	if collision.Parent and not collision.Anchored then  
-		local direction = Vector3.new(  
-			math.random(-100, 100) / 100,  
-			math.random(20, 100) / 100,  
-			math.random(-100, 100) / 100  
-		).Unit  
+	for i = 1, 8 do
+		if collision.Parent and not collision.Anchored then
+			local direction = Vector3.new(
+				math.random(-100, 100) / 100,
+				math.random(20, 100) / 100,
+				math.random(-100, 100) / 100
+			).Unit
 
-		collision:ApplyImpulse(direction * force)  
+			collision:ApplyImpulse(
+				direction * force
+			)
 
-		collision:ApplyAngularImpulse(  
-			Vector3.new(  
-				math.random(-3, 3),  
-				math.random(-3, 3),  
-				math.random(-3, 3)  
-			) * mass * 15  
-		)  
+			collision:ApplyAngularImpulse(
+				Vector3.new(
+					math.random(-3, 3),
+					math.random(-3, 3),
+					math.random(-3, 3)
+				) * mass * 15
+			)
 
-		task.wait(0.03)  
-	end  
-end
-
+			task.wait(0.03)
+		end
+	end
 end
 
 local function setupModel(model, room, targets)
-if not model:IsA("Model") then
-return
-end
+	if not model:IsA("Model") then
+		return
+	end
 
-if isBlacklisted(model) then  
-	return  
-end  
+	if isBlacklisted(model) then
+		return
+	end
 
-if hasTargetParent(model, room) then  
-	return  
-end  
+	if hasTargetParent(model, room) then
+		return
+	end
 
-local parts = {}  
+	local existingCollision
+	local hasScriptCollision = false
 
-for _, v in ipairs(model:GetDescendants()) do  
-	if v:IsA("BasePart")  
-		and v.Name ~= "Collision"  
-		and not isBlacklisted(v) then  
+	for _, v in ipairs(model:GetDescendants()) do
+		if v:IsA("BasePart")
+			and v.Name == "Collision"
+			and v:GetAttribute("WindCollision") == true then
 
-		table.insert(parts, v)  
-	end  
-end  
+			hasScriptCollision = true
 
-if #parts == 0 then  
-	return  
-end  
+			if v:GetAttribute("Picked") ~= true then
+				existingCollision = v
+				break
+			end
+		end
+	end
 
-local cf, size = model:GetBoundingBox()  
+	if existingCollision then
+		table.insert(targets, existingCollision)
+		return
+	end
 
-local volume = size.X * size.Y * size.Z  
+	if hasScriptCollision then
+		return
+	end
 
-if volume <= 0 then  
-	return  
-end  
+	local parts = {}
 
-local density = math.clamp(  
-	TARGET_MASS / volume,  
-	0.0001,  
-	100  
-)  
+	for _, v in ipairs(model:GetDescendants()) do
+		if v:IsA("BasePart")
+			and v.Name ~= "Collision"
+			and not isBlacklisted(v) then
 
-local collision = Instance.new("Part")  
-collision.Name = "Collision"  
-collision.Size = size  
-collision.CFrame = cf  
-collision.Transparency = 1  
-collision.CanCollide = true  
-collision.CanTouch = true  
-collision.CanQuery = true  
-collision.CastShadow = false  
-collision.Anchored = true  
-collision.Massless = false  
+			table.insert(parts, v)
+		end
+	end
 
-collision.CustomPhysicalProperties = PhysicalProperties.new(  
-	density,  
-	0.3,  
-	0.5,  
-	1,  
-	1  
-)  
+	if #parts == 0 then
+		return
+	end
 
-collision.Parent = model  
+	local cf, size = model:GetBoundingBox()
 
-table.insert(targets, collision)  
+	local volume = size.X * size.Y * size.Z
 
-collision:GetPropertyChangedSignal("Anchored"):Connect(function()  
-	if not collision.Anchored then  
-		task.spawn(shakeCollision, collision)  
-	end  
-end)  
+	if volume <= 0 then
+		return
+	end
 
-for _, v in ipairs(model:GetDescendants()) do  
-	if v:IsA("WeldConstraint")  
-		or v:IsA("Weld")  
-		or v:IsA("ManualWeld")  
-		or v:IsA("Motor6D")  
-		or v:IsA("Snap")  
-		or v:IsA("Glue")  
-		or v:IsA("RigidConstraint") then  
+	local density = math.clamp(
+		TARGET_MASS / volume,
+		0.0001,
+		100
+	)
 
-		local p0 = v.Part0  
-		local p1 = v.Part1  
+	local collision = Instance.new("Part")
 
-		if p0 and p1 then  
-			if isInside(p0, model) ~= isInside(p1, model) then  
-				v:Destroy()  
-			end  
-		end  
-	end  
-end  
+	collision.Name = "Collision"
+	collision.Size = size
+	collision.CFrame = cf
 
-for _, part in ipairs(parts) do  
-	part.Anchored = false  
-	part.CanCollide = false  
-	part.CanTouch = false  
-	part.CanQuery = false  
-	part.Massless = true  
+	collision.Transparency = 1
+	collision.CanCollide = true
+	collision.CanTouch = true
+	collision.CanQuery = true
+	collision.CastShadow = false
 
-	local weld = Instance.new("WeldConstraint")  
-	weld.Part0 = collision  
-	weld.Part1 = part  
-	weld.Parent = collision  
-end
+	collision.Anchored = true
+	collision.Massless = false
 
+	collision.CustomPhysicalProperties = PhysicalProperties.new(
+		density,
+		0.3,
+		0.5,
+		1,
+		1
+	)
+
+	collision:SetAttribute("WindCollision", true)
+	collision:SetAttribute("Picked", false)
+
+	collision.Parent = model
+
+	table.insert(targets, collision)
+
+	collision:GetPropertyChangedSignal("Anchored"):Connect(function()
+		if not collision.Anchored then
+			task.spawn(shakeCollision, collision)
+		end
+	end)
+
+	for _, v in ipairs(model:GetDescendants()) do
+		if v:IsA("WeldConstraint")
+			or v:IsA("Weld")
+			or v:IsA("ManualWeld")
+			or v:IsA("Motor6D")
+			or v:IsA("Snap")
+			or v:IsA("Glue")
+			or v:IsA("RigidConstraint") then
+
+			local p0 = v.Part0
+			local p1 = v.Part1
+
+			if p0 and p1 then
+				if isInside(p0, model) ~= isInside(p1, model) then
+					v:Destroy()
+				end
+			end
+		end
+	end
+
+	for _, part in ipairs(parts) do
+		part.Anchored = false
+		part.CanCollide = false
+		part.CanTouch = false
+		part.CanQuery = false
+		part.Massless = true
+
+		local weld = Instance.new("WeldConstraint")
+
+		weld.Part0 = collision
+		weld.Part1 = part
+		weld.Parent = collision
+	end
 end
 
 local function processLatestRoom()
-local room = CurrentRooms:FindFirstChild(tostring(LatestRoom.Value))
+	local room = CurrentRooms:FindFirstChild(
+		tostring(LatestRoom.Value)
+	)
 
-if not room then  
-	return  
-end  
-
-local targets = {}  
-
-for _, v in ipairs(room:GetDescendants()) do  
-	if v:IsA("Model") then  
-		setupModel(v, room, targets)  
-	end  
-end  
-
-	for _, collision in ipairs(targets) do  
-		if collision and collision.Parent then  
-			collision.Anchored = false  
-		end  
+	if not room then
+		return
 	end
 
+	local targets = {}
+
+	for _, v in ipairs(room:GetDescendants()) do
+		if v:IsA("Model") then
+			setupModel(v, room, targets)
+		end
+	end
+
+	for _, collision in ipairs(targets) do
+		if collision
+			and collision.Parent
+			and collision:GetAttribute("WindCollision") == true then
+
+			collision.Anchored = false
+		end
+	end
+
+	return targets
 end
 
 processLatestRoom()
