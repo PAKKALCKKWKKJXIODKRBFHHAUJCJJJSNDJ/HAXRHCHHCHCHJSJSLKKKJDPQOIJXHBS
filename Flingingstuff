@@ -1,450 +1,303 @@
+
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local RunService = game:GetService("RunService")
 
 local CurrentRooms = workspace:WaitForChild("CurrentRooms")
 local LatestRoom = ReplicatedStorage:WaitForChild("GameData"):WaitForChild("LatestRoom")
 
 local TARGET_MASS = 0
 
-local WIND_RADIUS = 60
-local WIND_FORCE = 50
-local WIND_COOLDOWN = 1
-local MAX_IMPULSE = 180
-
 local blacklist = {
-	"wardrobe",
-	"rafter",
-	"bed",
-	"rug",
-	"carpet",
-	"sideroom",
-	"key",
-	"drawer",
-	"breaker",
-	"table",
-	"desk",
-	"gold",
-	"dresser",
-	"floor",
-	"wall",
-	"chandelier",
-	"door",
-	"ceiling",
-	"light",
-	"beam",
-	"window",
-	"curtain",
-	"gate",
-	"stairs",
-	"vent",
-	"lattice",
-	"fireplace",
-	"barrelstack",
-	"smoothie",
-	"rolltop",
-	"dupe",
-	"boards",
-	"crucifix",
-	"flashlight",
-	"moonfloat",
-	"lockpick",
-	"candle",
-	"skeleton key"
+"wardrobe",
+"rafter",
+"bed",
+"rug",
+"carpet",
+"sideroom",
+"key",
+"drawer",
+"breaker",
+"table",
+"desk",
+"gold",
+"dresser",
+"floor",
+"wall",
+"door",
+"ceiling",
+"light",
+"beam",
+"window",
+"curtain",
+"gate",
+"stairs",
+"vent",
+"lattice",
+"barrelstack",
+"smoothie",
+"rolltop",
+"dupe",
+"boards",
+"crucifix",
+"flashlight",
+"moonfloat",
+"lockpick",
+"candle",
+"skeleton key", 
+"fireplace" 
 }
 
 local function hasAncestorContaining(object, text)
-	local parent = object.Parent
+local parent = object.Parent
 
-	while parent do
-		if parent:IsA("Model") then
-			if string.find(
-				string.lower(parent.Name),
-				text,
-				1,
-				true
-			) then
-				return true
-			end
-		end
+while parent do  
+	if parent:IsA("Model") then  
+		if string.find(  
+			string.lower(parent.Name),  
+			text,  
+			1,  
+			true  
+		) then  
+			return true  
+		end  
+	end  
 
-		if parent == CurrentRooms then
-			break
-		end
+	if parent == CurrentRooms then  
+		break  
+	end  
 
-		parent = parent.Parent
-	end
+	parent = parent.Parent  
+end  
 
-	return false
+return false
+
 end
 
 local function isBlacklisted(object)
-	local name = string.lower(object.Name)
+local name = string.lower(object.Name)
 
-	if object:IsA("BasePart") then
-		if string.find(name, "book", 1, true) then
-			if hasAncestorContaining(object, "book") then
-				return false
-			end
+if object:IsA("BasePart") then  
+	if string.find(name, "book", 1, true) then  
+		if hasAncestorContaining(object, "book") then  
+			return false  
+		end  
 
-			return true
-		end
+		return true  
+	end  
 
-		if string.find(name, "light", 1, true) then
-			if hasAncestorContaining(object, "book") then
-				return false
-			end
+	if string.find(name, "light", 1, true) then  
+		if hasAncestorContaining(object, "book") then  
+			return false  
+		end  
 
-			return true
-		end
+		return true  
+	end  
+	  
+	if string.find(name, "wall", 1, true) then  
+		if hasAncestorContaining(object, "pillar") then  
+			return false  
+		end  
 
-		if string.find(name, "wall", 1, true) then
-			if hasAncestorContaining(object, "pillar") then
-				return false
-			end
+		return true  
+	end  
+	  
+	if string.find(name, "board", 1, true) then  
+		if hasAncestorContaining(object, "wooden") then  
+			return false  
+		end  
 
-			return true
-		end
+		return true  
+	end  
+end  
 
-		if string.find(name, "board", 1, true) then
-			if hasAncestorContaining(object, "wooden") then
-				return false
-			end
+for _, blacklistName in ipairs(blacklist) do  
+	if string.find(name, blacklistName, 1, true) then  
+		return true  
+	end  
+end  
 
-			return true
-		end
-	end
+return false
 
-	for _, blacklistName in ipairs(blacklist) do
-		if string.find(name, blacklistName, 1, true) then
-			return true
-		end
-	end
-
-	return false
 end
 
 local function isInside(instance, model)
-	return instance == model or instance:IsDescendantOf(model)
+return instance == model or instance:IsDescendantOf(model)
 end
 
 local function hasTargetParent(model, room)
-	local parent = model.Parent
+local parent = model.Parent
 
-	while parent and parent ~= room do
-		if parent:IsA("Model") and not isBlacklisted(parent) then
-			return true
-		end
+while parent and parent ~= room do  
+	if parent:IsA("Model") and not isBlacklisted(parent) then  
+		return true  
+	end  
 
-		parent = parent.Parent
-	end
+	parent = parent.Parent  
+end  
 
-	return false
+return false
+
+end
+
+local function shakeCollision(collision)
+if not collision or collision.Anchored then
+return
+end
+
+local mass = collision.AssemblyMass  
+local force = mass * 35  
+
+for i = 1, 8 do  
+	if collision.Parent and not collision.Anchored then  
+		local direction = Vector3.new(  
+			math.random(-100, 100) / 100,  
+			math.random(20, 100) / 100,  
+			math.random(-100, 100) / 100  
+		).Unit  
+
+		collision:ApplyImpulse(direction * force)  
+
+		collision:ApplyAngularImpulse(  
+			Vector3.new(  
+				math.random(-3, 3),  
+				math.random(-3, 3),  
+				math.random(-3, 3)  
+			) * mass * 15  
+		)  
+
+		task.wait(0.03)  
+	end  
+end
+
 end
 
 local function setupModel(model, room, targets)
-	if not model:IsA("Model") then
-		return
-	end
+if not model:IsA("Model") then
+return
+end
 
-	if isBlacklisted(model) then
-		return
-	end
+if isBlacklisted(model) then  
+	return  
+end  
 
-	if hasTargetParent(model, room) then
-		return
-	end
+if hasTargetParent(model, room) then  
+	return  
+end  
 
-	local parts = {}
+local parts = {}  
 
-	for _, v in ipairs(model:GetDescendants()) do
-		if v:IsA("BasePart")
-			and v.Name ~= "Collision"
-			and not isBlacklisted(v) then
+for _, v in ipairs(model:GetDescendants()) do  
+	if v:IsA("BasePart")  
+		and v.Name ~= "Collision"  
+		and not isBlacklisted(v) then  
 
-			table.insert(parts, v)
-		end
-	end
+		table.insert(parts, v)  
+	end  
+end  
 
-	if #parts == 0 then
-		return
-	end
+if #parts == 0 then  
+	return  
+end  
 
-	local cf, size = model:GetBoundingBox()
+local cf, size = model:GetBoundingBox()  
 
-	local volume = size.X * size.Y * size.Z
+local volume = size.X * size.Y * size.Z  
 
-	if volume <= 0 then
-		return
-	end
+if volume <= 0 then  
+	return  
+end  
 
-	local density = math.clamp(
-		TARGET_MASS / volume,
-		0.0001,
-		100
-	)
+local density = math.clamp(  
+	TARGET_MASS / volume,  
+	0.0001,  
+	100  
+)  
 
-	local collision = Instance.new("Part")
-	collision.Name = "Collision"
-	collision.Size = size
-	collision.CFrame = cf
-	collision.Transparency = 1
-	collision.CanCollide = true
-	collision.CanTouch = true
-	collision.CanQuery = true
-	collision.CastShadow = false
-	collision.Anchored = true
-	collision.Massless = false
+local collision = Instance.new("Part")  
+collision.Name = "Collision"  
+collision.Size = size  
+collision.CFrame = cf  
+collision.Transparency = 1  
+collision.CanCollide = true  
+collision.CanTouch = true  
+collision.CanQuery = true  
+collision.CastShadow = false  
+collision.Anchored = true  
+collision.Massless = false  
 
-	collision.CustomPhysicalProperties = PhysicalProperties.new(
-		density,
-		0.3,
-		0.5,
-		1,
-		1
-	)
+collision.CustomPhysicalProperties = PhysicalProperties.new(  
+	density,  
+	0.3,  
+	0.5,  
+	1,  
+	1  
+)  
 
-	collision.Parent = model
+collision.Parent = model  
 
-	table.insert(targets, collision)
+table.insert(targets, collision)  
 
-	for _, v in ipairs(model:GetDescendants()) do
-		if v:IsA("WeldConstraint")
-			or v:IsA("Weld")
-			or v:IsA("ManualWeld")
-			or v:IsA("Motor6D")
-			or v:IsA("Snap")
-			or v:IsA("Glue")
-			or v:IsA("RigidConstraint") then
+collision:GetPropertyChangedSignal("Anchored"):Connect(function()  
+	if not collision.Anchored then  
+		task.spawn(shakeCollision, collision)  
+	end  
+end)  
 
-			local p0 = v.Part0
-			local p1 = v.Part1
+for _, v in ipairs(model:GetDescendants()) do  
+	if v:IsA("WeldConstraint")  
+		or v:IsA("Weld")  
+		or v:IsA("ManualWeld")  
+		or v:IsA("Motor6D")  
+		or v:IsA("Snap")  
+		or v:IsA("Glue")  
+		or v:IsA("RigidConstraint") then  
 
-			if p0 and p1 then
-				if isInside(p0, model) ~= isInside(p1, model) then
-					v:Destroy()
-				end
-			end
-		end
-	end
+		local p0 = v.Part0  
+		local p1 = v.Part1  
 
-	for _, part in ipairs(parts) do
-		part.Anchored = false
-		part.CanCollide = false
-		part.CanTouch = false
-		part.CanQuery = false
-		part.Massless = true
+		if p0 and p1 then  
+			if isInside(p0, model) ~= isInside(p1, model) then  
+				v:Destroy()  
+			end  
+		end  
+	end  
+end  
 
-		local weld = Instance.new("WeldConstraint")
-		weld.Part0 = collision
-		weld.Part1 = part
-		weld.Parent = collision
-	end
+for _, part in ipairs(parts) do  
+	part.Anchored = false  
+	part.CanCollide = false  
+	part.CanTouch = false  
+	part.CanQuery = false  
+	part.Massless = true  
+
+	local weld = Instance.new("WeldConstraint")  
+	weld.Part0 = collision  
+	weld.Part1 = part  
+	weld.Parent = collision  
+end
+
 end
 
 local function processLatestRoom()
-	local room = CurrentRooms:FindFirstChild(
-		tostring(LatestRoom.Value)
-	)
+local room = CurrentRooms:FindFirstChild(tostring(LatestRoom.Value))
 
-	if not room then
-		return
+if not room then  
+	return  
+end  
+
+local targets = {}  
+
+for _, v in ipairs(room:GetDescendants()) do  
+	if v:IsA("Model") then  
+		setupModel(v, room, targets)  
+	end  
+end  
+
+	for _, collision in ipairs(targets) do  
+		if collision and collision.Parent then  
+			collision.Anchored = false  
+		end  
 	end
 
-	local targets = {}
-
-	for _, v in ipairs(room:GetDescendants()) do
-		if v:IsA("Model") then
-			setupModel(v, room, targets)
-		end
-	end
-
-	for _, collision in ipairs(targets) do
-		if collision and collision.Parent then
-			collision.Anchored = false
-		end
-	end
-end
-
-local function getTargetFromPart(part)
-	if not part or part.Name ~= "Collision" then
-		return nil
-	end
-
-	local model = part:FindFirstAncestorOfClass("Model")
-
-	if not model then
-		return nil
-	end
-
-	return part, model
-end
-
-local activeRippers = {}
-
-local function setupRipper(ripper)
-	if activeRippers[ripper] then
-		return
-	end
-
-	if not ripper:IsA("Model")
-		or ripper.Name ~= "RipperBla" then
-		return
-	end
-
-	activeRippers[ripper] = true
-
-	local cf = ripper:GetBoundingBox()
-
-	local rootPart = Instance.new("Part")
-	rootPart.Name = "RipperWindHitbox"
-	rootPart.Size = Vector3.new(60, 60, 60)
-	rootPart.Transparency = 1
-	rootPart.CanCollide = false
-	rootPart.CanTouch = false
-	rootPart.CanQuery = true
-	rootPart.Anchored = true
-	rootPart.Massless = true
-	rootPart.CastShadow = false
-	rootPart.Parent = ripper
-
-	local lastImpulse = {}
-
-	local function pushTarget(target, velocity)
-		if not target
-			or not target.Parent
-			or target.Anchored then
-			return
-		end
-
-		local now = os.clock()
-
-		if lastImpulse[target]
-			and now - lastImpulse[target] < WIND_COOLDOWN then
-			return
-		end
-
-		lastImpulse[target] = now
-
-		local speed = velocity.Magnitude
-
-		if speed < 1 then
-			return
-		end
-
-		local direction = velocity.Unit
-
-		local offset = target.Position - rootPart.Position
-		local distance = offset.Magnitude
-
-		if distance > WIND_RADIUS then
-			return
-		end
-
-		local falloff = 1 - math.clamp(
-			distance / WIND_RADIUS,
-			0,
-			1
-		)
-
-		local force =
-			WIND_FORCE
-			* falloff
-			* math.clamp(speed / 180, 0.35, 1)
-
-		force = math.clamp(
-			force,
-			0,
-			MAX_IMPULSE
-		)
-
-		target:ApplyImpulse(
-			direction
-			* target.AssemblyMass
-			* force
-		)
-
-		target:ApplyAngularImpulse(
-			Vector3.new(
-				math.random(-100, 100),
-				math.random(-40, 40),
-				math.random(-100, 100)
-			)
-			* target.AssemblyMass
-			* force
-			* 0.04
-		)
-	end
-
-	local connection
-
-	connection = RunService.Heartbeat:Connect(function()
-		if not ripper.Parent then
-			connection:Disconnect()
-
-			if rootPart.Parent then
-				rootPart:Destroy()
-			end
-
-			activeRippers[ripper] = nil
-
-			return
-		end
-
-		local currentCF = ripper:GetBoundingBox()
-
-		rootPart.CFrame = currentCF
-
-		local velocity = rootPart.AssemblyLinearVelocity
-
-		if velocity.Magnitude < 1 then
-			return
-		end
-
-		local overlapParams = OverlapParams.new()
-		overlapParams.FilterType = Enum.RaycastFilterType.Exclude
-		overlapParams.FilterDescendantsInstances = {
-			ripper,
-			rootPart
-		}
-
-		local parts = workspace:GetPartBoundsInBox(
-			rootPart.CFrame,
-			rootPart.Size,
-			overlapParams
-		)
-
-		local processed = {}
-
-		for _, part in ipairs(parts) do
-			local collision = getTargetFromPart(part)
-
-			if collision
-				and not processed[collision]
-				and not collision:IsDescendantOf(ripper) then
-
-				processed[collision] = true
-
-				if collision.Anchored then
-					collision.Anchored = false
-				end
-
-				pushTarget(
-					collision,
-					velocity
-				)
-			end
-		end
-	end)
 end
 
 processLatestRoom()
-
-for _, child in ipairs(workspace:GetChildren()) do
-	if child:IsA("Model")
-		and child.Name == "RipperBla" then
-
-		task.defer(function()
-			setupRipper(child)
-		end)
-	end
-end
