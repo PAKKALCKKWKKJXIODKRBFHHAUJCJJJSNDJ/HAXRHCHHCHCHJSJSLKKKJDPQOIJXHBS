@@ -6,7 +6,7 @@ local LatestRoom = ReplicatedStorage:WaitForChild("GameData"):WaitForChild("Late
 
 local TARGET_MASS = 0
 
-local WIND_RADIUS = 40
+local WIND_RADIUS = 60
 local WIND_FORCE = 50
 local WIND_COOLDOWN = 1
 local MAX_IMPULSE = 180
@@ -438,10 +438,6 @@ local function setupRipper(ripper)
 end
 
 processLatestRoom()
-
-LatestRoom:GetPropertyChangedSignal("Value"):Connect(function()
-	processLatestRoom()
-end)
 
 for _, child in ipairs(workspace:GetChildren()) do
 	if child:IsA("Model")
