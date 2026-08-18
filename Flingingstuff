@@ -1,7 +1,4 @@
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-
 local CurrentRooms = workspace:WaitForChild("CurrentRooms")
-local LatestRoom = ReplicatedStorage:WaitForChild("GameData"):WaitForChild("LatestRoom")
 
 local TARGET_MASS = 0
 
@@ -44,6 +41,8 @@ local blacklist = {
 	"skeleton key",
 	"fireplace"
 }
+
+local processed = {}
 
 local function hasAncestorContaining(object, text)
 	local parent = object.Parent
@@ -167,16 +166,22 @@ local function shakeCollision(collision)
 	end
 end
 
-local function setupModel(model, room, targets)
+local function setupModel(model, room)
 	if not model:IsA("Model") then
 		return
 	end
 
+	if processed[model] then
+		return processed[model]
+	end
+
 	if isBlacklisted(model) then
+		processed[model] = false
 		return
 	end
 
 	if hasTargetParent(model, room) then
+		processed[model] = false
 		return
 	end
 
@@ -198,11 +203,12 @@ local function setupModel(model, room, targets)
 	end
 
 	if existingCollision then
-		table.insert(targets, existingCollision)
-		return
+		processed[model] = existingCollision
+		return existingCollision
 	end
 
 	if hasScriptCollision then
+		processed[model] = false
 		return
 	end
 
@@ -218,6 +224,7 @@ local function setupModel(model, room, targets)
 	end
 
 	if #parts == 0 then
+		processed[model] = false
 		return
 	end
 
@@ -226,6 +233,7 @@ local function setupModel(model, room, targets)
 	local volume = size.X * size.Y * size.Z
 
 	if volume <= 0 then
+		processed[model] = false
 		return
 	end
 
@@ -263,7 +271,7 @@ local function setupModel(model, room, targets)
 
 	collision.Parent = model
 
-	table.insert(targets, collision)
+	processed[model] = collision
 
 	collision:GetPropertyChangedSignal("Anchored"):Connect(function()
 		if not collision.Anchored then
@@ -304,35 +312,73 @@ local function setupModel(model, room, targets)
 		weld.Part1 = part
 		weld.Parent = collision
 	end
+
+	return collision
 end
 
-local function processLatestRoom()
-	local room = CurrentRooms:FindFirstChild(
-		tostring(LatestRoom.Value)
-	)
-
-	if not room then
+local function activateTarget(collision)
+	if not collision or not collision.Parent then
 		return
 	end
 
-	local targets = {}
-
-	for _, v in ipairs(room:GetDescendants()) do
-		if v:IsA("Model") then
-			setupModel(v, room, targets)
-		end
+	if collision:GetAttribute("WindCollision") ~= true then
+		return
 	end
 
-	for _, collision in ipairs(targets) do
-		if collision
-			and collision.Parent
-			and collision:GetAttribute("WindCollision") == true then
-
-			collision.Anchored = false
-		end
+	if collision:GetAttribute("Picked") == true then
+		return
 	end
 
-	return targets
+	collision:SetAttribute("Picked", true)
+	collision.Anchored = false
 end
 
-processLatestRoom()
+local function processRipper(ripper)
+	local cf = ripper:GetBoundingBox()
+
+	local hitboxSize = Vector3.new(50, 50, 50)
+
+	local overlapParams = OverlapParams.new()
+	overlapParams.FilterType = Enum.RaycastFilterType.Exclude
+	overlapParams.FilterDescendantsInstances = {
+		ripper
+	}
+
+	local parts = workspace:GetPartBoundsInBox(
+		cf,
+		hitboxSize,
+		overlapParams
+	)
+
+	local foundModels = {}
+
+	for _, part in ipairs(parts) do
+		if part:IsA("BasePart") then
+			local model = part:FindFirstAncestorOfClass("Model")
+
+			if model
+				and model ~= ripper
+				and model:IsDescendantOf(CurrentRooms)
+				and not foundModels[model] then
+
+				foundModels[model] = true
+
+				local room = model.Parent
+
+				if room and room.Parent == CurrentRooms then
+					local collision = setupModel(model, room)
+
+					if collision then
+						activateTarget(collision)
+					end
+				end
+			end
+		end
+	end
+end
+
+local ripper = workspace:FindFirstChild("RipperBla")
+
+if ripper and ripper:IsA("Model") then
+	processRipper(ripper)
+end
