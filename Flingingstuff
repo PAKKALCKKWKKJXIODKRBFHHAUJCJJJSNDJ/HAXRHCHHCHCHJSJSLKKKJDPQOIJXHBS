@@ -16,12 +16,16 @@ local blacklist = {
 	"desk",
 	"gold",
 	"dresser",
+	"rift", 
+	"chest", 
 	"floor",
 	"wall",
 	"door",
 	"ceiling",
 	"light",
 	"beam",
+	"model", 
+	"chandelier", 
 	"window",
 	"curtain",
 	"gate",
@@ -116,25 +120,38 @@ local function shakeCollision(collision)
 	end
 
 	local mass = collision.AssemblyMass
-	local force = mass * 35
+	local force = mass * 5
 
 	for i = 1, 8 do
 		if collision.Parent and not collision.Anchored then
-			local direction = Vector3.new(
-				math.random(-100, 100) / 100,
-				math.random(20, 100) / 100,
-				math.random(-100, 100) / 100
-			).Unit
+			local look = collision.CFrame.LookVector
+			look = Vector3.new(look.X, 0, look.Z)
 
-			collision:ApplyImpulse(direction * force)
+			if look.Magnitude > 0 then
+				look = look.Unit
 
-			collision:ApplyAngularImpulse(
-				Vector3.new(
-					math.random(-3, 3),
-					math.random(-3, 3),
-					math.random(-3, 3)
-				) * mass * 15
-			)
+				local angle = math.rad(math.random(-60, 60))
+				local direction = CFrame.fromAxisAngle(
+					Vector3.yAxis,
+					angle
+				):VectorToWorldSpace(look)
+
+				direction = Vector3.new(
+					direction.X,
+					0,
+					direction.Z
+				).Unit
+
+				collision:ApplyImpulse(direction * force)
+
+				collision:ApplyAngularImpulse(
+					Vector3.new(
+						math.random(-1, 1),
+						math.random(-1, 1),
+						math.random(-1, 1)
+					) * mass * 15
+				)
+			end
 
 			task.wait(0.03)
 		end
