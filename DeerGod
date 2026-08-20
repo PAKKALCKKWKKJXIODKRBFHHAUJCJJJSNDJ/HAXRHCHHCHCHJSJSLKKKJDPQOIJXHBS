@@ -284,34 +284,17 @@ local function ChangeLordSound()
 		return
 	end
 
-	wallDetectorCount += 1
+	local pitch = math.random(30, 100) / 100
+	local playbackSpeed = math.random(30, 90) / 100
 
-	local pitch
-	local playbackSpeed
-	local volume
-
-	if wallDetectorCount == 1 then
-		pitch = 0.6
-		playbackSpeed = 0.7
-		volume = 4
-	elseif wallDetectorCount == 2 then
-		pitch = 0.5
-		playbackSpeed = 0.6
-		volume = 5
-	else
-		pitch = 0.3
-		playbackSpeed = 0.4
-		volume = 5
-	end
-
-	Lord.Volume = 0
+Lord.Volume = 0
 	Lord:Pause()
 
 	LordPitch.Octave = pitch
 	Lord.PlaybackSpeed = playbackSpeed
 
 	Lord:Resume()
-
+	
 	TweenService:Create(
 		Lord,
 		TweenInfo.new(
@@ -320,12 +303,12 @@ local function ChangeLordSound()
 			Enum.EasingDirection.Out
 		),
 		{
-			Volume = volume
+			Volume = 3
 		}
 	):Play()
 end
 
-local Teleport = GetGitSound("https://github.com/lynguyen26031993-design/-u/raw/refs/heads/main/XRecorder_Edited_20260814_01.mp3?raw=true", "jcjjswqw")
+local Teleport = GetGitSound("https://github.com/lynguyen26031993-design/-u/raw/refs/heads/main/deer%20god%20portal%20open.mp3.oga.mp3?raw=true", "kjchhjjsjjcjd")
 if Teleport then
 	Teleport.Parent = Workspace
 	Teleport.Volume = 3
