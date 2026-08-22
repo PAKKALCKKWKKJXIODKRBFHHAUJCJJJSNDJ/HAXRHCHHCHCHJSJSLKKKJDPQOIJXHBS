@@ -324,7 +324,7 @@ end
 
 local Phase2Sound = GetGitSound("https://github.com/vuivuiviu2/Doors-Hardcore-Reignited-/raw/refs/heads/main/THE%20LAST%20PHASE.mp3", "FrostbitePhase2")
 
-local modelTemplate = GetGithubModel("https://github.com/reboundplayz/hardcore-reignited/raw/refs/heads/main/frostbiteFINALDONE.rbxm", "vjjjdjssssww")
+local modelTemplate = GetGithubModel("https://github.com/reboundplayz/hardcore-reignited/raw/refs/heads/main/frostbiteREAL.rbxm", "kcjjsjnjjckoos")
 if not modelTemplate then
     warn("[Frostbite]: Không thể khởi tạo Model, đã dừng script.")
     return
