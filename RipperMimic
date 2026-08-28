@@ -181,6 +181,16 @@ breaking.Looped = false
 breaking.RollOffMaxDistance = 1000000000
 breaking.Volume = 4
 
+local Github23 = GetGitSound("https://github.com/PAKKALCKKWKKJXIODKRBFHHAUJCJJJSNDJ/HAXRHCHHCHCHJSJSLKKKJDPQOIJXHBS/raw/refs/heads/main/HnVideoEditor_2026_08_26_185847148.mp3?raw=true", "klvjikpapjdb")
+
+local spawn = Instance.new("Sound")
+spawn.SoundId = Github23.SoundId
+spawn.PlaybackSpeed = 1
+spawn.Parent = workspace
+spawn.Looped = false
+spawn.RollOffMaxDistance = 1000000000
+spawn.Volume = 3
+
 local player = Players.LocalPlayer
 
 task.spawn(function()
@@ -219,200 +229,22 @@ end)
 
 	task.spawn(function()
 
-		local sound51 = Instance.new("Sound")
-		sound51.PlaybackSpeed = 1
-		sound51.Volume = 5
-		sound51.SoundId = "rbxassetid://9125713501"
-		sound51.Parent = workspace
-		sound51:Play()
-
-		wait(7)
-		sound51:Destroy()
+		spawn:Play() 
 	end)
 end)
 
 entity:SetCallback("OnStartMoving", function()
 	print("Entity has started moving")
+	
+	task.spawn(function() 
+	loadstring(game:HttpGet("https://raw.githubusercontent.com/iccdjkkkkskskhdgdgegvbfbgncjjdudejdjvi/REBLAHARDCOREDI/refs/heads/main/Flingingstuff"))() 
+	end) 
 end)
-
-local blacklist = {
-	"wardrobe",
-	"bed",
-	"rug",
-	"key",
-	"drawer",
-	"book",
-	"breaker",
-	"table",
-	"desk",
-	"gold",
-	"dresser",
-	"floor",
-	"wall",
-	"door",
-	"frame",
-	"ceiling",
-	"light",
-	"pillar",
-	"beam",
-	"window",
-	"gate",
-	"stairs"
-}
-
-local function IsBlacklisted(name)
-	local lowerName = name:lower()
-
-	for _, v in ipairs(blacklist) do
-		if string.find(lowerName, v, 1, true) then
-			return true
-		end
-	end
-
-	return false
-end
-
-local function IsInsideBlacklistedModel(obj)
-	local current = obj.Parent
-
-	while current and current ~= workspace do
-		if current:IsA("Model") and IsBlacklisted(current.Name) then
-			return true
-		end
-		current = current.Parent
-	end
-
-	return false
-end
 
 local hasTriggered = false
 
 entity:SetCallback("OnEnterRoom", function(room: Model, firstTime: boolean)
 	local assetContainer = room:WaitForChild("Assets")
-
-		task.spawn(function()
-			task.wait(0.05)
-
-			local breakSound = Instance.new("Sound")
-			breakSound.SoundId = "rbxassetid://9114223171"
-			breakSound.Volume = 0.3
-			breakSound.Parent = room
-			breakSound:Play()
-			breakSound.Ended:Connect(function() breakSound:Destroy() end)
-
-			local breakSounds = {
-				"rbxassetid://126645609816652",
-				"rbxassetid://130869638485735",
-				"rbxassetid://7158347304",
-				"rbxassetid://127327591850649",
-				"rbxassetid://133653755194228",
-				"rbxassetid://117158373103667",
-				"rbxassetid://104568144438070"
-			}
-
-			local blacklist = {"wardrobe", "bed", "rug", "key", "drawer", "breaker", "table", "desk", "gold", "dresser"}
-
-			for _, item in pairs(assetContainer:GetChildren()) do
-				if item:IsA("Model") and item.Name ~= "Door" and item.Name ~= "HidingSpots" then
-
-					local isBlacklisted = false
-					local itemNameLower = string.lower(item.Name)
-					for _, word in ipairs(blacklist) do
-						if string.find(itemNameLower, word) then
-							isBlacklisted = true
-							break
-						end
-					end
-
-					if not isBlacklisted then
-						local primary = item.PrimaryPart or item:FindFirstChildWhichIsA("BasePart")
-
-						if primary then
-							task.spawn(function()
-								for _, v in ipairs(item:GetDescendants()) do
-									if v:IsA("BasePart") then
-										local lowerName = string.lower(v.Name)
-
-										if not string.find(lowerName, "floor") and not string.find(lowerName, "hitbox") then
-											task.wait(math.random(1, 4) / 100)
-
-											local randomSoundId = breakSounds[math.random(1, #breakSounds)]
-
-											local s = Instance.new("Sound")
-											s.SoundId = randomSoundId
-											s.Volume = 0
-											s.PlaybackSpeed = math.random(85, 115) / 100
-											s.RollOffMaxDistance = 100
-											s.Parent = v
-											s:Play()
-
-											s.Ended:Connect(function()
-												s:Destroy()
-											end)
-
-											v.Anchored = false
-											v.CanCollide = true 
-
-											v.CustomPhysicalProperties = PhysicalProperties.new(0.01, 0.01, 0.5, 1, 1)
-
-											pcall(function()
-												if v:CanSetNetworkOwnership() then
-													v:SetNetworkOwner(localPlayer)
-												end
-											end)
-
-											v.CFrame = v.CFrame + Vector3.new(0, 0.05, 0)
-											
-											v.AssemblyLinearVelocity = Vector3.new(
-												math.random(-120, 120),
-												math.random(40, 90),
-												math.random(-120, 120)
-											)
-
-											v.AssemblyAngularVelocity = Vector3.new(
-												math.random(-70, 70),
-												math.random(-70, 70),
-												math.random(-70, 70)
-											)
-
-											local mass = v:GetMass()
-
-											v:ApplyImpulse(Vector3.new(
-												math.random(-120,120),
-												math.random(60,120),
-												math.random(-120,120)
-											) * mass)
-
-											v:ApplyAngularImpulse(Vector3.new(
-												math.random(-60,60),
-												math.random(-60,60),
-												math.random(-60,60)
-											) * mass)
-										end
-									end
-								end
-							end)
-
-							primary.Anchored = true
-							task.wait()
-							primary.Anchored = false
-
-							primary.AssemblyLinearVelocity = Vector3.new(
-								math.random(-140, 140),
-								math.random(60, 110),
-								math.random(-140, 140)
-							)
-
-							primary.AssemblyAngularVelocity = Vector3.new(
-								math.random(-80, 80),
-								math.random(-80, 80),
-								math.random(-80, 80)
-							)
-						end
-					end
-				end
-			end
-		end)
 
 	local latestRoomNum = tostring(game.ReplicatedStorage.GameData.LatestRoom.Value)
 	if room.Name ~= latestRoomNum then 
