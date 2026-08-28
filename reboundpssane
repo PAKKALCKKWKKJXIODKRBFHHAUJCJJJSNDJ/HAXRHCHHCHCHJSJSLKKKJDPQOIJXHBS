@@ -558,79 +558,6 @@ local function Earthquake()
 	end
 end
 
-local function GetEntityHitbox(model: Model): BasePart?
-	return model:FindFirstChild("Hitbox", true)
-		or model.PrimaryPart
-		or model:FindFirstChildWhichIsA("BasePart", true)
-end
-
-local function IsTouchingLocalPlayer(hitbox: BasePart): boolean
-	if not hitbox or not hitbox.Parent or not Character or not Character.Parent then
-		return false
-	end
-
-	for _, part in next, workspace:GetPartsInPart(hitbox) do
-		if part:IsDescendantOf(Character) then
-			return true
-		end
-	end
-
-	return false
-end
-
-local function StartHitboxDamage(entity: any)
-	task.spawn(function()
-		local model = entity.Model
-		local hitbox = GetEntityHitbox(model)
-
-		if not hitbox then
-			return
-		end
-
-		while entity:IsAlive() and hitbox.Parent do
-			if Humanoid.Health <= 0 then
-				entity:Resume()
-				break
-			end
-
-			local touching = IsTouchingLocalPlayer(hitbox)
-			local hiding = Character:GetAttribute("Hiding") == true
-
-			if touching and not hiding and not model:GetAttribute("BeingBanished") then
-				entity:Pause()
-
-				while entity:IsAlive()
-					and hitbox.Parent
-					and Humanoid.Health > 0
-					and Character
-					and Character.Parent
-					and Character:GetAttribute("Hiding") ~= true
-					and not model:GetAttribute("BeingBanished")
-					and IsTouchingLocalPlayer(hitbox)
-				do
-					DamagePlayer(entity, 1)
-
-					if Humanoid.Health <= 0 then
-						break
-					end
-
-					task.wait(0.08)
-				end
-
-				entity:Resume()
-			else
-				entity:Resume()
-			end
-
-			RunService.Heartbeat:Wait()
-		end
-
-		if entity:IsAlive() then
-			entity:Resume()
-		end
-	end)
-end
-
 -- \\ Setup // --
 for name, value in next, CONST.ATTR.PLAYER do
 	LocalPlayer:SetAttribute(name, value)
@@ -789,10 +716,6 @@ Module.Run = function(self, entity: any, copyEntity: boolean)
 	model.Parent = workspace
 	task.spawn(entity.RunCallback, entity, "OnSpawned")
 	
-task.spawn(function() 
-	StartHitboxDamage(entity)
-	end) 
-	
 	local currentRoom = GetCurrentRoom(false)
 	if currentRoom then
 		-- Flickering lights
@@ -879,13 +802,62 @@ task.spawn(function()
 			end
 			
 			-- Damage detection
-			if not model:GetAttribute("Paused") and not usedCrucifix then
-				local damage = config.Damage
-				if damage.Enabled and damage.Range > 0 and Humanoid.Health > 0 and (not Character:GetAttribute("Hiding") or damage.IgnoreHiding) and model:GetAttribute("Damage") and not model:GetAttribute("BeingBanished") and (charOrigin - origin).Magnitude <= damage.Range and inSight then
-					model:SetAttribute("Damage", false)
-					DamagePlayer(entity)
-				end
+			-- Damage detection
+if not usedCrucifix then
+	local damage = config.Damage
+
+	if damage.Enabled
+		and damage.Range > 0
+		and Humanoid.Health > 0
+		and model:GetAttribute("Damage")
+		and not model:GetAttribute("BeingBanished")
+		and (charOrigin - origin).Magnitude <= damage.Range
+		and inSight
+	then
+		model:SetAttribute("Damage", false)
+		entity:Pause()
+
+		while entity:IsAlive()
+			and Humanoid.Health > 0
+			and not model:GetAttribute("BeingBanished")
+			and not Character:GetAttribute("Hiding")
+			and (RootPart.Position - model:GetPivot().Position).Magnitude <= damage.Range
+		do
+			local currentOrigin = model:GetPivot().Position
+			local currentCharOrigin = RootPart.Position
+
+			local params = RaycastParams.new()
+			params.FilterType = Enum.RaycastFilterType.Exclude
+			params.FilterDescendantsInstances = {
+				Character,
+				model,
+				CollectionService:GetTagged("HidingSpot")
+			}
+
+			local currentInSight =
+				(currentCharOrigin - currentOrigin).Magnitude <= damage.Range
+				and workspace:Raycast(
+					currentOrigin,
+					currentCharOrigin - currentOrigin,
+					params
+				) == nil
+
+			if not currentInSight then
+				break
 			end
+
+			DamagePlayer(entity, 1)
+
+			if Humanoid.Health <= 0 then
+				break
+			end
+
+			task.wait(0.08)
+		end
+
+		entity:Resume()
+	end
+end
 			
 			-- Camera shake
 			do
