@@ -663,7 +663,7 @@ end
 
 local light = Instance.new("PointLight")
 light.Parent = _Idx57.Multi
-light.Color = Color3.fromRGB(255,0,0)
+light.Color = Color3.fromRGB(255,255,255)
 light.Range = 70
 light.Brightness = 5
 
@@ -812,10 +812,68 @@ if hrp then
 						humanoid:TakeDamage(1000)
 					end
 
-					pcall(function()
+					local Players = game:GetService("Players")
+		getgenv().MultiKilled = true
+		
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-						game.ReplicatedStorage.GameStats['Player_' .. game.Players.LocalPlayer.Name].Total.DeathCause.Value = 'Multi Monster'
-					end)
+local LocalPlayer = Players.LocalPlayer
+local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
+local Remotes = ReplicatedStorage:WaitForChild("RemotesFolder")
+
+local DeathTypes = {
+	["Yellow"] = {"yellow", "curious"},
+	["Blue"] = {"blue", "guiding"}
+}
+
+local function DeathHint(hints, deathType)
+	if typeof(hints) ~= "table" or #hints == 0 then
+		return
+	end
+
+	local MainUI = PlayerGui:WaitForChild("MainUI")
+	local Death = MainUI:WaitForChild("Death")
+
+	Death:GetPropertyChangedSignal("Visible"):Wait()
+
+	deathType = tostring(deathType or "Guiding"):lower()
+
+	local colour
+
+	for name, values in next, DeathTypes do
+		if table.find(values, deathType) then
+			colour = name
+			break
+		end
+	end
+
+	if not colour then
+		local MainGame = MainUI:WaitForChild("Initiator"):WaitForChild("Main_Game")
+		local Health = MainGame:WaitForChild("Health")
+		local Music = Health:WaitForChild("Music")
+
+		for _, c in next, Music:GetChildren() do
+			if c.Name:lower() == deathType then
+				colour = c.Name
+				break
+			end
+		end
+	end
+
+	colour = colour or "Blue"
+
+	if firesignal then
+		firesignal(
+			Remotes.DeathHint.OnClientEvent,
+			hints,
+			colour
+		)
+	end
+end
+
+DeathHint({
+"", "", "", "", "", "", "", ""
+}, "Guiding")
 
 					break
 				end
