@@ -842,16 +842,20 @@ Module.Run = function(self, entity: any, copyEntity: boolean)
     model:PivotTo(originalSpawnCFrame)
     model.Parent = workspace
 
-    local silence = workspace:FindFirstChild("A60ButSilence")
+    local silence
 
-    if silence and silence:IsA("Model") then
-        local silencePart = silence:FindFirstChildWhichIsA("BasePart", true)
+if math.random(1, 100) <= 40 then
+	silence = workspace:FindFirstChild("A60ButSilence")
+end
 
-        if silencePart then
-            model:PivotTo(silencePart.CFrame)
-            silence:Destroy()
-            
-            local function GetGitSound(GithubSnd, SoundName)
+if silence and silence:IsA("Model") then
+	local silencePart = silence:FindFirstChildWhichIsA("BasePart", true)
+
+	if silencePart then
+		model:PivotTo(silencePart.CFrame)
+		silence:Destroy()
+
+		local function GetGitSound(GithubSnd, SoundName)
 			local url = GithubSnd
 			if not isfile(SoundName .. ".mp3") then
 				writefile(SoundName .. ".mp3", game:HttpGet(url))
@@ -860,10 +864,13 @@ Module.Run = function(self, entity: any, copyEntity: boolean)
 			sound.SoundId = (getcustomasset or getsynasset)(SoundName .. ".mp3")
 			return sound
 		end
-		
-		local gitSoundTemp2 = GetGitSound("https://github.com/lynguyen26031993-design/-u/raw/refs/heads/main/lv_0_20260829232829%20(1).mp3?raw=true", "lkckkskjjx")
 
-local blaSound = Instance.new("Sound") 
+		local gitSoundTemp2 = GetGitSound(
+			"https://github.com/lynguyen26031993-design/-u/raw/refs/heads/main/lv_0_20260829232829%20(1).mp3?raw=true",
+			"lkckkskjjx"
+		)
+
+		local blaSound = Instance.new("Sound")
 		blaSound.SoundId = gitSoundTemp2.SoundId
 		blaSound.PlaybackSpeed = 1
 		blaSound.Looped = false
@@ -872,78 +879,66 @@ local blaSound = Instance.new("Sound")
 		blaSound.Parent = workspace
 		blaSound.RollOffMaxDistance = 1000000000
 		blaSound:Play()
-		
-		task.spawn(function() 
-		local yes = TweenService:Create(blaSound, TweenInfo.new(0.4), {Volume = 1})
-yes:Play()
-yes.Completed:Wait()
-local no = TweenService:Create(blaSound, TweenInfo.new(0.8), {Volume = 0})
-no:Play()
-no.Completed:Wait()
-no:Destroy()
-end)
-		
 
-            local cframeValue = Instance.new("CFrameValue")
-            cframeValue.Value = model:GetPivot()
+		task.spawn(function()
+			local yes = TweenService:Create(blaSound, TweenInfo.new(0.7), {
+				Volume = 1
+			})
+			yes:Play()
+			yes.Completed:Wait()
 
-            local connection = cframeValue:GetPropertyChangedSignal("Value"):Connect(function()
-                if model.Parent then
-                    model:PivotTo(cframeValue.Value)
-                end
-            end)
+			local no = TweenService:Create(blaSound, TweenInfo.new(1), {
+				Volume = 0
+			})
+			no:Play()
+			no.Completed:Wait()
+			no:Destroy()
+		end)
 
-            local tween = TweenService:Create(
-                cframeValue,
-                TweenInfo.new(
-                    0.7,
-                    Enum.EasingStyle.Linear,
-                    Enum.EasingDirection.InOut
-                ),
-                {
-                    Value = originalSpawnCFrame
-                }
-            )
+		local cframeValue = Instance.new("CFrameValue")
+		cframeValue.Value = model:GetPivot()
 
-            tween:Play()
+		local connection = cframeValue:GetPropertyChangedSignal("Value"):Connect(function()
+			if model.Parent then
+				model:PivotTo(cframeValue.Value)
+			end
+		end)
 
-            task.spawn(
-                entity.RunCallback,
-                entity,
-                "OnSpawned"
-            )
+		local tween = TweenService:Create(
+			cframeValue,
+			TweenInfo.new(0.7, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut),
+			{
+				Value = originalSpawnCFrame
+			}
+		)
 
-            tween.Completed:Wait()
-            
-            blaSound:Destroy()
+		tween:Play()
 
-            connection:Disconnect()
-            cframeValue:Destroy()
+		task.spawn(entity.RunCallback, entity, "OnSpawned")
 
-            if model.Parent then
-                model:PivotTo(originalSpawnCFrame)
-                model:SetAttribute("Damage", true)
-            end
-        else
-            model:PivotTo(originalSpawnCFrame)
-            model:SetAttribute("Damage", true)
+		tween.Completed:Wait()
 
-            task.spawn(
-                entity.RunCallback,
-                entity,
-                "OnSpawned"
-            )
-        end
-    else
-        model:PivotTo(originalSpawnCFrame)
-        model:SetAttribute("Damage", true)
+		blaSound:Destroy()
 
-        task.spawn(
-            entity.RunCallback,
-            entity,
-            "OnSpawned"
-        )
-    end
+		connection:Disconnect()
+		cframeValue:Destroy()
+
+		if model.Parent then
+			model:PivotTo(originalSpawnCFrame)
+			model:SetAttribute("Damage", true)
+		end
+	else
+		model:PivotTo(originalSpawnCFrame)
+		model:SetAttribute("Damage", true)
+
+		task.spawn(entity.RunCallback, entity, "OnSpawned")
+	end
+else
+	model:PivotTo(originalSpawnCFrame)
+	model:SetAttribute("Damage", true)
+
+	task.spawn(entity.RunCallback, entity, "OnSpawned")
+end
 
     local currentRoom = GetCurrentRoom(false)
     if currentRoom then
