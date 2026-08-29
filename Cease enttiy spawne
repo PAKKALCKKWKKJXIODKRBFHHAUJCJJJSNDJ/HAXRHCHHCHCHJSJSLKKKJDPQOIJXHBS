@@ -1,4 +1,4 @@
--- Cea
+-- Cease
 --[[
     __      __          _            _       ______       _   _ _            _____                                       __      _____  
     \ \    / /         (_)          ( )     |  ____|     | | (_) |          / ____|                                      \ \    / /__ \ 
@@ -868,10 +868,21 @@ local blaSound = Instance.new("Sound")
 		blaSound.PlaybackSpeed = 1
 		blaSound.Looped = false
 		blaSound.TimePosition = 0
-		blaSound.Volume = 1
-		blaSound.Parent = model:FindFirstChildWhichIsA("BasePart") 
-		blaSound.RollOffMaxDistance = 300
+		blaSound.Volume = 0
+		blaSound.Parent = workspace
+		blaSound.RollOffMaxDistance = 1000000000
 		blaSound:Play()
+		
+		task.spawn(function() 
+		local yes = TweenService:Create(blaSound, TweenInfo.new(0.4), {Volume = 1})
+yes:Play()
+yes.Completed:Wait()
+local no = TweenService:Create(blaSound, TweenInfo.new(0.8), {Volume = 0})
+no:Play()
+no.Completed:Wait()
+no:Destroy()
+end)
+		
 
             local cframeValue = Instance.new("CFrameValue")
             cframeValue.Value = model:GetPivot()
@@ -885,7 +896,7 @@ local blaSound = Instance.new("Sound")
             local tween = TweenService:Create(
                 cframeValue,
                 TweenInfo.new(
-                    1,
+                    0.7,
                     Enum.EasingStyle.Linear,
                     Enum.EasingDirection.InOut
                 ),
