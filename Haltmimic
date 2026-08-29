@@ -356,6 +356,7 @@ model = game:GetObjects(getcustomasset(file))[1]
 
 if model then
 	model.Parent = Workspace
+model.Name = "A60ButHalt"
 	for _, v in ipairs(model:GetDescendants()) do
 		if v:IsA("PointLight") then
 			v.Enabled = false
