@@ -138,8 +138,6 @@ blueSound = Instance.new("Sound")
 	blueSound.TimePosition = 4
 	blueSound.Volume = 2
 
-	gitSoundTemp:Destroy()
-
 	wait(4)
 
 	local move = GetGitSound("https://github.com/check78/worldcuuuup/blob/main/DoomBegin.mp3?raw=true","Reboun")
