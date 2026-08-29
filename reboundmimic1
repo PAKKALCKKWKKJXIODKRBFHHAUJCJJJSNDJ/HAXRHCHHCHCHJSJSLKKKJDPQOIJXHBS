@@ -136,7 +136,7 @@ blueSound = Instance.new("Sound")
 	blueSound.RollOffMaxDistance = 150
 	blueSound.Parent = entity.Model.Multi
 	blueSound.TimePosition = 4
-	blueSound.Volume = 2
+	blueSound.Volume = 1
 
 	wait(4)
 
