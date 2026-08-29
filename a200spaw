@@ -1,3 +1,4 @@
+-- ok
 --[[
     __      __          _            _       ______       _   _ _            _____                                       __      _____  
     \ \    / /         (_)          ( )     |  ____|     | | (_) |          / ____|                                      \ \    / /__ \ 
@@ -1034,7 +1035,7 @@ Module.Run = function(self, entity: any, copyEntity: boolean)
 
     -- Pathfinding
 task.spawn(function()
-	local lastRoom = nil
+	local checkedRooms = {}
 
 	while entity:IsAlive() do
 		if model:GetAttribute("Paused") then
@@ -1052,14 +1053,14 @@ task.spawn(function()
 
 		if config.Movement.Reversed then
 			for i = #rooms, 1, -1 do
-				if rooms[i] ~= lastRoom then
+				if not checkedRooms[rooms[i]] then
 					targetRoom = rooms[i]
 					break
 				end
 			end
 		else
 			for i = 1, #rooms do
-				if rooms[i] ~= lastRoom then
+				if not checkedRooms[rooms[i]] then
 					targetRoom = rooms[i]
 					break
 				end
@@ -1071,35 +1072,27 @@ task.spawn(function()
 			continue
 		end
 
-		lastRoom = targetRoom
+		checkedRooms[targetRoom] = true
 
+		-- Get nodes
 		local nodes = GetNodesFromRoom(
 			targetRoom,
 			config.Movement.Reversed
 		)
 
-		-- Chờ NodeGraph/Data/Nodes nếu room vừa mới generate
+		-- Nếu room chưa generate NodeGraph thì chờ một chút
 		if #nodes == 0 then
-			local nodeGraph = targetRoom:WaitForChild("NodeGraph", 5)
+			local nodeGraph = targetRoom:FindFirstChild("NodeGraph")
 
 			if nodeGraph then
-				local data = nodeGraph:WaitForChild("Data", 5)
+				local data = nodeGraph:FindFirstChild("Data")
+				local nodesFolder = data and data:FindFirstChild("Nodes")
 
-				if data then
-					local nodesFolder = data:WaitForChild("Nodes", 5)
-
-					if nodesFolder then
-						repeat
-							nodes = GetNodesFromRoom(
-								targetRoom,
-								config.Movement.Reversed
-							)
-
-							if #nodes == 0 then
-								task.wait()
-							end
-						until #nodes > 0 or not entity:IsAlive()
-					end
+				if nodesFolder then
+					nodes = GetNodesFromRoom(
+						targetRoom,
+						config.Movement.Reversed
+					)
 				end
 			end
 		end
@@ -1108,7 +1101,7 @@ task.spawn(function()
 			return
 		end
 
-		-- Đi qua từng node
+		-- Đi qua Nodes nếu có
 		for _, node in next, nodes do
 			if not entity:IsAlive() then
 				return
@@ -1152,30 +1145,25 @@ task.spawn(function()
 			)
 		end
 
-		-- Cho room mới có thời gian generate
+		if not entity:IsAlive() then
+			return
+		end
+
+		-- Kiểm tra room cao nhất hiện tại
+		local currentRooms = CurrentRooms:GetChildren()
+
+		table.sort(currentRooms, function(a, b)
+			return (tonumber(a.Name) or 0) < (tonumber(b.Name) or 0)
+		end)
+
+		local highestRoom = currentRooms[#currentRooms]
+
+		if targetRoom == highestRoom then
+			entity:Despawn()
+			return
+		end
+
 		task.wait()
-	end
-
-	-- Despawn
-	if entity:IsAlive() and not model:GetAttribute("Despawning") then
-		model:SetAttribute("Despawning", true)
-
-		task.spawn(
-			entity.RunCallback,
-			entity,
-			"OnDespawning"
-		)
-
-		local target = model:GetPivot() - Vector3.new(0, 300, 0)
-
-		EntityMoveTo(
-			model,
-			target,
-			config.Movement.Speed,
-			0
-		)
-
-		entity:Despawn()
 	end
 end)
 end
