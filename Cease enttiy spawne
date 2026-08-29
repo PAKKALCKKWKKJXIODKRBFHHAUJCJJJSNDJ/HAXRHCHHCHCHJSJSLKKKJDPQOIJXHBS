@@ -1,4 +1,4 @@
--- Cease
+-- Ceas
 --[[
     __      __          _            _       ______       _   _ _            _____                                       __      _____  
     \ \    / /         (_)          ( )     |  ____|     | | (_) |          / ____|                                      \ \    / /__ \ 
@@ -828,8 +828,53 @@ Module.Run = function(self, entity: any, copyEntity: boolean)
         error(string.format(debug.traceback("Failed to find spawn point for entity: '%s'"), config.Entity.Name))
     end
 
-    model:PivotTo(spawnPoint.CFrame + Vector3.new(0, config.Entity.HeightOffset, 0))
+    local originalSpawnCFrame = spawnPoint.CFrame + Vector3.new(0, config.Entity.HeightOffset, 0)
+
+    model:SetAttribute("Damage", false)
+    model:PivotTo(originalSpawnCFrame)
     model.Parent = workspace
+
+    local silence = workspace:FindFirstChild("A60ButSilence")
+    if silence and silence:IsA("Model") then
+        local silencePart = silence:FindFirstChildWhichIsA("BasePart", true)
+
+        if silencePart then
+            model:PivotTo(silencePart.CFrame)
+            silence:Destroy()
+
+            local cframeValue = Instance.new("CFrameValue")
+            cframeValue.Value = model:GetPivot()
+
+            local connection = cframeValue:GetPropertyChangedSignal("Value"):Connect(function()
+                if model.Parent then
+                    model:PivotTo(cframeValue.Value)
+                end
+            end)
+
+            local tween = TweenService:Create(
+                cframeValue,
+                TweenInfo.new(3, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut),
+                {Value = originalSpawnCFrame}
+            )
+
+            tween:Play()
+            tween.Completed:Wait()
+
+            connection:Disconnect()
+            cframeValue:Destroy()
+
+            if model.Parent then
+                model:PivotTo(originalSpawnCFrame)
+                model:SetAttribute("Damage", true)
+            end
+        else
+            model:PivotTo(originalSpawnCFrame)
+            model:SetAttribute("Damage", true)
+        end
+    else
+        model:SetAttribute("Damage", true)
+    end
+
     task.spawn(entity.RunCallback, entity, "OnSpawned")
 
     local currentRoom = GetCurrentRoom(false)
