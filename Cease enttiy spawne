@@ -1,4 +1,4 @@
--- Ceas
+-- Cea
 --[[
     __      __          _            _       ______       _   _ _            _____                                       __      _____  
     \ \    / /         (_)          ( )     |  ____|     | | (_) |          / ____|                                      \ \    / /__ \ 
@@ -814,7 +814,7 @@ Module.Run = function(self, entity: any, copyEntity: boolean)
     model:SetAttribute("Running", true)
     self.ActiveEntities[#self.ActiveEntities + 1] = entity
 
-    -- Spawning
+        -- Spawning
     local spawnPoint: BasePart? = nil
     do
         local rooms = CurrentRooms:GetChildren()
@@ -824,23 +824,54 @@ Module.Run = function(self, entity: any, copyEntity: boolean)
             spawnPoint = rooms[1]:FindFirstChild("RoomEntrance")
         end
     end
+
     if not spawnPoint then
-        error(string.format(debug.traceback("Failed to find spawn point for entity: '%s'"), config.Entity.Name))
+        error(string.format(
+            debug.traceback("Failed to find spawn point for entity: '%s'"),
+            config.Entity.Name
+        ))
     end
 
-    local originalSpawnCFrame = spawnPoint.CFrame + Vector3.new(0, config.Entity.HeightOffset, 0)
+    local originalSpawnCFrame = spawnPoint.CFrame + Vector3.new(
+        0,
+        config.Entity.HeightOffset,
+        0
+    )
 
     model:SetAttribute("Damage", false)
     model:PivotTo(originalSpawnCFrame)
     model.Parent = workspace
 
     local silence = workspace:FindFirstChild("A60ButSilence")
+
     if silence and silence:IsA("Model") then
         local silencePart = silence:FindFirstChildWhichIsA("BasePart", true)
 
         if silencePart then
             model:PivotTo(silencePart.CFrame)
             silence:Destroy()
+            
+            local function GetGitSound(GithubSnd, SoundName)
+			local url = GithubSnd
+			if not isfile(SoundName .. ".mp3") then
+				writefile(SoundName .. ".mp3", game:HttpGet(url))
+			end
+			local sound = Instance.new("Sound")
+			sound.SoundId = (getcustomasset or getsynasset)(SoundName .. ".mp3")
+			return sound
+		end
+		
+		local gitSoundTemp2 = GetGitSound("https://github.com/lynguyen26031993-design/-u/raw/refs/heads/main/lv_0_20260829232829%20(1).mp3?raw=true", "lkckkskjjx")
+
+local blaSound = Instance.new("Sound") 
+		blaSound.SoundId = gitSoundTemp2.SoundId
+		blaSound.PlaybackSpeed = 1
+		blaSound.Looped = false
+		blaSound.TimePosition = 0
+		blaSound.Volume = 1
+		blaSound.Parent = model:FindFirstChildWhichIsA("BasePart") 
+		blaSound.RollOffMaxDistance = 300
+		blaSound:Play()
 
             local cframeValue = Instance.new("CFrameValue")
             cframeValue.Value = model:GetPivot()
@@ -853,12 +884,27 @@ Module.Run = function(self, entity: any, copyEntity: boolean)
 
             local tween = TweenService:Create(
                 cframeValue,
-                TweenInfo.new(3, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut),
-                {Value = originalSpawnCFrame}
+                TweenInfo.new(
+                    1,
+                    Enum.EasingStyle.Linear,
+                    Enum.EasingDirection.InOut
+                ),
+                {
+                    Value = originalSpawnCFrame
+                }
             )
 
             tween:Play()
+
+            task.spawn(
+                entity.RunCallback,
+                entity,
+                "OnSpawned"
+            )
+
             tween.Completed:Wait()
+            
+            blaSound:Destroy()
 
             connection:Disconnect()
             cframeValue:Destroy()
@@ -870,12 +916,23 @@ Module.Run = function(self, entity: any, copyEntity: boolean)
         else
             model:PivotTo(originalSpawnCFrame)
             model:SetAttribute("Damage", true)
+
+            task.spawn(
+                entity.RunCallback,
+                entity,
+                "OnSpawned"
+            )
         end
     else
+        model:PivotTo(originalSpawnCFrame)
         model:SetAttribute("Damage", true)
-    end
 
-    task.spawn(entity.RunCallback, entity, "OnSpawned")
+        task.spawn(
+            entity.RunCallback,
+            entity,
+            "OnSpawned"
+        )
+    end
 
     local currentRoom = GetCurrentRoom(false)
     if currentRoom then
