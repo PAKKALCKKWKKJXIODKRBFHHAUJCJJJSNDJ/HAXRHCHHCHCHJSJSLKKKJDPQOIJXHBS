@@ -89,7 +89,7 @@ end)
 	local TweenService = game:GetService("TweenService")
 	local sound = Instance.new("Sound")
 	sound.SoundId = "rbxassetid://6734393210"
-	sound.Volume = 3
+	sound.Volume = 1
 	sound.Parent = workspace
 	sound:Play()
 
