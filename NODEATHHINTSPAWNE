@@ -9,8 +9,8 @@
 	                                                          |___/          
 ]]--
 
-if getgenv().VynixuEntitySpawnerV2 then
-	return getgenv().VynixuEntitySpawnerV2
+if getgenv().NoDeathHint then
+	return getgenv().NoDeathHint end
 end
 
 loadstring(game:HttpGet("https://raw.githubusercontent.com/RegularVynixu/Utilities/main/Functions.lua"))()
@@ -984,5 +984,5 @@ Module.Unload = function(self)
 	end
 end
 
-getgenv().VynixuEntitySpawnerV2 = Module
+getgenv().NoDeathHint = Module
 return Module
