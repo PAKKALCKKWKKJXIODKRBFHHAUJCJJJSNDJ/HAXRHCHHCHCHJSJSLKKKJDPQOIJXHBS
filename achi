@@ -7,7 +7,7 @@ local playerGui = localPlayer:WaitForChild("PlayerGui")
 
 local moduleScripts = {
     AchievementUnlock = require(playerGui:FindFirstChild("AchievementUnlock", true)),
-    Achievements = require(ReplicatedStorage.ModulesClient.AchievementInfo)
+    Achievements = require(CorePackages.Workspace.Packages.Achievements)
 }
 local defaultAchievement = {
     Title = "Title",
