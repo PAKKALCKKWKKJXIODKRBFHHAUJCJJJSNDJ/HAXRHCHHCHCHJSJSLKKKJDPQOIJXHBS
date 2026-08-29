@@ -69,7 +69,7 @@ local entity = Spawner:Create({
 		Values = {3, 10, 1, 0.1} -- Magnitude, Roughness, FadeIn, FadeOut
 	},
 	Movement = {
-		Speed = 20,
+		Speed = 30,
 		Delay = 0,
 		Reversed = false
 	},
