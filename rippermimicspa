@@ -9,7 +9,7 @@
             |___/                                                   |___/         |_|
 ]]--
 
-if getgenv().VynixuEntitySpawnerV2 then return getgenv().VynixuEntitySpawnerV2 end
+if getgenv().RipperMimic then return getgenv().RipperMimic end
 
 loadstring(game:HttpGet("https://raw.githubusercontent.com/RegularVynixu/Utilities/main/Functions.lua"))()
 
@@ -1104,5 +1104,5 @@ Module.Unload = function(self)
     end
 end
 
-getgenv().VynixuEntitySpawnerV2 = Module
+getgenv().RipperMimic = Module
 return Module
