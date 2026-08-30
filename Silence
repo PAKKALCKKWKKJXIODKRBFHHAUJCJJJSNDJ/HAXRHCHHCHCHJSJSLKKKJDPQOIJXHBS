@@ -845,6 +845,331 @@ obj:Destroy()
 end) 
 
 local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
+local Lighting = game:GetService("Lighting")
+
+local LP = Players.LocalPlayer
+local PG = LP:WaitForChild("PlayerGui")
+
+local old = PG:FindFirstChild("SilenceHeardGui")
+if old then
+	old:Destroy()
+end
+
+local gui = Instance.new("ScreenGui")
+gui.Name = "SilenceHeardGui"
+gui.IgnoreGuiInset = true
+gui.ResetOnSpawn = false
+gui.DisplayOrder = 1000
+gui.Parent = PG
+
+local text = Instance.new("TextLabel")
+text.Name = "HeardText"
+text.AnchorPoint = Vector2.new(0.5, 0.5)
+text.Position = UDim2.fromScale(0.5, 0.42)
+text.Size = UDim2.fromOffset(700, 100)
+text.BackgroundTransparency = 1
+text.Text = "You were heard."
+text.TextColor3 = Color3.fromRGB(255, 255, 255)
+text.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+text.TextStrokeTransparency = 0.8
+text.TextScaled = true
+text.Font = Enum.Font.Oswald
+text.Visible = false
+text.ZIndex = 10
+text.Parent = gui
+
+local basePos = UDim2.fromScale(0.5, 0.42)
+
+local renderConnection
+local tweens = {}
+local textToken = 0
+
+local tint = Lighting:FindFirstChild("SilenceMonochromeTint")
+
+if not tint then
+	tint = Instance.new("ColorCorrectionEffect")
+	tint.Name = "SilenceMonochromeTint"
+	tint.Saturation = 0
+	tint.Contrast = 0
+	tint.Brightness = 0
+	tint.TintColor = Color3.fromRGB(255, 255, 255)
+	tint.Enabled = false
+	tint.Parent = Lighting
+end
+
+local tintTween
+local tintToken = 0
+
+local function StopText()
+	textToken += 1
+
+	if renderConnection then
+		renderConnection:Disconnect()
+		renderConnection = nil
+	end
+
+	for _, t in ipairs(tweens) do
+		t:Cancel()
+	end
+
+	table.clear(tweens)
+
+	text.Visible = false
+	text.Position = basePos
+	text.Rotation = 0
+	text.TextTransparency = 0.8
+	text.TextStrokeTransparency = 0.8
+	text.TextColor3 = Color3.fromRGB(255, 255, 255)
+end
+
+local function StopTint(immediate)
+	tintToken += 1
+
+	local token = tintToken
+
+	if tintTween then
+		tintTween:Cancel()
+		tintTween = nil
+	end
+
+	if immediate then
+		tint.Saturation = 0
+		tint.Contrast = 0
+		tint.Brightness = 0
+		tint.TintColor = Color3.fromRGB(255, 255, 255)
+		tint.Enabled = false
+	else
+		tintTween = TweenService:Create(
+			tint,
+			TweenInfo.new(1, Enum.EasingStyle.Sine, Enum.EasingDirection.Out),
+			{
+				Saturation = 0,
+				Contrast = 0,
+				Brightness = 0,
+				TintColor = Color3.fromRGB(255, 255, 255)
+			}
+		)
+
+		tintTween:Play()
+
+		task.spawn(function()
+			tintTween.Completed:Wait()
+
+			if token == tintToken then
+				tint.Enabled = false
+				tintTween = nil
+			end
+		end)
+	end
+end
+
+local function StartTint(red)
+	tintToken += 1
+
+	if tintTween then
+		tintTween:Cancel()
+		tintTween = nil
+	end
+
+	tint.Enabled = true
+	tint.TintColor = red
+		and Color3.fromRGB(255, 110, 110)
+		or Color3.fromRGB(255, 255, 255)
+
+	tintTween = TweenService:Create(
+		tint,
+		TweenInfo.new(0.01, Enum.EasingStyle.Sine, Enum.EasingDirection.Out),
+		{
+			Saturation = 0.2,
+			Contrast = 0.15,
+			Brightness = 0.25
+		}
+	)
+
+	tintTween:Play()
+	tintTween.Completed:Wait()
+
+	tintTween = TweenService:Create(
+		tint,
+		TweenInfo.new(5, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out),
+		{
+			Saturation = -1,
+			Contrast = 0.15,
+			Brightness = -0.05
+		}
+	)
+
+	tintTween:Play()
+end
+
+local function StartText(duration)
+	textToken += 1
+
+	if renderConnection then
+		renderConnection:Disconnect()
+		renderConnection = nil
+	end
+
+	for _, t in ipairs(tweens) do
+		t:Cancel()
+	end
+
+	table.clear(tweens)
+
+	text.Visible = true
+	text.Position = basePos
+	text.Rotation = 0
+	text.TextTransparency = 0.8
+	text.TextStrokeTransparency = 0.8
+	text.TextColor3 = Color3.fromRGB(255, 255, 255)
+
+	local started = os.clock()
+	local token = textToken
+
+	renderConnection = RunService.RenderStepped:Connect(function()
+		if token ~= textToken then
+			return
+		end
+
+		local progress = math.clamp(
+			(os.clock() - started) / math.max(duration, 0.01),
+			0,
+			1
+		)
+
+		local offset = progress ^ 2 * 32 + 2
+		local rotation = progress ^ 2 * 10 + 1
+
+		text.Position = UDim2.new(
+			basePos.X.Scale,
+			basePos.X.Offset + math.random(-math.floor(offset), math.floor(offset)),
+			basePos.Y.Scale,
+			basePos.Y.Offset + math.random(-math.floor(offset), math.floor(offset))
+		)
+
+		text.Rotation = math.random(
+			-math.floor(rotation),
+			math.floor(rotation)
+		)
+	end)
+end
+
+local function LaunchText(red)
+	textToken += 1
+
+	local token = textToken
+
+	if renderConnection then
+		renderConnection:Disconnect()
+		renderConnection = nil
+	end
+
+	for _, t in ipairs(tweens) do
+		t:Cancel()
+	end
+
+	table.clear(tweens)
+
+	if not text.Visible then
+		return
+	end
+
+	text.Position = basePos
+	text.Rotation = 0
+	text.TextColor3 = Color3.fromRGB(255, 255, 255)
+
+	local direction = math.random(1, 2) == 1 and -360 or 360
+
+	local move = TweenService:Create(
+		text,
+		TweenInfo.new(0.25, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out),
+		{
+			Position = UDim2.fromScale(0.5, 0.32)
+		}
+	)
+
+	table.insert(tweens, move)
+	move:Play()
+
+	local color = TweenService:Create(
+		text,
+		TweenInfo.new(2.5, Enum.EasingStyle.Sine, Enum.EasingDirection.Out),
+		{
+			Rotation = direction,
+			TextColor3 = red
+				and Color3.fromRGB(255, 70, 70)
+				or Color3.fromRGB(205, 170, 255)
+		}
+	)
+
+	table.insert(tweens, color)
+	color:Play()
+
+	task.spawn(function()
+		move.Completed:Wait()
+
+		if token ~= textToken then
+			return
+		end
+
+		local exit = TweenService:Create(
+			text,
+			TweenInfo.new(0.5, Enum.EasingStyle.Exponential, Enum.EasingDirection.In),
+			{
+				Position = UDim2.fromScale(0.5, 1.2)
+			}
+		)
+
+		table.insert(tweens, exit)
+		exit:Play()
+
+		exit.Completed:Wait()
+
+		if token == textToken then
+			text.Visible = false
+		end
+	end)
+end
+
+local function Reset()
+	StopText()
+	StopTint(true)
+end
+
+local function SetupCharacter(char)
+	local hum = char:WaitForChild("Humanoid")
+
+	hum.Died:Connect(function()
+		Reset()
+	end)
+end
+
+if LP.Character then
+	task.spawn(SetupCharacter, LP.Character)
+end
+
+LP.CharacterAdded:Connect(function(char)
+	Reset()
+	SetupCharacter(char)
+end)
+
+-- CHẠY TRỰC TIẾP
+local hum = LP.Character and LP.Character:FindFirstChildOfClass("Humanoid")
+
+task.spawn(function() 
+if hum and hum.Health > 0 then
+	StartText(3)
+
+	task.wait(3)
+
+	LaunchText(false)
+	StartTint(false)
+end
+end) 
+
+local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 
@@ -854,6 +1179,7 @@ local gui = Instance.new("ScreenGui")
 gui.Name = "HeardGui"
 gui.ResetOnSpawn = false
 gui.IgnoreGuiInset = true
+gui.Enabled = false
 gui.Parent = PlayerGui
 
 local label = Instance.new("TextLabel")
@@ -937,89 +1263,8 @@ task.delay(0, function()
 
 rotateTween:Play()
 
-task.spawn(function() 
-local duration = 0.5
-		local start = tick()
-
-
-		local power = math.clamp(
-			1 - (27000 / 300),
-			0.05,
-			1
-		)
-
-
-		local velocity = Vector3.new(
-			math.random(-100,100),
-			220,
-			math.random(-100,100)
-		)
-
-
-		RunService:BindToRenderStep(
-			"EntityImpactShake",
-			Enum.RenderPriority.Camera.Value + 6,
-			function(dt)
-
-				local t = tick() - start
-
-
-				local alpha =
-					1 - math.clamp(
-						t / duration,
-						0,
-						1
-					)
-
-
-				if alpha <= 0 then
-					RunService:UnbindFromRenderStep(
-						"EntityImpactShake"
-					)
-					return
-				end
-
-
-				velocity *= math.pow(0.0005,dt)
-
-
-				local kick =
-					velocity
-					*
-					alpha
-					*
-					power
-
-
-				local sway = Vector3.new(
-					math.sin(tick()*3),
-					math.sin(tick()*4),
-					math.cos(tick()*2)
-				)
-
-
-				sway *= 15 * alpha * power
-
-
-				camera.CFrame *=
-					CFrame.new(
-						kick.X/100,
-						kick.Y/100,
-						kick.Z/100
-					)
-					*
-					CFrame.Angles(
-						math.rad(sway.X + kick.X/5),
-						math.rad(sway.Y),
-						math.rad(sway.Z + kick.Z/5)
-					)
-
-			end
-		)
-		end) 
-
 local cc = Instance.new("ColorCorrectionEffect")
-cc.Brightness = 0.3
+cc.Brightness = 0
 cc.Parent = game:GetService("Lighting")
 
 task.delay(0.1, function()
@@ -1056,11 +1301,6 @@ rotateTween.Completed:Wait()
 		}
 	)
 
-exitTween:Play()
-exitTween.Completed:Wait()
-
-label:Destroy()
-gui:Destroy()
 
 
 local char = Players.LocalPlayer.Character
@@ -1091,6 +1331,8 @@ local Lighting = game:GetService("Lighting")
 			local distance = direction.Magnitude
 
 			if distance < 3 and not noChase then
+
+tint:Destroy() 
 
 	if hiding then
 chasing = false
@@ -1975,40 +2217,6 @@ end)
 		entityMoving = false
 	end)
 end
-end)
-
-task.spawn(function()
-	while label.Parent and shaking do
-		local range = math.floor(posRange.Value)
-
-		local x = math.random(-range, range)
-		local y = math.random(-range, range)
-
-		TweenService:Create(
-			label,
-			TweenInfo.new(
-				0.001,
-				Enum.EasingStyle.Linear
-			),
-			{
-				Position = UDim2.new(
-					basePos.X.Scale,
-					x,
-					basePos.Y.Scale,
-					y
-				)
-			}
-		):Play()
-
-		task.wait(0.01)
-	end
-end)
-
-RunService.RenderStepped:Connect(function()
-	if shaking then
-		local power = math.floor(shakeValue.Value)
-		label.Rotation = math.random(-power, power)
-	end
 end)
 					
 					entityLocked = true
