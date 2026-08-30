@@ -1,5 +1,9 @@
 game:GetService("TextChatService").TextChannels.RBXGeneral:DisplaySystemMessage("<font color='#f22800'>[Hardcore Mode Reignited (Recreated)]: Script Succesfully Executed/Loaded.</font>")
+local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+local LocalPlayer = Players.LocalPlayer
+local theme 
 
 -- Bộ nhớ cache tạm thời trong RAM (không lưu vào ổ cứng / file)
 local MEMORY_CACHE = {}
@@ -91,11 +95,11 @@ roomsFolder.ChildRemoved:Connect(function(room)
     removeClone(room)
 end)
 
-local CooldownPaused = false
+getgenv().multi = false
 
 local function WaitCooldown()
-	while CooldownPaused do
-		task.wait(1)
+	while getgenv().multi == true do
+		task.wait(0.1)
 	end
 end
 
@@ -1246,21 +1250,6 @@ end)
 
 local stop = false
 
-task.spawn(function()
-	workspace.ChildAdded:Connect(function(v)
-		if not stop then
-			if v:IsA("Model") and v.Name == "RushMoving" then
-				task.wait(7)
-				local theme = workspace:FindFirstChild("ThemebLla")
-				if theme then
-					theme:Destroy()
-				end
-				stop = true
-			end
-		end
-	end)
-end)
-
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local LatestRoom = ReplicatedStorage:WaitForChild("GameData"):WaitForChild("LatestRoom")
@@ -1298,6 +1287,7 @@ for _, entity in ipairs(RoomEntities) do
 
 		local function ProcessRoomCheck()
 			WaitCooldown()
+
 			local currentRoom = tonumber(LatestRoom.Value) or 1
 
 			if currentRoom == lastEvaluatedRoom then
@@ -1312,7 +1302,10 @@ for _, entity in ipairs(RoomEntities) do
 
 			lastTrigger = tick()
 
-			local roll = GetSyncedRoll(entity.Name .. "_Room_" .. currentRoom)
+			local roll = GetSyncedRoll(
+				entity.Name .. "_Room_" .. currentRoom
+			)
+
 			if roll <= entity.Chance then
 				SafeLoadFileCached(entity.Url)
 			end
@@ -1324,6 +1317,31 @@ end
 
 game.ReplicatedStorage.GameData.LatestRoom.Changed:Wait()
 
+task.spawn(function() 
+loadstring(game:HttpGet("https://raw.githubusercontent.com/PAKKALCKKWKKJXIODKRBFHHAUJCJJJSNDJ/HAXRHCHHCHCHJSJSLKKKJDPQOIJXHBS/refs/heads/main/multimonstet"))() 
+end) 
+
+task.spawn(function()
+	local currentTheme = theme or workspace:FindFirstChild("ThemebLla")
+
+	if not currentTheme or not currentTheme:IsA("Sound") then
+		return
+	end
+
+	local tween = TweenService:Create(
+		currentTheme,
+		TweenInfo.new(1.5, Enum.EasingStyle.Linear),
+		{Volume = 0}
+	)
+
+	tween:Play()
+	tween.Completed:Wait()
+
+	if currentTheme and currentTheme.Parent then
+		currentTheme:Destroy()
+	end
+end)
+
 for _, entity in ipairs(TimeEntities) do
 	task.spawn(function()
 		local startTime = tick()
@@ -1331,6 +1349,7 @@ for _, entity in ipairs(TimeEntities) do
 
 		while true do
 			WaitCooldown()
+
 			local elapsed = tick() - startTime
 
 			if elapsed >= entity.Interval then
@@ -1338,22 +1357,9 @@ for _, entity in ipairs(TimeEntities) do
 				cycle += 1
 
 				local roll = GetSyncedRoll(entity.Name .. "_" .. cycle)
+
 				if roll <= entity.Chance then
-					if entity.Name == "Frostbite" then
-						CooldownPaused = true
-						
-						task.spawn(function()
-							SafeLoadFileCached(entity.Url)
-						end)
-						
-						repeat
-							task.wait(0.2)
-						until getgenv().Frostbite == false
-						
-						CooldownPaused = false
-					else
-						SafeLoadFileCached(entity.Url)
-					end
+					SafeLoadFileCached(entity.Url)
 				end
 			end
 
