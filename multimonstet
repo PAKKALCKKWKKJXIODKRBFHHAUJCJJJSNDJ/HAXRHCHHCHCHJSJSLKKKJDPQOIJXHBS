@@ -1,5 +1,6 @@
 local Players = game:GetService("Players")
 
+getgenv().multi = true
 getgenv().spam = false
 local fringeFrame
 
@@ -806,6 +807,8 @@ task.spawn(function()
 	breaking3:Destroy()
 	breaking5:Destroy()
 end)
+
+getgenv().multi = false
 end) 
 
 local CameraShaker = require(game.ReplicatedStorage:WaitForChild("CameraShaker"))
