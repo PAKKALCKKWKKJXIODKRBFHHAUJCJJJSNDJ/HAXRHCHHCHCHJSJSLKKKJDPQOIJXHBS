@@ -170,6 +170,10 @@ local camera = workspace:WaitForChild("Camera")
 local stop = false
 
 camera.DescendantAdded:Connect(function(v)
+if not getgenv().multi then
+return
+end
+
 	if v.Name == "DeathBackgroundBlue"
     and getgenv().MultiKilled ~= nil
     and getgenv().MultiKilled == true then
