@@ -302,7 +302,7 @@ breaking5.Parent = workspace
 breaking5.Looped = false
 breaking5.Name = "Spawn"
 breaking5.RollOffMaxDistance = 1000000000
-breaking5.Volume = 1
+breaking5.Volume = 2.5
 
 breaking.Ended:Connect(function() 
 
