@@ -303,7 +303,7 @@ breaking5.Parent = workspace
 breaking5.Looped = false
 breaking5.Name = "Spawn"
 breaking5.RollOffMaxDistance = 1000000000
-breaking5.Volume = 1
+breaking5.Volume = 3
 
 breaking.Ended:Connect(function() 
 
@@ -851,7 +851,7 @@ getgenv().RipperMimi = true
 
 task.spawn(function()
 	while getgenv().spam do
-		task.wait(math.random(4, 10))
+		task.wait(math.random(8, 12))
 
 		if #RandomScripts > 0 then
 			breaking5:Play()
