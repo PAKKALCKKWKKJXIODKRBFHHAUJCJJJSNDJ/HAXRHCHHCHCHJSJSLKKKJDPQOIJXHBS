@@ -1,5 +1,6 @@
 local Players = game:GetService("Players")
 
+getgenv().multi = true
 getgenv().spam = false
 local fringeFrame
 
@@ -805,6 +806,7 @@ task.spawn(function()
 	breaking2:Destroy()
 	breaking3:Destroy()
 	breaking5:Destroy()
+getgenv().multi = false
 end)
 end) 
 
