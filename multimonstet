@@ -1,6 +1,5 @@
 local Players = game:GetService("Players")
 
-getgenv().multi = true
 getgenv().spam = false
 local fringeFrame
 
@@ -170,10 +169,6 @@ local camera = workspace:WaitForChild("Camera")
 local stop = false
 
 camera.DescendantAdded:Connect(function(v)
-if not getgenv().multi then
-return
-end
-
 	if v.Name == "DeathBackgroundBlue"
     and getgenv().MultiKilled ~= nil
     and getgenv().MultiKilled == true then
@@ -307,7 +302,7 @@ breaking5.Parent = workspace
 breaking5.Looped = false
 breaking5.Name = "Spawn"
 breaking5.RollOffMaxDistance = 1000000000
-breaking5.Volume = 3
+breaking5.Volume = 1
 
 breaking.Ended:Connect(function() 
 
@@ -810,7 +805,6 @@ task.spawn(function()
 	breaking2:Destroy()
 	breaking3:Destroy()
 	breaking5:Destroy()
-getgenv().multi = false
 end)
 end) 
 
@@ -843,25 +837,63 @@ end)
 
 local RandomScripts = {}
 
+local WaitModels = {
+	RipperMimic = "A60ButRipper",
+	CeaseMimic = "CeaseMimic",
+	SilenceMimic = "A60ButSilence",
+	reboundbla1 = "A60ButRebound1",
+	DeerMimic = "A60ButDeer"
+}
+
 for name, fn in pairs(ScriptCache) do
 	if name ~= "ReboundMimic"
 		and name ~= "3ARCHITECTS"
 		and name ~= "HaltMimic" then
-		table.insert(RandomScripts, fn)
+
+		table.insert(RandomScripts, {
+			Name = name,
+			Function = fn
+		})
 	end
 end
 
 getgenv().RipperMimi = true
 
+local function WaitEntityDone(name)
+	local modelName = WaitModels[name]
+
+	if not modelName then
+		return
+	end
+
+	repeat
+		task.wait()
+	until workspace:FindFirstChild(modelName, true)
+
+	repeat
+		task.wait()
+	until not workspace:FindFirstChild(modelName, true)
+end
+
 task.spawn(function()
 	while getgenv().spam do
-		task.wait(math.random(8, 12))
+		task.wait(math.random(4, 10))
 
 		if #RandomScripts > 0 then
 			breaking5:Play()
 
-			local randomScript = RandomScripts[math.random(1, #RandomScripts)]
-			task.spawn(randomScript)
+			local index = math.random(1, #RandomScripts)
+			local selected = table.remove(RandomScripts, index)
+
+			task.spawn(function()
+				selected.Function()
+
+				WaitEntityDone(selected.Name)
+
+				if getgenv().spam then
+					table.insert(RandomScripts, selected)
+				end
+			end)
 		end
 	end
 end)
