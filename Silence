@@ -210,10 +210,10 @@ end)
 
 task.spawn(function()
 	CustomGitSound(
-	"url",
-	5,
+	"https://github.com/lynguyen26031993-design/-u/raw/refs/heads/main/black_kumuzhi-huge-cinematic-reverb-impact-506132.mp3",
+	0.5,
 	25000,
-	"silencebooom",
+	"kjcldllpppa",
 	"BOKKOMOFFHSJEJSJSJ",
 	_Idx57.RushNew,
 	false,
@@ -460,120 +460,43 @@ local function ImpactEffect()
 
 		-- IMPACT SHAKE
 
-		local duration = 2.5
-		local start = tick()
+		local CameraShaker = require(game.ReplicatedStorage:WaitForChild("CameraShaker"))
+local camera = workspace.CurrentCamera
 
+local spawnShake = CameraShaker.new(Enum.RenderPriority.Camera.Value, function(shakeCf)
+	camera.CFrame = camera.CFrame * shakeCf
+end)
 
-		local power = math.clamp(
-			1 - (distance / 300),
-			0.05,
-			1
-		)
+spawnShake:Start()
 
-
-		local velocity = Vector3.new(
-			math.random(-100,100),
-			220,
-			math.random(-100,100)
-		)
-
-
-		RunService:BindToRenderStep(
-			"EntityImpactShake",
-			Enum.RenderPriority.Camera.Value + 6,
-			function(dt)
-
-				local t = tick() - start
-
-
-				local alpha =
-					1 - math.clamp(
-						t / duration,
-						0,
-						1
-					)
-
-
-				if alpha <= 0 then
-					RunService:UnbindFromRenderStep(
-						"EntityImpactShake"
-					)
-					return
-				end
-
-
-				velocity *= math.pow(0.0005,dt)
-
-
-				local kick =
-					velocity
-					*
-					alpha
-					*
-					power
-
-
-				local sway = Vector3.new(
-					math.sin(tick()*3),
-					math.sin(tick()*4),
-					math.cos(tick()*2)
-				)
-
-
-				sway *= 15 * alpha * power
-
-
-				camera.CFrame *=
-					CFrame.new(
-						kick.X/100,
-						kick.Y/100,
-						kick.Z/100
-					)
-					*
-					CFrame.Angles(
-						math.rad(sway.X + kick.X/5),
-						math.rad(sway.Y),
-						math.rad(sway.Z + kick.Z/5)
-					)
-
-			end
-		)
+spawnShake:ShakeOnce(
+	30,   -- Magnitude (mạnh)
+	3,   -- Roughness
+	0.05, -- FadeIn
+	3, -- FadeOut
+	0,    -- PositionInfluence
+	0.8   -- RotationInfluence
+)
 
 
 	else
 
-		-- FAR EARTHQUAKE SHAKE
+local CameraShaker = require(game.ReplicatedStorage:WaitForChild("CameraShaker"))
+local camera = workspace.CurrentCamera
 
-		local shakePower = 2
-local speed = 45
-local fadeSpeed = 2
+local spawnShake = CameraShaker.new(Enum.RenderPriority.Camera.Value, function(shakeCf)
+	camera.CFrame = camera.CFrame * shakeCf
+end)
 
-RunService:BindToRenderStep(
-	"EntityFarShake",
-	Enum.RenderPriority.Camera.Value + 6,
-	function(dt)
+spawnShake:Start()
 
-		if shakePower > 0 then
-			shakePower = math.max(0, shakePower - fadeSpeed * dt)
-		else
-			RunService:UnbindFromRenderStep("EntityFarShake")
-			return
-		end
-
-		local t = tick() * speed
-
-		local x = math.sin(t * 1.00) * shakePower / 100
-		local y = math.cos(t * 1.35) * shakePower / 100
-		local z = math.sin(t * 0.82) * shakePower / 100
-
-		local pitch = math.rad(math.sin(t * 0.90) * shakePower * 0.45)
-		local yaw   = math.rad(math.cos(t * 1.20) * shakePower * 0.35)
-		local roll  = math.rad(math.sin(t * 1.60) * shakePower * 0.60)
-
-		camera.CFrame *=
-			CFrame.new(x, y, z)
-			* CFrame.Angles(pitch, yaw, roll)
-	end
+spawnShake:ShakeOnce(
+	10,   -- Magnitude (mạnh)
+	13,   -- Roughness
+	0.05, -- FadeIn
+	1, -- FadeOut
+	0,    -- PositionInfluence
+	0.8   -- RotationInfluence
 )
 
 	end
@@ -1332,7 +1255,9 @@ local Lighting = game:GetService("Lighting")
 
 			if distance < 3 and not noChase then
 
+if not hiding then
 tint:Destroy() 
+end
 
 	if hiding then
 chasing = false
@@ -1358,6 +1283,8 @@ local function GetGitSound(GithubSnd, SoundName)
 	sound.SoundId = (getcustomasset or getsynasset)(SoundName .. ".ogg")
 	return sound
 end
+
+tint:Destroy()
 
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
@@ -1385,6 +1312,18 @@ if model:IsA("Model") then
 	end
 elseif model:IsA("BasePart") then
 	model.CFrame = cf
+end
+
+for _, v in ipairs(model:GetDescendants()) do
+	if v:IsA("PointLight") or v:IsA("SpotLight") or v:IsA("SurfaceLight") then
+		v.Enabled = false
+
+		v:GetPropertyChangedSignal("Enabled"):Connect(function()
+			if v.Enabled then
+				v.Enabled = false
+			end
+		end)
+	end
 end
 
 local HiddenUI = {}
@@ -1603,10 +1542,10 @@ local function Failsafe()
     -- phần code còn lại...
 		
 		task.spawn(function() 
-local jum = GetGitSound("https://github.com/eoyoustme/Hardcore/blob/main/sound.ogg?raw=true","sound")
+local jum = GetGitSound("https://github.com/lynguyen26031993-design/-u/raw/refs/heads/main/Attann%20(1).mp3?raw=true","polxladdks")
 jum.Parent = workspace
-jum.Volume = 0.5
-jum.Name = "JUMP" 
+jum.Volume = 1
+jum.Name = "pppkkkkkksskhch" 
 jum.PlaybackSpeed = 1
 jum.RollOffMaxDistance = 12000000
 jum:Play() 
@@ -1974,10 +1913,10 @@ end
     -- phần code còn lại...
 		
 		task.spawn(function() 
-local jum = GetGitSound("https://github.com/eoyoustme/Hardcore/blob/main/sound.ogg?raw=true","sound")
+local jum = GetGitSound("https://github.com/lynguyen26031993-design/-u/raw/refs/heads/main/Attann%20(1).mp3?raw=true","pjxnapllkxddddjd")
 jum.Parent = workspace
-jum.Volume = 0.5
-jum.Name = "JUMP" 
+jum.Volume = 1
+jum.Name = "jncjkskkxkkkdjdh" 
 jum.PlaybackSpeed = 1
 jum.RollOffMaxDistance = 12000000
 jum:Play() 
@@ -2161,9 +2100,9 @@ break
 	
 	task.spawn(function()
 	
-local Jumpscare = GetGitSound("https://github.com/eoyoustme/Hardcore/blob/main/sound.ogg?raw=true","sound")
+local Jumpscare = GetGitSound("https://github.com/lynguyen26031993-design/-u/raw/refs/heads/main/Attann%20(1).mp3?raw=true","pkkcllalllkkxjjd")
 Jumpscare.Parent = workspace
-Jumpscare.Volume = 0.5
+Jumpscare.Volume = 1
 Jumpscare.Name = "bla" 
 Jumpscare.PlaybackSpeed = 1
 Jumpscare:Play()
