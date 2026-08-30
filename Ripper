@@ -433,6 +433,12 @@ end
 				if chance == 1 then
 				
 				task.wait(2)
+				
+				FadeDestroy(entityModel)
+
+				task.wait(2)
+
+				hasTriggered = false 
 
 				else
 				
