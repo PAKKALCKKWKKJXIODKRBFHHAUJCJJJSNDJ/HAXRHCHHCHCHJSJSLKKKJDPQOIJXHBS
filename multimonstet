@@ -250,7 +250,10 @@ local function GetGitSound(GithubSnd, SoundName)
 					return sound
 				end
 				
-				local Github = GetGitSound("https://github.com/PAKKALCKKWKKJXIODKRBFHHAUJCJJJSNDJ/HAXRHCHHCHCHJSJSLKKKJDPQOIJXHBS/raw/refs/heads/main/multimonster%20calm%20wip.mp3?raw=true", "kckllslkkxjklcjd")
+				local Github = GetGitSound(
+	"https://raw.githubusercontent.com/PAKKALCKKWKKJXIODKRBFHHAUJCJJJSNDJ/HAXRHCHHCHCHJSJSLKKKJDPQOIJXHBS/refs/heads/main/multimonster%20calm%20wip.mp3",
+	"okkjjjjxjjdcf"
+)
 
 local breaking = Instance.new("Sound")
 breaking.SoundId = Github.SoundId
@@ -261,7 +264,10 @@ breaking.Name = "A60Theme"
 breaking.RollOffMaxDistance = 1000000000
 breaking.Volume = 1
 
-local Github22 = GetGitSound("https://github.com/PAKKALCKKWKKJXIODKRBFHHAUJCJJJSNDJ/HAXRHCHHCHCHJSJSLKKKJDPQOIJXHBS/raw/refs/heads/main/multi%20semi-intense%20variant.mp3.oga.mp3?raw=true", "ncmkdllxlckks")
+local Github22 = GetGitSound(
+	"https://raw.githubusercontent.com/PAKKALCKKWKKJXIODKRBFHHAUJCJJJSNDJ/HAXRHCHHCHCHJSJSLKKKJDPQOIJXHBS/refs/heads/main/multi%20semi-intense%20variant.mp3.oga.mp3",
+	"mmcjhshbhxolsd"
+)
 
 local breaking2 = Instance.new("Sound")
 breaking2.SoundId = Github22.SoundId
@@ -272,7 +278,10 @@ breaking2.Name = "SemiIntense"
 breaking2.RollOffMaxDistance = 1000000000
 breaking2.Volume = 1
 
-local Github234 = GetGitSound("https://github.com/PAKKALCKKWKKJXIODKRBFHHAUJCJJJSNDJ/HAXRHCHHCHCHJSJSLKKKJDPQOIJXHBS/raw/refs/heads/main/Pursue.mp3.oga.mp3?raw=true", "lllcjiakkxkkk")
+local Github234 = GetGitSound(
+	"https://github.com/lynguyen26031993-design/-u/raw/refs/heads/main/Puuse.mp3",
+	"pppoigddfvhjhb"
+)
 
 local breaking3 = Instance.new("Sound")
 breaking3.SoundId = Github234.SoundId
@@ -283,7 +292,10 @@ breaking3.Name = "Intense"
 breaking3.RollOffMaxDistance = 1000000000
 breaking3.Volume = 1
 
-local Github666 = GetGitSound("https://github.com/PAKKALCKKWKKJXIODKRBFHHAUJCJJJSNDJ/HAXRHCHHCHCHJSJSLKKKJDPQOIJXHBS/raw/refs/heads/main/final%20fakeout.mp3.oga.mp3?raw=true", "pligfsdvvhvcg")
+local Github666 = GetGitSound(
+	"https://github.com/lynguyen26031993-design/-u/raw/refs/heads/main/final%20fakeout.mp3",
+	"bvhvfghhvsejbv"
+)
 
 local breaking4 = Instance.new("Sound")
 breaking4.SoundId = Github666.SoundId
@@ -294,7 +306,10 @@ breaking4.Name = "Final"
 breaking4.RollOffMaxDistance = 1000000000
 breaking4.Volume = 1.3
 
-local Ok = GetGitSound("https://github.com/PAKKALCKKWKKJXIODKRBFHHAUJCJJJSNDJ/HAXRHCHHCHCHJSJSLKKKJDPQOIJXHBS/raw/refs/heads/main/Lhouijie%20Almendras%20-%20glitcheffectphase2%20-%201786806518250%202026-08-15%2019_08.mp3?raw=true", "jnvkdkkxjjn")
+local Ok = GetGitSound(
+	"https://raw.githubusercontent.com/PAKKALCKKWKKJXIODKRBFHHAUJCJJJSNDJ/HAXRHCHHCHCHJSJSLKKKJDPQOIJXHBS/refs/heads/main/Lhouijie%20Almendras%20-%20glitcheffectphase2%20-%201786806518250%202026-08-15%2019_08.mp3",
+	"okcjsopppkknx"
+)
 
 local breaking5 = Instance.new("Sound")
 breaking5.SoundId = Ok.SoundId
