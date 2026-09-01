@@ -13,6 +13,8 @@ local function GetRoom()
 	return nil
 end
 
+local RunService = game:GetService("RunService")
+
 local victimScream
 local lastPullFinished = Instance.new("BindableEvent")
 
@@ -66,6 +68,33 @@ for _, v in ipairs(s:GetDescendants()) do
 	end
 end
 
+local spawnSounds = {}
+local spawnParticles = {}
+
+for _, v in ipairs(s:GetDescendants()) do
+	if v:IsA("Sound") then
+		spawnSounds[v] = v.PlaybackSpeed
+		v.PlaybackSpeed = 0
+
+	elseif v:IsA("ParticleEmitter") then
+		local originalColor = v.Color
+		spawnParticles[v] = originalColor
+
+		local keypoints = {}
+
+		for _, kp in ipairs(originalColor.Keypoints) do
+			local h, sat, val = kp.Value:ToHSV()
+
+			table.insert(keypoints, ColorSequenceKeypoint.new(
+				kp.Time,
+				Color3.fromHSV(h, sat, val / 3)
+			))
+		end
+
+		v.Color = ColorSequence.new(keypoints)
+	end
+end
+
 for _, v in ipairs(s:GetDescendants()) do
 	if v:IsA("Beam") then
 		v.Brightness = 1
@@ -85,10 +114,13 @@ if not entity then
 	return
 end
 
+task.wait(0.2)
+
 local light = Instance.new("PointLight")
 light.Color = Color3.fromRGB(255,148,148)
 light.Range = 0
 light.Brightness = 1
+
 local lightPart = entity
 
 if entity:IsA("Model") then
@@ -101,9 +133,83 @@ if lightPart then
 	light.Parent = lightPart
 end
 
+local spawnTweenInfo = TweenInfo.new(
+	1.5,
+	Enum.EasingStyle.Quint,
+	Enum.EasingDirection.Out
+)
+
+for sound, originalSpeed in pairs(spawnSounds) do
+	if sound.Parent then
+		TweenService:Create(
+			sound,
+			spawnTweenInfo,
+			{PlaybackSpeed = originalSpeed}
+		):Play()
+	end
+end
+
+task.spawn(function()
+	local startTime = tick()
+
+	while true do
+		local alpha = math.clamp(
+			(tick() - startTime) / 1.5,
+			0,
+			1
+		)
+
+		local eased = TweenService:GetValue(
+			alpha,
+			Enum.EasingStyle.Quint,
+			Enum.EasingDirection.Out
+		)
+
+		for emitter, originalColor in pairs(spawnParticles) do
+			if emitter.Parent then
+				local keypoints = {}
+
+				for i, kp in ipairs(originalColor.Keypoints) do
+					local c = kp.Value
+
+					local h, sat, val = c:ToHSV()
+
+local darkColor = Color3.fromHSV(
+	h,
+	sat,
+	val / 3
+)
+
+					table.insert(
+						keypoints,
+						ColorSequenceKeypoint.new(
+							kp.Time,
+							darkColor:Lerp(c, eased)
+						)
+					)
+				end
+
+				emitter.Color = ColorSequence.new(keypoints)
+			end
+		end
+
+		if alpha >= 1 then
+			break
+		end
+
+		RunService.Heartbeat:Wait()
+	end
+
+	for emitter, originalColor in pairs(spawnParticles) do
+		if emitter.Parent then
+			emitter.Color = originalColor
+		end
+	end
+end)
+
 TweenService:Create(
 	light,
-	TweenInfo.new(0.5),
+	spawnTweenInfo,
 	{Range = 15}
 ):Play()
 
@@ -308,7 +414,7 @@ task.spawn(function()
 	end
 end)
 
-task.wait(1.5)
+task.wait(1)
 
 if hum and hrp then
 	local entityPos = entity:IsA("Model") and entity:GetPivot().Position or entity.Position
@@ -322,14 +428,15 @@ if hum and hrp then
 
 	-- 1. KIỂM TRA NẾU PLAYER Ở TRONG BÁN KÍNH 25 STUDS -> TÍNH LÀ 1 MỤC TIÊU
 	local playerDistance = (hrp.Position - entityPos).Magnitude
-	if playerDistance <= 25 then
-		table.insert(targets, {
-			instance = hrp,
-			distance = playerDistance,
-			isModel = false,
-			isPlayer = true
-		})
-	end
+
+if playerDistance <= 25 and math.random() <= 0.5 then
+	table.insert(targets, {
+		instance = hrp,
+		distance = playerDistance,
+		isModel = false,
+		isPlayer = true
+	})
+end
 
 	-- 2. TÌM CÁC VẬT THỂ XUNG QUANH
 	local overlapParams = OverlapParams.new()
@@ -371,9 +478,9 @@ end
 		return a.distance < b.distance
 	end)
 
-	local maxPull = math.min(#targets, math.random(2, 4))
+	local maxPull = math.min(#targets, math.random(7,12))
 
-local totalPullWindow = 1.5
+local totalPullWindow = 0.8
 
 local pullDelay = maxPull > 1
 	and totalPullWindow / (maxPull - 1)
@@ -510,7 +617,7 @@ end
 lastPullFinished.Event:Wait()
 lastPullFinished:Destroy()
 
-task.wait(0.2)
+task.wait(0.8)
 
 local rangeTween = TweenService:Create(
 	light,
