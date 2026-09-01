@@ -112,25 +112,6 @@ if not entity then
 	return
 end
 
-task.wait(0.2)
-
-local light = Instance.new("PointLight")
-light.Color = Color3.fromRGB(255,148,148)
-light.Range = 0
-light.Brightness = 1
-
-local lightPart = entity
-
-if entity:IsA("Model") then
-	lightPart =
-		entity.PrimaryPart
-		or entity:FindFirstChildWhichIsA("BasePart", true)
-end
-
-if lightPart then
-	light.Parent = lightPart
-end
-
 local spawnTweenInfo = TweenInfo.new(
 	1.5,
 	Enum.EasingStyle.Quint,
@@ -146,6 +127,68 @@ for sound, originalSpeed in pairs(spawnSounds) do
 		):Play()
 	end
 end
+
+TweenService:Create(
+	light,
+	spawnTweenInfo,
+	{Range = 15}
+):Play()
+
+task.spawn(function()
+	local startTime = tick()
+
+	while true do
+		local alpha = math.clamp(
+			(tick() - startTime) / 1.5,
+			0,
+			1
+		)
+
+		local eased = TweenService:GetValue(
+			alpha,
+			Enum.EasingStyle.Quint,
+			Enum.EasingDirection.Out
+		)
+
+		for emitter, originalColor in pairs(spawnParticles) do
+			if emitter.Parent then
+				local keypoints = {}
+
+				for i, kp in ipairs(originalColor.Keypoints) do
+					local c = kp.Value
+
+					local darkColor = Color3.new(
+						c.R / 3,
+						c.G / 3,
+						c.B / 3
+					)
+
+					table.insert(
+						keypoints,
+						ColorSequenceKeypoint.new(
+							kp.Time,
+							darkColor:Lerp(c, eased)
+						)
+					)
+				end
+
+				emitter.Color = ColorSequence.new(keypoints)
+			end
+		end
+
+		if alpha >= 1 then
+			break
+		end
+
+		RunService.Heartbeat:Wait()
+	end
+
+	for emitter, originalColor in pairs(spawnParticles) do
+		if emitter.Parent then
+			emitter.Color = originalColor
+		end
+	end
+end)
 
 TweenService:Create(
 	light,
