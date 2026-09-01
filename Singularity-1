@@ -112,6 +112,25 @@ if not entity then
 	return
 end
 
+task.wait(0.2)
+
+local light = Instance.new("PointLight")
+light.Color = Color3.fromRGB(255,148,148)
+light.Range = 0
+light.Brightness = 1
+
+local lightPart = entity
+
+if entity:IsA("Model") then
+	lightPart =
+		entity.PrimaryPart
+		or entity:FindFirstChildWhichIsA("BasePart", true)
+end
+
+if lightPart then
+	light.Parent = lightPart
+end
+
 local spawnTweenInfo = TweenInfo.new(
 	1.5,
 	Enum.EasingStyle.Quint,
