@@ -50,6 +50,16 @@ local s = assets[1]
 s.Name = "Singularity" -- Đổi tên để tránh lỗi Infinite Yield
 s.Parent = workspace
 
+for _, v in ipairs(s:GetDescendants()) do
+	if v:IsA("ParticleEmitter") then
+
+		if v.Name == "Face11" then
+			v.Texture = "rbxassetid://109425641377249"
+			v.Color = ColorSequence.new(Color3.fromRGB(255, 255, 255))
+		end
+	end
+end
+
 local spawnSounds = {}
 local spawnParticles = {}
 
