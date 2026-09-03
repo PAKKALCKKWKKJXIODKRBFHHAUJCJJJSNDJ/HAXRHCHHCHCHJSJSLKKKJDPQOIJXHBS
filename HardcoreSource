@@ -1,60 +1,57 @@
-game:GetService("TextChatService").TextChannels.RBXGeneral:DisplaySystemMessage("<font color='#f22800'>[Hardcore Mode Reignited (Recreated)]: Script Succesfully Executed/Loaded.</font>")
-local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
-local UserInputService = game:GetService("UserInputService")
-local LocalPlayer = Players.LocalPlayer
-local theme 
 
 -- Bộ nhớ cache tạm thời trong RAM (không lưu vào ổ cứng / file)
 local MEMORY_CACHE = {}
 
 if isfolder("REBLAHARDCOREDI_Cache") then
-	pcall(function()
-		delfolder("REBLAHARDCOREDI_Cache")
-	end)
+pcall(function()
+delfolder("REBLAHARDCOREDI_Cache")
+end)
 end
 
 local function SafeLoadFileCached(url)
-    task.spawn(function()
-        pcall(function()
-            local code = nil
-            
-            -- Kiểm tra xem đã có trong RAM chưa
-            if MEMORY_CACHE[url] then
-                code = MEMORY_CACHE[url]
-            else
-                -- Nếu chưa có, tải về và lưu vào RAM
-                local success, result = pcall(function()
-                    return game:HttpGet(url)
-                end)
-                if success and result and result ~= "" then
-                    code = result
-                    MEMORY_CACHE[url] = code
-                end
-            end
-            
-            -- Thực thi mã nguồn
-            if code then
-                local func, err = loadstring(code)
-                if func then
-                    func()
-                end
-            end
-        end)
-    end)
+task.spawn(function()
+pcall(function()
+local code = nil
+
+-- Kiểm tra xem đã có trong RAM chưa  
+        if MEMORY_CACHE[url] then  
+            code = MEMORY_CACHE[url]  
+        else  
+            -- Nếu chưa có, tải về và lưu vào RAM  
+            local success, result = pcall(function()  
+                return game:HttpGet(url)  
+            end)  
+            if success and result and result ~= "" then  
+                code = result  
+                MEMORY_CACHE[url] = code  
+            end  
+        end  
+          
+        -- Thực thi mã nguồn  
+        if code then  
+            local func, err = loadstring(code)  
+            if func then  
+                func()  
+            end  
+        end  
+    end)  
+end)
+
 end
 
 local function GetGitSound(GithubSnd)
-	local file = "HARDCORE_" .. tostring(#GithubSnd) .. "_" .. GithubSnd:sub(1,10):gsub("%W","") .. ".mp3"
+local file = "HARDCORE_" .. tostring(#GithubSnd) .. "_" .. GithubSnd:sub(1,10):gsub("%W","") .. ".mp3"
 
-	if not isfile(file) then
-		writefile(file, game:HttpGet(GithubSnd))
-	end
+if not isfile(file) then  
+	writefile(file, game:HttpGet(GithubSnd))  
+end  
 
-	local sound = Instance.new("Sound")
-	sound.SoundId = (getcustomasset or getsynasset)(file)
+local sound = Instance.new("Sound")  
+sound.SoundId = (getcustomasset or getsynasset)(file)  
 
-	return sound
+return sound
+
 end
 
 local roomsFolder = workspace:WaitForChild("CurrentRooms")
@@ -62,48 +59,49 @@ local roomsFolder = workspace:WaitForChild("CurrentRooms")
 local SavedClones = {}
 
 local function clonePath(room)
-    if SavedClones[room] then return end
+if SavedClones[room] then return end
 
-    local nodes = room:FindFirstChild("PathfindNodes")
-    if not nodes then return end
+local nodes = room:FindFirstChild("PathfindNodes")  
+if not nodes then return end  
 
-    local clone = nodes:Clone()
-    clone.Name = "PathfindNodes"
-    clone.Parent = room
+local clone = nodes:Clone()  
+clone.Name = "PathfindNodes"  
+clone.Parent = room  
 
-    SavedClones[room] = clone
+SavedClones[room] = clone
+
 end
 
 local function removeClone(room)
-    if SavedClones[room] then
-        SavedClones[room]:Destroy()
-        SavedClones[room] = nil
-    end
+if SavedClones[room] then
+SavedClones[room]:Destroy()
+SavedClones[room] = nil
+end
 end
 
 -- 🔥 CHECK CỰC NHANH (Heartbeat level)
 game:GetService("RunService").Heartbeat:Connect(function()
-    for _, room in ipairs(roomsFolder:GetChildren()) do
-        if not SavedClones[room] then
-            clonePath(room)
-        end
-    end
+for _, room in ipairs(roomsFolder:GetChildren()) do
+if not SavedClones[room] then
+clonePath(room)
+end
+end
 end)
 
 -- dọn clone nếu room bị xoá
 roomsFolder.ChildRemoved:Connect(function(room)
-    removeClone(room)
+removeClone(room)
 end)
 
-getgenv().multi = false
+local CooldownPaused = false
 
 local function WaitCooldown()
-	while getgenv().multi == true do
-		task.wait(0.1)
-	end
+while CooldownPaused do
+task.wait(1)
+end
 end
 
-task.spawn(function() 
+task.spawn(function()
 require(game.Players.LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game).caption("Hardcore Mode Reignited (Recreated) Actived!",true)
 task.wait(2)
 require(game.Players.LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game).caption("Recreated by Guestly",true)
@@ -114,35 +112,35 @@ require(game.Players.LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game).caption("
 end)
 
 task.spawn(function()
-	SafeLoadFileCached("https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/Hidable-Table")
+SafeLoadFileCached("https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/Hidable-Table")
 end)
 
 task.spawn(function()
-	SafeLoadFileCached("https://raw.githubusercontent.com/eoyoustme/Hardcore/refs/heads/main/Guiding%20light")
+SafeLoadFileCached("https://raw.githubusercontent.com/eoyoustme/Hardcore/refs/heads/main/Guiding%20light")
 end)
 
 task.spawn(function()
-	SafeLoadFileCached("https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/Hidable-Window")
+SafeLoadFileCached("https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/Hidable-Window")
 end)
 
 task.spawn(function()
-	SafeLoadFileCached("https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/Light-Model-Changer")
+SafeLoadFileCached("https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/Light-Model-Changer")
 end)
 
 task.spawn(function()
-	SafeLoadFileCached("https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/SprintBar")
+SafeLoadFileCached("https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/SprintBar")
 end)
 
 task.spawn(function()
-	SafeLoadFileCached("https://raw.githubusercontent.com/iccdjkkkkskskhdgdgegvbfbgncjjdudejdjvi/REBLAHARDCOREDI/refs/heads/main/test")
+SafeLoadFileCached("https://raw.githubusercontent.com/iccdjkkkkskskhdgdgegvbfbgncjjdudejdjvi/REBLAHARDCOREDI/refs/heads/main/test")
 end)
 
 task.spawn(function()
-	SafeLoadFileCached("https://raw.githubusercontent.com/vokfhehnbfhixiusushiicshshjjjssGSHHDXGX/REBLAHARDCOREDI/refs/heads/main/RushAmbush")
+SafeLoadFileCached("https://raw.githubusercontent.com/vokfhehnbfhixiusushiicshshjjjssGSHHDXGX/REBLAHARDCOREDI/refs/heads/main/RushAmbush")
 end)
 
 task.spawn(function()
-	SafeLoadFileCached("https://raw.githubusercontent.com/vokfhehnbfhixiusushiicshshjjjssGSHHDXGX/REBLAHARDCOREDI/refs/heads/main/Eyes")
+SafeLoadFileCached("https://raw.githubusercontent.com/vokfhehnbfhixiusushiicshshjjjssGSHHDXGX/REBLAHARDCOREDI/refs/heads/main/Eyes")
 end)
 
 local Workspace = game:GetService("Workspace")
@@ -161,13 +159,12 @@ part.Size = Vector3.new(1, 1, 1)
 part.CFrame = cf
 part.Parent = Workspace
 
-
 local url = "https://github.com/lynguyen26031993-design/-u/raw/refs/heads/main/XRecorder_Edited_20260805_02.mp3"
 
 local file = "RoomCenterSound.mp3"
 
 if not isfile(file) then
-	writefile(file, game:HttpGet(url))
+writefile(file, game:HttpGet(url))
 end
 
 local sound = Instance.new("Sound")
@@ -179,234 +176,234 @@ sound.Parent = part
 
 sound:Play()
 
-task.spawn(function() 
+task.spawn(function()
 -- ============================================================================
 -- CONFIGURATION & GLOBAL VARIABLES
 -- ============================================================================
 local CONFIG = {
-	Files = {
-		LobbyFile = "LobbyFrame.txt",
-		ButtonFile = "ButtonCharms.txt"
-	},
-	Urls = {
-		LobbyGui = "https://raw.githubusercontent.com/lynguyen26031993-design/-u/refs/heads/main/Place_74871629393921_Frame_LobbyFrame_1785934723.txt",
-		ButtonGui = "https://raw.githubusercontent.com/lynguyen26031993-design/-u/refs/heads/main/Place_74871629393921_TextButton_ButtonCharms_1785943384.txt"
-	},
-	Names = {
-		ParentUI = "MainUI",
-		GuiName = "CharmsThingy",
-		CharmsFolder = "Charms",
-		CloseButton = "CloseButton",
-		ListFolder = "List",
-		EffectsFolder = "Effects",
-		DownsidesLabel = "Downsides",
-		UpsidesLabel = "Upsides",
-		MainFrame = "Frame",
-		ApplyButton = "Apply",
-		AppliedButton = "Applied",
-		UnlockLabel = "Unlock",
-		ImageObj = "ImageLabel",
-		DescLabel = "Desc",
-        TaglineLabel = "Tagline",
-		TitleLabel = "Title"
-	},
-	DisplaySettings = {
-		ShowAllByDefault = false 
-	},
-	Charms = {
-		Laziness = {
-			Visible = true,
-			GetGenVar = "Lazyness",
-			UnlockFile = "LazyGot",
-			TestMode = false,
-			IsUpcoming = false,
-			IsTBA = false, -- Thêm config TBA (true sẽ ẩn tất cả icons và đặt ở cuối hàng)
-			Data = {
-				Downsides = '<font color="rgb(255,222,189)">DOWNSIDES</font>\n- Unlocking doors with a key takes twice as long\n- Half stamima will be reduced when player uses tracking keys power',
-				Upsides = '<font color="rgb(255,222,189)">UPSIDES</font>\n+ Every sideroom door bash pays back 28 stamina and a burst of speed\n+ Track key in room where player is in',
-				Image = "rbxassetid://105951848239499",
-				Desc = "Locked doors are a suggestion. Lower a shoulder, pay in bruises, and walk right through.. just don't expect keys to feel like helping anymore.",
-				Tagline = '"Effort is overrated."',
-				Title = "Pure Laziness",
-				Unlock = "Unlock: Slam open 20 side room doors in a single run by sprinting into them."
-			}
-		},
-		Accursed = {
-			Visible = false,
-			GetGenVar = "AccursedCharm",
-			UnlockFile = "AccursedGot",
-			TestMode = false,
-			IsUpcoming = false,
-			IsTBA = true,
-			Data = {
-				Downsides = '<font color="rgb(255,222,189)">DOWNSIDES</font>\n- Upcoming',
-				Upsides = '<font color="rgb(255,222,189)">UPSIDES</font>\n+ Upcoming',
-				Image = "",
-				Desc = "",
-				Tagline = '""',
-				Title = "Accursed",
-				Unlock = "Unlock: Upcoming."
-			}
-		},
-		Adrenaline = {
-			Visible = true,
-			GetGenVar = "AdrenalineCharm",
-			UnlockFile = "AdrenalineGot",
-			TestMode = false,
-			IsUpcoming = false,
-			IsTBA = false,
-			Data = {
-				Downsides = '<font color="rgb(255,222,189)">DOWNSIDES</font>\n- You cannot sprint',
-				Upsides = '<font color="rgb(255,222,189)">UPSIDES</font>\n+ The closer to death, the faster you move',
-				Image = "rbxassetid://104874764918679",
-				Desc = "Your legs only remember how to run when death leans in close. The rest of the time, they refuse to hurry at all.",
-				Tagline = '"Fear is fuel."',
-				Title = "Adrenaline",
-				Unlock = "Unlock: Survive 10 entity attacks without hiding."
-			}
-		},
-		CharmTile = {
-			Visible = false,
-			GetGenVar = "CharmTileCharm",
-			UnlockFile = "CharmTileGot",
-			TestMode = false,
-			IsUpcoming = false,
-			IsTBA = false,
-			Data = {
-				Downsides = '<font color="rgb(255,222,189)">DOWNSIDES</font>\n- ???',
-				Upsides = '<font color="rgb(255,222,189)">UPSIDES</font>\n+ ???',
-				Image = "",
-				Desc = "???",
-				Tagline = '"???"',
-				Title = "CharmTile",
-				Unlock = "Unlock: ???"
-			}
-		},
-		Favored = {
-			Visible = true,
-			GetGenVar = "FavoredCharm",
-			UnlockFile = "FavoredGot",
-			TestMode = false,
-			IsUpcoming = false,
-			IsTBA = true,
-			Data = {
-				Downsides = '<font color="rgb(255,222,189)">DOWNSIDES</font>\n- ???',
-				Upsides = '<font color="rgb(255,222,189)">UPSIDES</font>\n+ ???',
-				Image = "",
-				Desc = "???",
-				Tagline = '"???"',
-				Title = "Favored",
-				Unlock = "Unlock: ???"
-			}
-		},
-		Glass = {
-			Visible = true,
-			GetGenVar = "GlassCharm",
-			UnlockFile = "GlassGot",
-			TestMode = false,
-			IsUpcoming = false,
-			IsTBA = true,
-			Data = {
-				Downsides = '<font color="rgb(255,222,189)">DOWNSIDES</font>\n- ???',
-				Upsides = '<font color="rgb(255,222,189)">UPSIDES</font>\n+ ???',
-				Image = "",
-				Desc = "???",
-				Tagline = '"???"',
-				Title = "Glass",
-				Unlock = "Unlock: ???"
-			}
-		},
-		Keen = {
-			Visible = true,
-			GetGenVar = "KeenCharm",
-			UnlockFile = "KeenGot",
-			TestMode = false,
-			IsUpcoming = false,
-			IsTBA = true,
-			Data = {
-				Downsides = '<font color="rgb(255,222,189)">DOWNSIDES</font>\n- ???',
-				Upsides = '<font color="rgb(255,222,189)">UPSIDES</font>\n+ ???',
-				Image = "",
-				Desc = "???",
-				Tagline = '"???"',
-				Title = "Keen",
-				Unlock = "Unlock: ???"
-			}
-		},
-		Timid = {
-			Visible = true,
-			GetGenVar = "TimidCharm",
-			UnlockFile = "TimidGot",
-			TestMode = false,
-			IsUpcoming = true,
-			IsTBA = true,
-			Data = {
-				Downsides = '<font color="rgb(255,222,189)">DOWNSIDES</font>\n- ???',
-				Upsides = '<font color="rgb(255,222,189)">UPSIDES</font>\n+ ???',
-				Image = "",
-				Desc = "???",
-				Tagline = '"???"',
-				Title = "Timid",
-				Unlock = "Unlock: ???"
-			}
-		},
-		Wired = {
-			Visible = true,
-			GetGenVar = "WiredCharm",
-			UnlockFile = "WiredGot",
-			TestMode = false,
-			IsUpcoming = false,
-			IsTBA = true,
-			Data = {
-				Downsides = '<font color="rgb(255,222,189)">DOWNSIDES</font>\n- ???',
-				Upsides = '<font color="rgb(255,222,189)">UPSIDES</font>\n+ ???',
-				Image = "",
-				Desc = "???",
-				Tagline = '"???"',
-				Title = "Wired",
-				Unlock = "Unlock: ???"
-			}
-		},
-		BackpackPlus = {
-			Visible = true,
-			GetGenVar = "BackpackPlusCharm",
-			UnlockFile = "BackpackPlusGot",
-			TestMode = false,
-			IsUpcoming = false,
-			IsTBA = true,
-			Data = {
-				Downsides = '<font color="rgb(255,222,189)">DOWNSIDES</font>\n- ???',
-				Upsides = '<font color="rgb(255,222,189)">UPSIDES</font>\n+ ???',
-				Image = "",
-				Desc = "???",
-				Tagline = '"???"',
-				Title = "BackpackPlus",
-				Unlock = "Unlock: ???"
-			}
-		}
-	},
-	DefaultData = {
-		Downsides = '<font color="rgb(255,222,189)">DOWNSIDES</font>\n- ???',
-		Upsides = '<font color="rgb(255,222,189)">UPSIDES</font>\n+ ???',
-		Image = "",
-		Desc = "???",
-		Tagline = '"???"',
-		Title = "???",
-		Unlock = "Unlock: ???"
-	},
-	Animation = {
-		ScaleMultiplier = 1.08,
-		TweenDuration = 0.1,
-		TextPopDuration = 0.5,
-		TextPopOffset = 8
-	}
+Files = {
+LobbyFile = "LobbyFrame.txt",
+ButtonFile = "ButtonCharms.txt"
+},
+Urls = {
+LobbyGui = "https://raw.githubusercontent.com/lynguyen26031993-design/-u/refs/heads/main/Place_74871629393921_Frame_LobbyFrame_1785934723.txt",
+ButtonGui = "https://raw.githubusercontent.com/lynguyen26031993-design/-u/refs/heads/main/Place_74871629393921_TextButton_ButtonCharms_1785943384.txt"
+},
+Names = {
+ParentUI = "MainUI",
+GuiName = "CharmsThingy",
+CharmsFolder = "Charms",
+CloseButton = "CloseButton",
+ListFolder = "List",
+EffectsFolder = "Effects",
+DownsidesLabel = "Downsides",
+UpsidesLabel = "Upsides",
+MainFrame = "Frame",
+ApplyButton = "Apply",
+AppliedButton = "Applied",
+UnlockLabel = "Unlock",
+ImageObj = "ImageLabel",
+DescLabel = "Desc",
+TaglineLabel = "Tagline",
+TitleLabel = "Title"
+},
+DisplaySettings = {
+ShowAllByDefault = false
+},
+Charms = {
+Laziness = {
+Visible = true,
+GetGenVar = "Lazyness",
+UnlockFile = "LazyGot",
+TestMode = false,
+IsUpcoming = false,
+IsTBA = false, -- Thêm config TBA (true sẽ ẩn tất cả icons và đặt ở cuối hàng)
+Data = {
+Downsides = '<font color="rgb(255,222,189)">DOWNSIDES</font>\n- Unlocking doors with a key takes twice as long\n- Half stamima will be reduced when player uses tracking keys power',
+Upsides = '<font color="rgb(255,222,189)">UPSIDES</font>\n+ Every sideroom door bash pays back 28 stamina and a burst of speed\n+ Track key in room where player is in',
+Image = "rbxassetid://105951848239499",
+Desc = "Locked doors are a suggestion. Lower a shoulder, pay in bruises, and walk right through.. just don't expect keys to feel like helping anymore.",
+Tagline = '"Effort is overrated."',
+Title = "Pure Laziness",
+Unlock = "Unlock: Slam open 20 side room doors in a single run by sprinting into them."
+}
+},
+Accursed = {
+Visible = false,
+GetGenVar = "AccursedCharm",
+UnlockFile = "AccursedGot",
+TestMode = false,
+IsUpcoming = false,
+IsTBA = true,
+Data = {
+Downsides = '<font color="rgb(255,222,189)">DOWNSIDES</font>\n- Upcoming',
+Upsides = '<font color="rgb(255,222,189)">UPSIDES</font>\n+ Upcoming',
+Image = "",
+Desc = "",
+Tagline = '""',
+Title = "Accursed",
+Unlock = "Unlock: Upcoming."
+}
+},
+Adrenaline = {
+Visible = true,
+GetGenVar = "AdrenalineCharm",
+UnlockFile = "AdrenalineGot",
+TestMode = false,
+IsUpcoming = false,
+IsTBA = false,
+Data = {
+Downsides = '<font color="rgb(255,222,189)">DOWNSIDES</font>\n- You cannot sprint',
+Upsides = '<font color="rgb(255,222,189)">UPSIDES</font>\n+ The closer to death, the faster you move',
+Image = "rbxassetid://104874764918679",
+Desc = "Your legs only remember how to run when death leans in close. The rest of the time, they refuse to hurry at all.",
+Tagline = '"Fear is fuel."',
+Title = "Adrenaline",
+Unlock = "Unlock: Survive 10 entity attacks without hiding."
+}
+},
+CharmTile = {
+Visible = false,
+GetGenVar = "CharmTileCharm",
+UnlockFile = "CharmTileGot",
+TestMode = false,
+IsUpcoming = false,
+IsTBA = false,
+Data = {
+Downsides = '<font color="rgb(255,222,189)">DOWNSIDES</font>\n- ???',
+Upsides = '<font color="rgb(255,222,189)">UPSIDES</font>\n+ ???',
+Image = "",
+Desc = "???",
+Tagline = '"???"',
+Title = "CharmTile",
+Unlock = "Unlock: ???"
+}
+},
+Favored = {
+Visible = true,
+GetGenVar = "FavoredCharm",
+UnlockFile = "FavoredGot",
+TestMode = false,
+IsUpcoming = false,
+IsTBA = true,
+Data = {
+Downsides = '<font color="rgb(255,222,189)">DOWNSIDES</font>\n- ???',
+Upsides = '<font color="rgb(255,222,189)">UPSIDES</font>\n+ ???',
+Image = "",
+Desc = "???",
+Tagline = '"???"',
+Title = "Favored",
+Unlock = "Unlock: ???"
+}
+},
+Glass = {
+Visible = true,
+GetGenVar = "GlassCharm",
+UnlockFile = "GlassGot",
+TestMode = false,
+IsUpcoming = false,
+IsTBA = true,
+Data = {
+Downsides = '<font color="rgb(255,222,189)">DOWNSIDES</font>\n- ???',
+Upsides = '<font color="rgb(255,222,189)">UPSIDES</font>\n+ ???',
+Image = "",
+Desc = "???",
+Tagline = '"???"',
+Title = "Glass",
+Unlock = "Unlock: ???"
+}
+},
+Keen = {
+Visible = true,
+GetGenVar = "KeenCharm",
+UnlockFile = "KeenGot",
+TestMode = false,
+IsUpcoming = false,
+IsTBA = true,
+Data = {
+Downsides = '<font color="rgb(255,222,189)">DOWNSIDES</font>\n- ???',
+Upsides = '<font color="rgb(255,222,189)">UPSIDES</font>\n+ ???',
+Image = "",
+Desc = "???",
+Tagline = '"???"',
+Title = "Keen",
+Unlock = "Unlock: ???"
+}
+},
+Timid = {
+Visible = true,
+GetGenVar = "TimidCharm",
+UnlockFile = "TimidGot",
+TestMode = false,
+IsUpcoming = true,
+IsTBA = true,
+Data = {
+Downsides = '<font color="rgb(255,222,189)">DOWNSIDES</font>\n- ???',
+Upsides = '<font color="rgb(255,222,189)">UPSIDES</font>\n+ ???',
+Image = "",
+Desc = "???",
+Tagline = '"???"',
+Title = "Timid",
+Unlock = "Unlock: ???"
+}
+},
+Wired = {
+Visible = true,
+GetGenVar = "WiredCharm",
+UnlockFile = "WiredGot",
+TestMode = false,
+IsUpcoming = false,
+IsTBA = true,
+Data = {
+Downsides = '<font color="rgb(255,222,189)">DOWNSIDES</font>\n- ???',
+Upsides = '<font color="rgb(255,222,189)">UPSIDES</font>\n+ ???',
+Image = "",
+Desc = "???",
+Tagline = '"???"',
+Title = "Wired",
+Unlock = "Unlock: ???"
+}
+},
+BackpackPlus = {
+Visible = true,
+GetGenVar = "BackpackPlusCharm",
+UnlockFile = "BackpackPlusGot",
+TestMode = false,
+IsUpcoming = false,
+IsTBA = true,
+Data = {
+Downsides = '<font color="rgb(255,222,189)">DOWNSIDES</font>\n- ???',
+Upsides = '<font color="rgb(255,222,189)">UPSIDES</font>\n+ ???',
+Image = "",
+Desc = "???",
+Tagline = '"???"',
+Title = "BackpackPlus",
+Unlock = "Unlock: ???"
+}
+}
+},
+DefaultData = {
+Downsides = '<font color="rgb(255,222,189)">DOWNSIDES</font>\n- ???',
+Upsides = '<font color="rgb(255,222,189)">UPSIDES</font>\n+ ???',
+Image = "",
+Desc = "???",
+Tagline = '"???"',
+Title = "???",
+Unlock = "Unlock: ???"
+},
+Animation = {
+ScaleMultiplier = 1.08,
+TweenDuration = 0.1,
+TextPopDuration = 0.5,
+TextPopOffset = 8
+}
 }
 
 -- Initialize Global Variables from Config
 for _, charmInfo in pairs(CONFIG.Charms) do
-	if charmInfo.GetGenVar then
-		getgenv()[charmInfo.GetGenVar] = false
-	end
+if charmInfo.GetGenVar then
+getgenv()[charmInfo.GetGenVar] = false
+end
 end
 
 -- Services & Shared Variables
@@ -415,22 +412,22 @@ local TweenService = game:GetService("TweenService")
 local LocalPlayer = Players.LocalPlayer
 
 local SharedState = {
-	Gui = nil,
-	CharmsFolder = nil,
-	EffectsFolder = nil,
-	ListFolder = nil,
-	MainFrame = nil,
-	DownsidesLabel = nil,
-	UpsidesLabel = nil,
-	ApplyButton = nil,
-	AppliedButton = nil,
-	UnlockLabel = nil,
-	ImageObj = nil,
-	DescLabel = nil,
-	TaglineLabel = nil,
-	TitleLabel = nil,
-	CurrentSelectedCharm = nil,
-	OriginalMouseBehavior = nil
+Gui = nil,
+CharmsFolder = nil,
+EffectsFolder = nil,
+ListFolder = nil,
+MainFrame = nil,
+DownsidesLabel = nil,
+UpsidesLabel = nil,
+ApplyButton = nil,
+AppliedButton = nil,
+UnlockLabel = nil,
+ImageObj = nil,
+DescLabel = nil,
+TaglineLabel = nil,
+TitleLabel = nil,
+CurrentSelectedCharm = nil,
+OriginalMouseBehavior = nil
 }
 
 -- Forward declaration of RefreshCharmListUI function
@@ -441,404 +438,414 @@ local RefreshCharmListUI
 -- ============================================================================
 
 local function LoadGui(file, url)
-	if not isfile(file) then
-		writefile(file, game:HttpGet(url))
-	end
-	return game:GetObjects(getcustomasset(file))[1]
+if not isfile(file) then
+writefile(file, game:HttpGet(url))
+end
+return game:GetObjects(getcustomasset(file))[1]
 end
 
 local function ApplyAnimationToButton(btn)
-	local size = btn.Size
-	local big = UDim2.new(
-		size.X.Scale * CONFIG.Animation.ScaleMultiplier, size.X.Offset,
-		size.Y.Scale * CONFIG.Animation.ScaleMultiplier, size.Y.Offset
-	)
-	local info = TweenInfo.new(CONFIG.Animation.TweenDuration, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)  
+local size = btn.Size
+local big = UDim2.new(
+size.X.Scale * CONFIG.Animation.ScaleMultiplier, size.X.Offset,
+size.Y.Scale * CONFIG.Animation.ScaleMultiplier, size.Y.Offset
+)
+local info = TweenInfo.new(CONFIG.Animation.TweenDuration, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
 
-	btn.MouseButton1Down:Connect(function()  
-		TweenService:Create(btn, info, { Size = big }):Play()  
-	end)  
+btn.MouseButton1Down:Connect(function()    
+	TweenService:Create(btn, info, { Size = big }):Play()    
+end)    
 
-	local function Reset()  
-		TweenService:Create(btn, info, { Size = size }):Play()  
-	end  
+local function Reset()    
+	TweenService:Create(btn, info, { Size = size }):Play()    
+end    
 
-	btn.MouseButton1Up:Connect(Reset)  
-	btn.MouseLeave:Connect(Reset)
+btn.MouseButton1Up:Connect(Reset)    
+btn.MouseLeave:Connect(Reset)
+
 end
 
 local function SetupTextPopAnimation(lbl, delayTime)
-	if not lbl then return function() end end
-	local pos = lbl.Position
-	local busy = false
+if not lbl then return function() end end
+local pos = lbl.Position
+local busy = false
 
-	local function Play()  
-		if busy then return end  
-		busy = true  
+local function Play()    
+	if busy then return end    
+	busy = true    
 
-		task.delay(delayTime or 0, function()  
-			lbl.Position = pos + UDim2.new(0, 0, 0, CONFIG.Animation.TextPopOffset)  
-			TweenService:Create(  
-				lbl,  
-				TweenInfo.new(CONFIG.Animation.TextPopDuration, Enum.EasingStyle.Back, Enum.EasingDirection.Out),  
-				{ Position = pos }  
-			):Play()  
-			task.wait(CONFIG.Animation.TextPopDuration)  
-			busy = false  
-		end)  
-	end  
+	task.delay(delayTime or 0, function()    
+		lbl.Position = pos + UDim2.new(0, 0, 0, CONFIG.Animation.TextPopOffset)    
+		TweenService:Create(    
+			lbl,    
+			TweenInfo.new(CONFIG.Animation.TextPopDuration, Enum.EasingStyle.Back, Enum.EasingDirection.Out),    
+			{ Position = pos }    
+		):Play()    
+		task.wait(CONFIG.Animation.TextPopDuration)    
+		busy = false    
+	end)    
+end    
 
-	lbl:GetPropertyChangedSignal("Text"):Connect(Play)  
-	return Play
+lbl:GetPropertyChangedSignal("Text"):Connect(Play)    
+return Play
+
 end
 
 local function CacheGuiReferences(gui)
-	SharedState.Gui = gui
-	SharedState.CharmsFolder = gui:FindFirstChild(CONFIG.Names.CharmsFolder, true)
-	
-	if SharedState.CharmsFolder then
-		SharedState.EffectsFolder = SharedState.CharmsFolder:FindFirstChild(CONFIG.Names.EffectsFolder, true)
-		SharedState.ListFolder = SharedState.CharmsFolder:FindFirstChild(CONFIG.Names.ListFolder, true)
-		SharedState.MainFrame = SharedState.CharmsFolder:FindFirstChild(CONFIG.Names.MainFrame, true)
-		
-		if SharedState.EffectsFolder then
-			SharedState.DownsidesLabel = SharedState.EffectsFolder:FindFirstChild(CONFIG.Names.DownsidesLabel, true)
-			SharedState.UpsidesLabel = SharedState.EffectsFolder:FindFirstChild(CONFIG.Names.UpsidesLabel, true)
-		end
-		
-		if SharedState.MainFrame then
-			SharedState.ApplyButton = SharedState.MainFrame:FindFirstChild(CONFIG.Names.ApplyButton, true)
-			SharedState.AppliedButton = SharedState.MainFrame:FindFirstChild(CONFIG.Names.AppliedButton, true)
-			SharedState.UnlockLabel = SharedState.MainFrame:FindFirstChild(CONFIG.Names.UnlockLabel, true)
-			SharedState.ImageObj = SharedState.MainFrame:FindFirstChild(CONFIG.Names.ImageObj, true)
-			SharedState.DescLabel = SharedState.MainFrame:FindFirstChild(CONFIG.Names.DescLabel, true)
-			if SharedState.DescLabel then
-				SharedState.TaglineLabel = SharedState.DescLabel.Parent:FindFirstChild(CONFIG.Names.TaglineLabel)
-			end
-			SharedState.TitleLabel = SharedState.MainFrame:FindFirstChild(CONFIG.Names.TitleLabel, true)
-		end
-	end
+SharedState.Gui = gui
+SharedState.CharmsFolder = gui:FindFirstChild(CONFIG.Names.CharmsFolder, true)
+
+if SharedState.CharmsFolder then  
+	SharedState.EffectsFolder = SharedState.CharmsFolder:FindFirstChild(CONFIG.Names.EffectsFolder, true)  
+	SharedState.ListFolder = SharedState.CharmsFolder:FindFirstChild(CONFIG.Names.ListFolder, true)  
+	SharedState.MainFrame = SharedState.CharmsFolder:FindFirstChild(CONFIG.Names.MainFrame, true)  
+	  
+	if SharedState.EffectsFolder then  
+		SharedState.DownsidesLabel = SharedState.EffectsFolder:FindFirstChild(CONFIG.Names.DownsidesLabel, true)  
+		SharedState.UpsidesLabel = SharedState.EffectsFolder:FindFirstChild(CONFIG.Names.UpsidesLabel, true)  
+	end  
+	  
+	if SharedState.MainFrame then  
+		SharedState.ApplyButton = SharedState.MainFrame:FindFirstChild(CONFIG.Names.ApplyButton, true)  
+		SharedState.AppliedButton = SharedState.MainFrame:FindFirstChild(CONFIG.Names.AppliedButton, true)  
+		SharedState.UnlockLabel = SharedState.MainFrame:FindFirstChild(CONFIG.Names.UnlockLabel, true)  
+		SharedState.ImageObj = SharedState.MainFrame:FindFirstChild(CONFIG.Names.ImageObj, true)  
+		SharedState.DescLabel = SharedState.MainFrame:FindFirstChild(CONFIG.Names.DescLabel, true)  
+		if SharedState.DescLabel then  
+			SharedState.TaglineLabel = SharedState.DescLabel.Parent:FindFirstChild(CONFIG.Names.TaglineLabel)  
+		end  
+		SharedState.TitleLabel = SharedState.MainFrame:FindFirstChild(CONFIG.Names.TitleLabel, true)  
+	end  
+end
+
 end
 
 local function UpdateCharmInfo(charmName, data)
-	SharedState.CurrentSelectedCharm = charmName
-	local charmConfig = CONFIG.Charms[charmName]
+SharedState.CurrentSelectedCharm = charmName
+local charmConfig = CONFIG.Charms[charmName]
 
-	if SharedState.DownsidesLabel then
-		SharedState.DownsidesLabel.RichText = true
-		SharedState.DownsidesLabel.Text = data.Downsides
-	end
+if SharedState.DownsidesLabel then  
+	SharedState.DownsidesLabel.RichText = true  
+	SharedState.DownsidesLabel.Text = data.Downsides  
+end  
 
-	if SharedState.UpsidesLabel then
-		SharedState.UpsidesLabel.RichText = true
-		SharedState.UpsidesLabel.Text = data.Upsides
-	end
+if SharedState.UpsidesLabel then  
+	SharedState.UpsidesLabel.RichText = true  
+	SharedState.UpsidesLabel.Text = data.Upsides  
+end  
 
-	if SharedState.ApplyButton and SharedState.AppliedButton then
-		if charmConfig then
-			local isUnlocked = isfile(charmConfig.UnlockFile) or charmConfig.TestMode == true
-			local isApplied = false
+if SharedState.ApplyButton and SharedState.AppliedButton then  
+	if charmConfig then  
+		local isUnlocked = isfile(charmConfig.UnlockFile) or charmConfig.TestMode == true  
+		local isApplied = false  
 
-			for _, cfg in pairs(CONFIG.Charms) do
-				if cfg.GetGenVar and getgenv()[cfg.GetGenVar] then
-					isApplied = (cfg == charmConfig)
-					break
-				end
-			end
+		for _, cfg in pairs(CONFIG.Charms) do  
+			if cfg.GetGenVar and getgenv()[cfg.GetGenVar] then  
+				isApplied = (cfg == charmConfig)  
+				break  
+			end  
+		end  
 
-			if not isUnlocked then
-				SharedState.ApplyButton.Visible = false
-				SharedState.AppliedButton.Visible = false
-				if SharedState.UnlockLabel then SharedState.UnlockLabel.Visible = true end
-			elseif isApplied then
-				SharedState.ApplyButton.Visible = false
-				SharedState.AppliedButton.Visible = true
-				if SharedState.UnlockLabel then SharedState.UnlockLabel.Visible = false end
-			else
-				SharedState.ApplyButton.Visible = true
-				SharedState.AppliedButton.Visible = false
-				if SharedState.UnlockLabel then SharedState.UnlockLabel.Visible = false end
-			end
-		else
-			SharedState.ApplyButton.Visible = false
-			SharedState.AppliedButton.Visible = false
-			if SharedState.UnlockLabel then SharedState.UnlockLabel.Visible = false end
-		end
-	end
+		if not isUnlocked then  
+			SharedState.ApplyButton.Visible = false  
+			SharedState.AppliedButton.Visible = false  
+			if SharedState.UnlockLabel then SharedState.UnlockLabel.Visible = true end  
+		elseif isApplied then  
+			SharedState.ApplyButton.Visible = false  
+			SharedState.AppliedButton.Visible = true  
+			if SharedState.UnlockLabel then SharedState.UnlockLabel.Visible = false end  
+		else  
+			SharedState.ApplyButton.Visible = true  
+			SharedState.AppliedButton.Visible = false  
+			if SharedState.UnlockLabel then SharedState.UnlockLabel.Visible = false end  
+		end  
+	else  
+		SharedState.ApplyButton.Visible = false  
+		SharedState.AppliedButton.Visible = false  
+		if SharedState.UnlockLabel then SharedState.UnlockLabel.Visible = false end  
+	end  
+end  
 
-	if SharedState.ImageObj and SharedState.ImageObj:IsA("ImageLabel") then
-		if data.Image ~= "" then
-			SharedState.ImageObj.Image = data.Image
-		else
-			SharedState.ImageObj.Image = ""
-		end
-	end
+if SharedState.ImageObj and SharedState.ImageObj:IsA("ImageLabel") then  
+	if data.Image ~= "" then  
+		SharedState.ImageObj.Image = data.Image  
+	else  
+		SharedState.ImageObj.Image = ""  
+	end  
+end  
 
-	if SharedState.DescLabel then
-		SharedState.DescLabel.Text = data.Desc
-	end
+if SharedState.DescLabel then  
+	SharedState.DescLabel.Text = data.Desc  
+end  
 
-	if SharedState.TaglineLabel then
-		SharedState.TaglineLabel.Text = data.Tagline
-	end
+if SharedState.TaglineLabel then  
+	SharedState.TaglineLabel.Text = data.Tagline  
+end  
 
-	if SharedState.TitleLabel then
-		SharedState.TitleLabel.Text = data.Title
-	end
+if SharedState.TitleLabel then  
+	SharedState.TitleLabel.Text = data.Title  
+end  
 
-	if SharedState.UnlockLabel then
-		SharedState.UnlockLabel.Text = data.Unlock
-	end
+if SharedState.UnlockLabel then  
+	SharedState.UnlockLabel.Text = data.Unlock  
+end
+
 end
 
 local function SetupButtonInteractions()
-	if not SharedState.ApplyButton or not SharedState.AppliedButton then return end
+if not SharedState.ApplyButton or not SharedState.AppliedButton then return end
 
-	if not SharedState.ApplyButton:GetAttribute("Connected") then
-		SharedState.ApplyButton:SetAttribute("Connected", true)
+if not SharedState.ApplyButton:GetAttribute("Connected") then  
+	SharedState.ApplyButton:SetAttribute("Connected", true)  
 
-		SharedState.ApplyButton.MouseButton1Click:Connect(function()
-			local currentName = SharedState.CurrentSelectedCharm
-			if not currentName then
-				return
-			end
+	SharedState.ApplyButton.MouseButton1Click:Connect(function()  
+		local currentName = SharedState.CurrentSelectedCharm  
+		if not currentName then  
+			return  
+		end  
 
-			local charmConfig = CONFIG.Charms[currentName]
-			if not charmConfig or not (isfile(charmConfig.UnlockFile) or charmConfig.TestMode == true) then
-				return
-			end
+		local charmConfig = CONFIG.Charms[currentName]  
+		if not charmConfig or not (isfile(charmConfig.UnlockFile) or charmConfig.TestMode == true) then  
+			return  
+		end  
 
-			-- Unapply tất cả charm đang bật
-			for _, cfg in pairs(CONFIG.Charms) do
-				if cfg.GetGenVar then
-					getgenv()[cfg.GetGenVar] = false
-				end
-			end
+		-- Unapply tất cả charm đang bật  
+		for _, cfg in pairs(CONFIG.Charms) do  
+			if cfg.GetGenVar then  
+				getgenv()[cfg.GetGenVar] = false  
+			end  
+		end  
 
-			-- Apply charm mới
-			if charmConfig.GetGenVar then
-				getgenv()[charmConfig.GetGenVar] = true
-			end
+		-- Apply charm mới  
+		if charmConfig.GetGenVar then  
+			getgenv()[charmConfig.GetGenVar] = true  
+		end  
 
-			SharedState.ApplyButton.Visible = false
-			SharedState.AppliedButton.Visible = true
+		SharedState.ApplyButton.Visible = false  
+		SharedState.AppliedButton.Visible = true  
 
-			if SharedState.UnlockLabel then
-				SharedState.UnlockLabel.Visible = false
-			end
+		if SharedState.UnlockLabel then  
+			SharedState.UnlockLabel.Visible = false  
+		end  
 
-			RefreshCharmListUI()
-		end)
+		RefreshCharmListUI()  
+	end)  
 
-		SharedState.AppliedButton.MouseButton1Click:Connect(function()
-			local currentName = SharedState.CurrentSelectedCharm
-			if not currentName then return end
-			local charmConfig = CONFIG.Charms[currentName]
-			if not charmConfig then return end
+	SharedState.AppliedButton.MouseButton1Click:Connect(function()  
+		local currentName = SharedState.CurrentSelectedCharm  
+		if not currentName then return end  
+		local charmConfig = CONFIG.Charms[currentName]  
+		if not charmConfig then return end  
 
-			if charmConfig.GetGenVar then
-				getgenv()[charmConfig.GetGenVar] = false
-			end
+		if charmConfig.GetGenVar then  
+			getgenv()[charmConfig.GetGenVar] = false  
+		end  
 
-			SharedState.AppliedButton.Visible = false
-			SharedState.ApplyButton.Visible = true
+		SharedState.AppliedButton.Visible = false  
+		SharedState.ApplyButton.Visible = true  
 
-			RefreshCharmListUI()
-		end)
-	end
+		RefreshCharmListUI()  
+	end)  
+end
+
 end
 
 RefreshCharmListUI = function()
-	if not SharedState.ListFolder then return end
+if not SharedState.ListFolder then return end
 
-	for _, v in ipairs(SharedState.ListFolder:GetChildren()) do
-		if v:IsA("ImageButton") then
-			local charmConfig = CONFIG.Charms[v.Name]
-			if charmConfig then
-				local unlocked = isfile(charmConfig.UnlockFile) or charmConfig.TestMode == true
-				local isApplied = charmConfig.GetGenVar and getgenv()[charmConfig.GetGenVar] == true
+for _, v in ipairs(SharedState.ListFolder:GetChildren()) do  
+	if v:IsA("ImageButton") then  
+		local charmConfig = CONFIG.Charms[v.Name]  
+		if charmConfig then  
+			local unlocked = isfile(charmConfig.UnlockFile) or charmConfig.TestMode == true  
+			local isApplied = charmConfig.GetGenVar and getgenv()[charmConfig.GetGenVar] == true  
 
-				local icons = v:FindFirstChild("Icons")
-				if icons then
-					local star = icons:FindFirstChild("Star")
-					local question = icons:FindFirstChild("Question")
-					local upcoming = icons:FindFirstChild("Upcoming")
+			local icons = v:FindFirstChild("Icons")  
+			if icons then  
+				local star = icons:FindFirstChild("Star")  
+				local question = icons:FindFirstChild("Question")  
+				local upcoming = icons:FindFirstChild("Upcoming")  
 
-					if charmConfig.IsTBA then
-						if star then star.Visible = false end
-						if question then question.Visible = false end
-						if upcoming then upcoming.Visible = false end
-					elseif charmConfig.IsUpcoming then
-						if star then star.Visible = false end
-						if question then question.Visible = false end
-					elseif unlocked then
-						-- Chỉ hiện Star nếu charm này đang được apply, hết apply thì Star tự ẩn
-						if star and star:IsA("ImageLabel") then
-							star.Visible = isApplied
-						end
-						if question then question.Visible = false end
-						if upcoming then upcoming.Visible = false end
-					else
-						if star then star.Visible = false end
-						if question then question.Visible = true end
-						if upcoming then upcoming.Visible = false end
-					end
-				end
-			end
-		end
-	end
+				if charmConfig.IsTBA then  
+					if star then star.Visible = false end  
+					if question then question.Visible = false end  
+					if upcoming then upcoming.Visible = false end  
+				elseif charmConfig.IsUpcoming then  
+					if star then star.Visible = false end  
+					if question then question.Visible = false end  
+				elseif unlocked then  
+					-- Chỉ hiện Star nếu charm này đang được apply, hết apply thì Star tự ẩn  
+					if star and star:IsA("ImageLabel") then  
+						star.Visible = isApplied  
+					end  
+					if question then question.Visible = false end  
+					if upcoming then upcoming.Visible = false end  
+				else  
+					if star then star.Visible = false end  
+					if question then question.Visible = true end  
+					if upcoming then upcoming.Visible = false end  
+				end  
+			end  
+		end  
+	end  
+end
+
 end
 
 local function InitializeCharmList()
-	if not SharedState.ListFolder then return end
+if not SharedState.ListFolder then return end
 
-	local unlockOrder = 0
+local unlockOrder = 0
+
 local lockOrder = 1000
 local upcomingOrder = 2000
 local tbaOrder = 3000
 
-	for _, v in ipairs(SharedState.ListFolder:GetChildren()) do
-		if v:IsA("ImageButton") then
+for _, v in ipairs(SharedState.ListFolder:GetChildren()) do  
+	if v:IsA("ImageButton") then  
 
-			local charmConfig = CONFIG.Charms[v.Name]
-			local shouldShow = false
+		local charmConfig = CONFIG.Charms[v.Name]  
+		local shouldShow = false  
 
-			if charmConfig then
-				shouldShow = charmConfig.Visible
-			else
-				shouldShow = CONFIG.DisplaySettings.ShowAllByDefault
-			end
+		if charmConfig then  
+			shouldShow = charmConfig.Visible  
+		else  
+			shouldShow = CONFIG.DisplaySettings.ShowAllByDefault  
+		end  
 
-			v.Visible = shouldShow
-			
-			if charmConfig then
-				local unlocked = isfile(charmConfig.UnlockFile) or charmConfig.TestMode == true
+		v.Visible = shouldShow  
+		  
+		if charmConfig then  
+			local unlocked = isfile(charmConfig.UnlockFile) or charmConfig.TestMode == true  
 
-		if charmConfig.IsTBA then
-	tbaOrder += 1
-	v.LayoutOrder = tbaOrder
+	if charmConfig.IsTBA then  
+tbaOrder += 1  
+v.LayoutOrder = tbaOrder
 
 elseif unlocked and not charmConfig.IsUpcoming then
-	unlockOrder += 1
-	v.LayoutOrder = unlockOrder
+unlockOrder += 1
+v.LayoutOrder = unlockOrder
 
 elseif not unlocked and not charmConfig.IsUpcoming then
-	lockOrder += 1
-	v.LayoutOrder = lockOrder
+lockOrder += 1
+v.LayoutOrder = lockOrder
 
 elseif charmConfig.IsUpcoming then
-	upcomingOrder += 1
-	v.LayoutOrder = upcomingOrder
+upcomingOrder += 1
+v.LayoutOrder = upcomingOrder
 end
-			end
+end
 
-			if shouldShow then
-				ApplyAnimationToButton(v)
+if shouldShow then  
+			ApplyAnimationToButton(v)  
 
-				local icons = v:FindFirstChild("Icons")
-				if icons then
-					local star = icons:FindFirstChild("Star")
-					local question = icons:FindFirstChild("Question")
-					local upcoming = icons:FindFirstChild("Upcoming")
+			local icons = v:FindFirstChild("Icons")  
+			if icons then  
+				local star = icons:FindFirstChild("Star")  
+				local question = icons:FindFirstChild("Question")  
+				local upcoming = icons:FindFirstChild("Upcoming")  
 
-					if charmConfig then
-						local unlocked = isfile(charmConfig.UnlockFile) or charmConfig.TestMode == true
-						local isApplied = charmConfig.GetGenVar and getgenv()[charmConfig.GetGenVar] == true
+				if charmConfig then  
+					local unlocked = isfile(charmConfig.UnlockFile) or charmConfig.TestMode == true  
+					local isApplied = charmConfig.GetGenVar and getgenv()[charmConfig.GetGenVar] == true  
 
-						if charmConfig.IsTBA then
-							-- Ẩn tất cả các icon nếu IsTBA = true
-							if star then star.Visible = false end
-							if question then question.Visible = false end
-							if upcoming then upcoming.Visible = false end
-						elseif charmConfig.IsUpcoming then
-							if upcoming and upcoming:IsA("ImageLabel") then
-								upcoming.Image = "rbxassetid://85509926410946"
-								upcoming.Visible = true
-							end
-							if star then star.Visible = false end
-							if question then question.Visible = false end
-						elseif unlocked then
-							v.ImageTransparency = 0
-							
-							-- Chỉ hiện Star khi charm này đang được apply
-							if star and star:IsA("ImageLabel") then 
-								star.Visible = isApplied 
-							end
-							if question then question.Visible = false end
-							if upcoming then upcoming.Visible = false end
-						else
-							if star then star.Visible = false end
-							if question then question.Visible = true end
-							if upcoming then upcoming.Visible = false end
-						end
-					end
-				end
+					if charmConfig.IsTBA then  
+						-- Ẩn tất cả các icon nếu IsTBA = true  
+						if star then star.Visible = false end  
+						if question then question.Visible = false end  
+						if upcoming then upcoming.Visible = false end  
+					elseif charmConfig.IsUpcoming then  
+						if upcoming and upcoming:IsA("ImageLabel") then  
+							upcoming.Image = "rbxassetid://85509926410946"  
+							upcoming.Visible = true  
+						end  
+						if star then star.Visible = false end  
+						if question then question.Visible = false end  
+					elseif unlocked then  
+						v.ImageTransparency = 0  
+						  
+						-- Chỉ hiện Star khi charm này đang được apply  
+						if star and star:IsA("ImageLabel") then   
+							star.Visible = isApplied   
+						end  
+						if question then question.Visible = false end  
+						if upcoming then upcoming.Visible = false end  
+					else  
+						if star then star.Visible = false end  
+						if question then question.Visible = true end  
+						if upcoming then upcoming.Visible = false end  
+					end  
+				end  
+			end  
 
-				v.MouseButton1Click:Connect(function()
-					local data = charmConfig and charmConfig.Data or CONFIG.DefaultData
-					UpdateCharmInfo(v.Name, data)
-				end)
-			end
-		end
-	end
+			v.MouseButton1Click:Connect(function()  
+				local data = charmConfig and charmConfig.Data or CONFIG.DefaultData  
+				UpdateCharmInfo(v.Name, data)  
+			end)  
+		end  
+	end  
+end
+
 end
 
 local function InitializeGui()
-	local gui = LoadGui(CONFIG.Files.LobbyFile, CONFIG.Urls.LobbyGui)
-	if not gui then return end
+local gui = LoadGui(CONFIG.Files.LobbyFile, CONFIG.Urls.LobbyGui)
+if not gui then return end
 
-	gui.Parent = LocalPlayer.PlayerGui:WaitForChild(CONFIG.Names.ParentUI)
-	gui.Name = CONFIG.Names.GuiName
+gui.Parent = LocalPlayer.PlayerGui:WaitForChild(CONFIG.Names.ParentUI)  
+gui.Name = CONFIG.Names.GuiName  
 
-	CacheGuiReferences(gui)
+CacheGuiReferences(gui)  
 
-	if SharedState.CharmsFolder then
-		local closeBtn = SharedState.CharmsFolder:FindFirstChild(CONFIG.Names.CloseButton)
-		if closeBtn then closeBtn:Destroy() end
-		SharedState.CharmsFolder.Visible = false
+if SharedState.CharmsFolder then  
+	local closeBtn = SharedState.CharmsFolder:FindFirstChild(CONFIG.Names.CloseButton)  
+	if closeBtn then closeBtn:Destroy() end  
+	SharedState.CharmsFolder.Visible = false  
 
-		local button = LoadGui(CONFIG.Files.ButtonFile, CONFIG.Urls.ButtonGui)
-		if button then
-			button.Parent = gui
-			ApplyAnimationToButton(button)
+	local button = LoadGui(CONFIG.Files.ButtonFile, CONFIG.Urls.ButtonGui)  
+	if button then  
+		button.Parent = gui  
+		ApplyAnimationToButton(button)  
 
-			if button:IsA("TextButton") then
-				button.MouseButton1Click:Connect(function()
-					SharedState.CharmsFolder.Visible = not SharedState.CharmsFolder.Visible
-				end)
-			end
-		end
+		if button:IsA("TextButton") then  
+			button.MouseButton1Click:Connect(function()  
+				SharedState.CharmsFolder.Visible = not SharedState.CharmsFolder.Visible  
+			end)  
+		end  
+	end  
 
-		local popUp = SetupTextPopAnimation(SharedState.UpsidesLabel, 0)
-		local popDown = SetupTextPopAnimation(SharedState.DownsidesLabel, 0.1)
+	local popUp = SetupTextPopAnimation(SharedState.UpsidesLabel, 0)  
+	local popDown = SetupTextPopAnimation(SharedState.DownsidesLabel, 0.1)  
 
-		SharedState.CharmsFolder:GetPropertyChangedSignal("Visible"):Connect(function()
-	if SharedState.CharmsFolder.Visible then
-		if UserInputService.MouseEnabled then
-			SharedState.OriginalMouseBehavior = UserInputService.MouseBehavior
-			UserInputService.MouseBehavior = Enum.MouseBehavior.Default
-		end
+	SharedState.CharmsFolder:GetPropertyChangedSignal("Visible"):Connect(function()  
+if SharedState.CharmsFolder.Visible then  
+	if UserInputService.MouseEnabled then  
+		SharedState.OriginalMouseBehavior = UserInputService.MouseBehavior  
+		UserInputService.MouseBehavior = Enum.MouseBehavior.Default  
+	end  
 
-		popUp()
-		popDown()
-	else
-		if SharedState.OriginalMouseBehavior then
-			UserInputService.MouseBehavior = SharedState.OriginalMouseBehavior
-			SharedState.OriginalMouseBehavior = nil
-		end
-	end
+	popUp()  
+	popDown()  
+else  
+	if SharedState.OriginalMouseBehavior then  
+		UserInputService.MouseBehavior = SharedState.OriginalMouseBehavior  
+		SharedState.OriginalMouseBehavior = nil  
+	end  
+end
+
 end)
 
-		SetupButtonInteractions()
-		
-		task.spawn(function()
-			UpdateCharmInfo("Default", CONFIG.DefaultData)
-		end)
+SetupButtonInteractions()  
+	  
+	task.spawn(function()  
+		UpdateCharmInfo("Default", CONFIG.DefaultData)  
+	end)  
 
-		InitializeCharmList()
-	end
+	InitializeCharmList()  
+end  
 
-	return gui
+return gui
+
 end
 
 -- ============================================================================
@@ -850,118 +857,120 @@ SharedState.Gui = InitializeGui()
 game.ReplicatedStorage.GameData.LatestRoom.Changed:Wait()
 
 if SharedState.Gui then
-	SharedState.Gui:Destroy()
-	SharedState.Gui = nil
+SharedState.Gui:Destroy()
+SharedState.Gui = nil
 end
 
 local function CheckAndPlayAutoEffects()
-	for charmName, charmConfig in pairs(CONFIG.Charms) do
-		if charmConfig.GetGenVar and getgenv()[charmConfig.GetGenVar] == true then
-			task.spawn(function()
-				local playerGui = LocalPlayer:FindFirstChildOfClass("PlayerGui")
-				if playerGui then
-					local effectScreenGui = Instance.new("ScreenGui")
-					effectScreenGui.Name = charmName .. "EffectScreen"
-					effectScreenGui.ResetOnSpawn = false
-					effectScreenGui.IgnoreGuiInset = true
-					effectScreenGui.DisplayOrder = 9999
-					effectScreenGui.Parent = playerGui
+for charmName, charmConfig in pairs(CONFIG.Charms) do
+if charmConfig.GetGenVar and getgenv()[charmConfig.GetGenVar] == true then
+task.spawn(function()
+local playerGui = LocalPlayer:FindFirstChildOfClass("PlayerGui")
+if playerGui then
+local effectScreenGui = Instance.new("ScreenGui")
+effectScreenGui.Name = charmName .. "EffectScreen"
+effectScreenGui.ResetOnSpawn = false
+effectScreenGui.IgnoreGuiInset = true
+effectScreenGui.DisplayOrder = 9999
+effectScreenGui.Parent = playerGui
 
-					local textLabel = Instance.new("TextLabel")
-					textLabel.Name = charmName .. "Effect"
-					textLabel.AnchorPoint = Vector2.new(0.5, 0.5)
-					textLabel.Position = UDim2.new(0.5, 0, 0.5, 0)
-					textLabel.Size = UDim2.new(50, 0, 50, 0)
-					textLabel.BackgroundTransparency = 1
-					textLabel.BorderSizePixel = 0
-					textLabel.Font = Enum.Font.Oswald
-					textLabel.Text = charmConfig.Data and charmConfig.Data.Title or charmName
-					textLabel.TextScaled = true
-					textLabel.TextColor3 = Color3.fromRGB(255, 222, 189)
-					textLabel.TextTransparency = 1
-					textLabel.TextStrokeTransparency = 0
-					textLabel.TextStrokeColor3 = Color3.new()
-					textLabel.ZIndex = 9999
-					textLabel.Parent = effectScreenGui
-					
-					local gradient = Instance.new("UIGradient")
-					gradient.Color = ColorSequence.new({
-						ColorSequenceKeypoint.new(0.00, Color3.fromRGB(255, 222, 189)),
-						ColorSequenceKeypoint.new(0.35, Color3.fromRGB(255, 222, 189)),
-						ColorSequenceKeypoint.new(0.65, Color3.fromRGB(255, 213, 46)),
-						ColorSequenceKeypoint.new(1.00, Color3.fromRGB(255, 213, 46))
-					})
-					gradient.Rotation = 90
-					gradient.Parent = textLabel
+local textLabel = Instance.new("TextLabel")  
+				textLabel.Name = charmName .. "Effect"  
+				textLabel.AnchorPoint = Vector2.new(0.5, 0.5)  
+				textLabel.Position = UDim2.new(0.5, 0, 0.5, 0)  
+				textLabel.Size = UDim2.new(50, 0, 50, 0)  
+				textLabel.BackgroundTransparency = 1  
+				textLabel.BorderSizePixel = 0  
+				textLabel.Font = Enum.Font.Oswald  
+				textLabel.Text = charmConfig.Data and charmConfig.Data.Title or charmName  
+				textLabel.TextScaled = true  
+				textLabel.TextColor3 = Color3.fromRGB(255, 222, 189)  
+				textLabel.TextTransparency = 1  
+				textLabel.TextStrokeTransparency = 0  
+				textLabel.TextStrokeColor3 = Color3.new()  
+				textLabel.ZIndex = 9999  
+				textLabel.Parent = effectScreenGui  
+				  
+				local gradient = Instance.new("UIGradient")  
+				gradient.Color = ColorSequence.new({  
+					ColorSequenceKeypoint.new(0.00, Color3.fromRGB(255, 222, 189)),  
+					ColorSequenceKeypoint.new(0.35, Color3.fromRGB(255, 222, 189)),  
+					ColorSequenceKeypoint.new(0.65, Color3.fromRGB(255, 213, 46)),  
+					ColorSequenceKeypoint.new(1.00, Color3.fromRGB(255, 213, 46))  
+				})  
+				gradient.Rotation = 90  
+				gradient.Parent = textLabel  
 
-					local tweenInfo1 = TweenInfo.new(1.5, Enum.EasingStyle.Sine, Enum.EasingDirection.Out)
-					local tween1 = TweenService:Create(textLabel, tweenInfo1, {
-						Size = UDim2.new(0, 1200, 0, 200),
-						Position = UDim2.new(0.5, 0, 0.5, 0),
-						TextTransparency = 0
-					})
+				local tweenInfo1 = TweenInfo.new(1.5, Enum.EasingStyle.Sine, Enum.EasingDirection.Out)  
+				local tween1 = TweenService:Create(textLabel, tweenInfo1, {  
+					Size = UDim2.new(0, 1200, 0, 200),  
+					Position = UDim2.new(0.5, 0, 0.5, 0),  
+					TextTransparency = 0  
+				})  
 
-					tween1:Play()
-					tween1.Completed:Wait()
+				tween1:Play()  
+				tween1.Completed:Wait()  
 
-					task.wait(3)
+				task.wait(3)  
 
-					local tween2 = TweenService:Create(
-						textLabel,
-						TweenInfo.new(0.8, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
-						{
-							Size = UDim2.new(0, 1600, 0, 260),
-							Position = UDim2.new(0.5, 0, 0.5, 0)
-						}
-					)
-					tween2:Play()
-					tween2.Completed:Wait()
+				local tween2 = TweenService:Create(  
+					textLabel,  
+					TweenInfo.new(0.8, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),  
+					{  
+						Size = UDim2.new(0, 1600, 0, 260),  
+						Position = UDim2.new(0.5, 0, 0.5, 0)  
+					}  
+				)  
+				tween2:Play()  
+				tween2.Completed:Wait()  
 
-					task.wait(2)
+				task.wait(2)  
 
-					local tween3 = TweenService:Create(
-						textLabel,
-						TweenInfo.new(0.6, Enum.EasingStyle.Quad, Enum.EasingDirection.In),
-						{
-							Position = UDim2.new(0.5, 0, -0.3, 0)
-						}
-					)
-					tween3:Play()
-					tween3.Completed:Wait()
+				local tween3 = TweenService:Create(  
+					textLabel,  
+					TweenInfo.new(0.6, Enum.EasingStyle.Quad, Enum.EasingDirection.In),  
+					{  
+						Position = UDim2.new(0.5, 0, -0.3, 0)  
+					}  
+				)  
+				tween3:Play()  
+				tween3.Completed:Wait()  
 
-					effectScreenGui:Destroy()
-				end
+				effectScreenGui:Destroy()  
+			end  
 
-				print("work: " .. charmName)
-			end)
-		end
-	end
+			print("work: " .. charmName)  
+		end)  
+	end  
 end
 
-task.spawn(function() 
+end
+
+task.spawn(function()
 CheckAndPlayAutoEffects()
-end) 
+end)
 
 if getgenv().Lazyness == true then
 
 local Players = game:GetService("Players")
 
 local function LoadGui(file, url)
-	if not isfile(file) then
-		writefile(file, game:HttpGet(url))
-	end
+if not isfile(file) then
+writefile(file, game:HttpGet(url))
+end
 
-	return game:GetObjects(getcustomasset(file))[1]
+return game:GetObjects(getcustomasset(file))[1]
+
 end
 
 local parent = Players.LocalPlayer.PlayerGui
-	:WaitForChild("MainUI")
-	:WaitForChild("MainFrame")
-	:WaitForChild("MobileButtons")
+:WaitForChild("MainUI")
+:WaitForChild("MainFrame")
+:WaitForChild("MobileButtons")
 
 local button = LoadGui(
-	"KeytrackButton.txt",
-	"https://raw.githubusercontent.com/lynguyen26031993-design/-u/refs/heads/main/Place_6839171747_ImageButton_KeytrackButton_1786012036.txt"
+"KeytrackButton.txt",
+"https://raw.githubusercontent.com/lynguyen26031993-design/-u/refs/heads/main/Place_6839171747_ImageButton_KeytrackButton_1786012036.txt"
 )
 
 button.Parent = parent
@@ -974,70 +983,70 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local busy = false
 
 button.MouseButton1Click:Connect(function()
-	if busy then
-		return
-	end
-	
-	if getgenv().Lazyness then
-	if getgenv().SetStamina then
-			getgenv().HalfStamina(0.1)
-			else
-			print("bla") 
-			end
-		end
+if busy then
+return
+end
 
-	local roomNum = ReplicatedStorage.GameData.LatestRoom.Value
-	local room = workspace.CurrentRooms:FindFirstChild(tostring(roomNum))
+if getgenv().Lazyness then  
+if getgenv().SetStamina then  
+		getgenv().HalfStamina(0.1)  
+		else  
+		print("bla")   
+		end  
+	end  
 
-	if not room then
-		return
-	end
+local roomNum = ReplicatedStorage.GameData.LatestRoom.Value  
+local room = workspace.CurrentRooms:FindFirstChild(tostring(roomNum))  
 
-	local key
+if not room then  
+	return  
+end  
 
-	for _, v in ipairs(room:GetDescendants()) do
-		if v.Name == "KeyObtain" and v:IsA("Model") then
-			key = v
-			break
-		end
-	end
+local key  
 
-	if not key then
-		require(game.Players.LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game)
-			.caption("This room you are in is not locked.", true)
-		return
-	end
+for _, v in ipairs(room:GetDescendants()) do  
+	if v.Name == "KeyObtain" and v:IsA("Model") then  
+		key = v  
+		break  
+	end  
+end  
 
-	busy = true
-	button.Active = false
-	button.AutoButtonColor = false
-	button.ImageColor3 = Color3.fromRGB(140,140,140)
+if not key then  
+	require(game.Players.LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game)  
+		.caption("This room you are in is not locked.", true)  
+	return  
+end  
 
-	local cd = 30
+busy = true  
+button.Active = false  
+button.AutoButtonColor = false  
+button.ImageColor3 = Color3.fromRGB(140,140,140)  
 
-	local txt = Instance.new("TextLabel")
-	txt.BackgroundTransparency = 1
-	txt.Size = UDim2.fromScale(1,1)
-	txt.Position = UDim2.fromScale(0,0)
-	txt.TextScaled = true
-	txt.Font = Enum.Font.Oswald
-	txt.TextColor3 = Color3.fromRGB(255,222,189)
-	txt.TextStrokeTransparency = 0.5
-	txt.Text = tostring(cd)
-	txt.ZIndex = button.ZIndex + 1
-	txt.Parent = button
+local cd = 30  
 
-	local part = key:FindFirstChildWhichIsA("BasePart", true)
+local txt = Instance.new("TextLabel")  
+txt.BackgroundTransparency = 1  
+txt.Size = UDim2.fromScale(1,1)  
+txt.Position = UDim2.fromScale(0,0)  
+txt.TextScaled = true  
+txt.Font = Enum.Font.Oswald  
+txt.TextColor3 = Color3.fromRGB(255,222,189)  
+txt.TextStrokeTransparency = 0.5  
+txt.Text = tostring(cd)  
+txt.ZIndex = button.ZIndex + 1  
+txt.Parent = button  
 
-	local hl = Instance.new("Highlight")
-	hl.FillColor = Color3.fromRGB(105,235,255)
-	hl.OutlineColor = hl.FillColor
-	hl.FillTransparency = 1
-	hl.OutlineTransparency = 1
-	hl.Adornee = key
-	hl.Parent = key
-	
-	local TweenService = game:GetService("TweenService")
+local part = key:FindFirstChildWhichIsA("BasePart", true)  
+
+local hl = Instance.new("Highlight")  
+hl.FillColor = Color3.fromRGB(105,235,255)  
+hl.OutlineColor = hl.FillColor  
+hl.FillTransparency = 1  
+hl.OutlineTransparency = 1  
+hl.Adornee = key  
+hl.Parent = key  
+  
+local TweenService = game:GetService("TweenService")
 
 local billboard = Instance.new("BillboardGui")
 billboard.Name = "KeyTracker"
@@ -1061,99 +1070,102 @@ billboard.MaxDistance = 10000
 billboard.LightInfluence = 0
 
 task.spawn(function()
-	while billboard.Parent do
-		TweenService:Create(
-			image,
-			TweenInfo.new(2, Enum.EasingStyle.Linear),
-			{ImageTransparency = 1}
-		):Play()
+while billboard.Parent do
+TweenService:Create(
+image,
+TweenInfo.new(2, Enum.EasingStyle.Linear),
+{ImageTransparency = 1}
+):Play()
 
-		task.wait(2)
+task.wait(2)  
 
-		if not billboard.Parent then
-			break
-		end
+	if not billboard.Parent then  
+		break  
+	end  
 
-		TweenService:Create(
-			image,
-			TweenInfo.new(2, Enum.EasingStyle.Linear),
-			{ImageTransparency = 0}
-		):Play()
+	TweenService:Create(  
+		image,  
+		TweenInfo.new(2, Enum.EasingStyle.Linear),  
+		{ImageTransparency = 0}  
+	):Play()  
 
-		task.wait(2)
-	end
+	task.wait(2)  
+end
+
 end)
 
-	TweenService:Create(hl,TweenInfo.new(0.4),{
-		FillTransparency = 0.5,
-		OutlineTransparency = 0
-	}):Play()
+TweenService:Create(hl,TweenInfo.new(0.4),{  
+	FillTransparency = 0.5,  
+	OutlineTransparency = 0  
+}):Play()  
 
-	local light
+local light  
 
-	if part then
-		light = Instance.new("PointLight")
-		light.Color = hl.FillColor
-		light.Brightness = 2
-		light.Range = 0
-		light.Parent = part
+if part then  
+	light = Instance.new("PointLight")  
+	light.Color = hl.FillColor  
+	light.Brightness = 2  
+	light.Range = 0  
+	light.Parent = part  
 
-		TweenService:Create(light,TweenInfo.new(0.4),{
-			Range = 15
-		}):Play()
-	end
+	TweenService:Create(light,TweenInfo.new(0.4),{  
+		Range = 15  
+	}):Play()  
+end  
 
-	task.spawn(function()
-		while cd > 0 do
-			task.wait(1)
-			cd -= 1
-			txt.Text = tostring(cd)
-		end
+task.spawn(function()  
+	while cd > 0 do  
+		task.wait(1)  
+		cd -= 1  
+		txt.Text = tostring(cd)  
+	end  
 
-		txt:Destroy()
+	txt:Destroy()  
 
-		button.ImageColor3 = Color3.fromRGB(255,255,255)
-		button.Active = true
-		button.AutoButtonColor = true
-		busy = false
+	button.ImageColor3 = Color3.fromRGB(255,255,255)  
+	button.Active = true  
+	button.AutoButtonColor = true  
+	busy = false  
 
-		TweenService:Create(hl,TweenInfo.new(3),{
-			FillTransparency = 1,
-			OutlineTransparency = 1
-		}):Play()
+	TweenService:Create(hl,TweenInfo.new(3),{  
+		FillTransparency = 1,  
+		OutlineTransparency = 1  
+	}):Play()  
 
-		if light then
-			TweenService:Create(light,TweenInfo.new(3),{
-				Range = 0,
-				Brightness = 0
-			}):Play()
-		end
+	if light then  
+		TweenService:Create(light,TweenInfo.new(3),{  
+			Range = 0,  
+			Brightness = 0  
+		}):Play()  
+	end  
 
-		task.wait(3)
+	task.wait(3)  
 
-		if light then
-			light:Destroy()
-		end
+	if light then  
+		light:Destroy()  
+	end  
 
-		hl:Destroy()
-		billboard:Destroy()
-	end)
+	hl:Destroy()  
+	billboard:Destroy()  
+end)
+
 end)
 end
-end) 
+end)
 
 local CurrentRooms = workspace:WaitForChild("CurrentRooms")
 
 local function checkRoom(room)
-	if not (room:IsA("Model") and room.Name == "0") then
-		return
-	end
+if not (room:IsA("Model") and room.Name == "0") then
+return
+end
 
-	for _, v in ipairs(room:GetDescendants()) do
-		if v:IsA("Model") and v.Name == "Luggage_Cart_Crouch" then
-			v:Destroy()
-		end
-	end
+for _, v in ipairs(room:GetDescendants()) do  
+	if v:IsA("Model") and v.Name == "Luggage_Cart_Crouch" then  
+		v:Destroy()  
+	end  
+end
+
 end
 
 checkRoom(CurrentRooms["0"])
@@ -1165,522 +1177,530 @@ require(game.Players.LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game).caption("
 local Jumpscare = GetGitSound("https://github.com/eoyoustme/Hardcore/blob/main/Doors%20hardcore%20reignited%20Door%201%20OST.mp3?raw=true","Ost")
 Jumpscare.Parent = workspace
 Jumpscare.Volume = 1.3
-Jumpscare.Name = "ThemebLla" 
+Jumpscare.Name = "ThemebLla"
 Jumpscare.PlaybackSpeed = 1
 Jumpscare:Play()
 
 task.spawn(function()
-	task.wait(7.6)
-	local TweenService = game:GetService("TweenService")
-	local CoreGui = game:GetService("CoreGui")
-	local UserInputService = game:GetService("UserInputService")
+task.wait(7.6)
+local TweenService = game:GetService("TweenService")
+local CoreGui = game:GetService("CoreGui")
+local UserInputService = game:GetService("UserInputService")
 
-	local ScreenGui = Instance.new("ScreenGui")
-	ScreenGui.Name = "HardcoreReiginitedCredits"
-	ScreenGui.ResetOnSpawn = false
-	ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+local ScreenGui = Instance.new("ScreenGui")  
+ScreenGui.Name = "HardcoreReiginitedCredits"  
+ScreenGui.ResetOnSpawn = false  
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling  
 
-	local CanvasGroup = Instance.new("CanvasGroup")
-	CanvasGroup.Size = UDim2.new(1, 0, 1, 0)
-	CanvasGroup.BackgroundTransparency = 1
-	CanvasGroup.GroupTransparency = 1 
-	CanvasGroup.Parent = ScreenGui
+local CanvasGroup = Instance.new("CanvasGroup")  
+CanvasGroup.Size = UDim2.new(1, 0, 1, 0)  
+CanvasGroup.BackgroundTransparency = 1  
+CanvasGroup.GroupTransparency = 1   
+CanvasGroup.Parent = ScreenGui  
 
-	local targetTextSize = 40
-	if UserInputService.TouchEnabled then 
-		targetTextSize = 25
-	end
+local targetTextSize = 40  
+if UserInputService.TouchEnabled then   
+	targetTextSize = 25  
+end  
 
-	local TextLabel = Instance.new("TextLabel")
-	TextLabel.Size = UDim2.new(0.25, 0, 0.25, 0)
-	TextLabel.Position = UDim2.new(0.9, 0, 0.5, 0) 
-	TextLabel.AnchorPoint = Vector2.new(1, 0.5) 
-	TextLabel.BackgroundTransparency = 1
-	TextLabel.Font = Enum.Font.Oswald
-	TextLabel.TextSize = targetTextSize
-	TextLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-	TextLabel.TextXAlignment = Enum.TextXAlignment.Center 
-	TextLabel.TextYAlignment = Enum.TextYAlignment.Center
-	TextLabel.RichText = true
+local TextLabel = Instance.new("TextLabel")  
+TextLabel.Size = UDim2.new(0.25, 0, 0.25, 0)  
+TextLabel.Position = UDim2.new(0.9, 0, 0.5, 0)   
+TextLabel.AnchorPoint = Vector2.new(1, 0.5)   
+TextLabel.BackgroundTransparency = 1  
+TextLabel.Font = Enum.Font.Oswald  
+TextLabel.TextSize = targetTextSize  
+TextLabel.TextColor3 = Color3.fromRGB(255, 255, 255)  
+TextLabel.TextXAlignment = Enum.TextXAlignment.Center   
+TextLabel.TextYAlignment = Enum.TextYAlignment.Center  
+TextLabel.RichText = true  
 
-	TextLabel.Text = [[
+TextLabel.Text = [[
+
 <font color="rgb(255,0,0)">DOORS Hardcore: <font color="rgb(163,0,0)">Reignited</font></font> <font color="rgb(153,255,163)">(Recreated)</font> <font color="rgb(145,220,255)">by Guestly (Outernal)</font>
 <u>Credits to:</u>
 <font color="rgb(255,228,130)">OG Hunger</font> <font color="rgb(235,87,87)">[Helper]</font>
 <font color="rgb(135,51,51)">Dripocapy</font> <font color="rgb(235,87,87)">[Contributed]</font>
-<font color="rgb(119,61,212)">March (Chrobahh)</font> <font color="rgb(235,87,87)">[Developer]</font> 
+<font color="rgb(119,61,212)">March (Chrobahh)</font> <font color="rgb(235,87,87)">[Developer]</font>
 <font color="rgb(255,222,224)">Crookie</font> <font color="rgb(255,255,255)">[Logo Design]</font>
 <font color="rgb(201,73,81)">Noonie and Ping</font> <font color="rgb(255,255,255)">[Creators of OG Hardcore]</font>
 <font color="rgb(230,130,250)">You! [For Playing!]</font>
 ]]
 
-	local UIStroke = Instance.new("UIStroke")
-	UIStroke.Thickness = 0.5
-	UIStroke.Color = Color3.fromRGB(0, 0, 0)
-	UIStroke.Transparency = 0.2
-	UIStroke.Parent = TextLabel
+local UIStroke = Instance.new("UIStroke")  
+UIStroke.Thickness = 0.5  
+UIStroke.Color = Color3.fromRGB(0, 0, 0)  
+UIStroke.Transparency = 0.2  
+UIStroke.Parent = TextLabel  
 
-	TextLabel.Parent = CanvasGroup
+TextLabel.Parent = CanvasGroup  
 
-	if syn and syn.protect_gui then
-		syn.protect_gui(ScreenGui)
-		ScreenGui.Parent = CoreGui
-	elseif gethui then
-		ScreenGui.Parent = gethui()
-	else
-		ScreenGui.Parent = CoreGui
-	end
+if syn and syn.protect_gui then  
+	syn.protect_gui(ScreenGui)  
+	ScreenGui.Parent = CoreGui  
+elseif gethui then  
+	ScreenGui.Parent = gethui()  
+else  
+	ScreenGui.Parent = CoreGui  
+end  
 
-	local faker = TweenInfo.new(1.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-	local fakerthua = TweenInfo.new(1.5, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
+local faker = TweenInfo.new(1.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)  
+local fakerthua = TweenInfo.new(1.5, Enum.EasingStyle.Quad, Enum.EasingDirection.In)  
 
-	local fakerwin = TweenService:Create(CanvasGroup, faker, {GroupTransparency = 0})
-	local fakerthuavl = TweenService:Create(CanvasGroup, fakerthua, {GroupTransparency = 1})
+local fakerwin = TweenService:Create(CanvasGroup, faker, {GroupTransparency = 0})  
+local fakerthuavl = TweenService:Create(CanvasGroup, fakerthua, {GroupTransparency = 1})  
 
-	fakerwin:Play()
-	fakerwin.Completed:Wait()
+fakerwin:Play()  
+fakerwin.Completed:Wait()  
 
-	task.wait(10)
+task.wait(10)  
 
-	fakerthuavl:Play()
-	fakerthuavl.Completed:Wait()
+fakerthuavl:Play()  
+fakerthuavl.Completed:Wait()  
 
-	ScreenGui:Destroy()
+ScreenGui:Destroy()
+
 end)
 
 local stop = false
+
+task.spawn(function()
+workspace.ChildAdded:Connect(function(v)
+if not stop then
+if v:IsA("Model") and v.Name == "RushMoving" then
+task.wait(7)
+local theme = workspace:FindFirstChild("ThemebLla")
+if theme then
+theme:Destroy()
+end
+stop = true
+end
+end
+end)
+end)
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local LatestRoom = ReplicatedStorage:WaitForChild("GameData"):WaitForChild("LatestRoom")
 
 local function GetSyncedRoll(saltString)
-    local hash = 5381
-    local str = tostring(saltString)
-    for i = 1, #str do
-        hash = (bit32.lshift(hash, 5) + hash) + string.byte(str, i)
-        hash = bit32.band(hash, 0x7FFFFFFF)
-    end
-    return (hash % 100) + 1
+local hash = 5381
+local str = tostring(saltString)
+for i = 1, #str do
+hash = (bit32.lshift(hash, 5) + hash) + string.byte(str, i)
+hash = bit32.band(hash, 0x7FFFFFFF)
+end
+return (hash % 100) + 1
 end
 
 local TimeEntities = {
-    { Name = "Shocker",    Interval = 35,  Chance = 100, Url = "https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/Shocker" },
-    { Name = "Limbo",      Interval = 170, Chance = 55, Url = "https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/Limbo" },
-    { Name = "Silence",    Interval = 220, Chance = 55, Url = "https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/Silence" },
-    { Name = "Deer God",   Interval = 300, Chance = 50, Url = "https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/DeerGod" },
-    { Name = "Cease",       Interval = 110, Chance = 80, Url = "https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/Cease" },
-    { Name = "Frostbite",       Interval = 10, Chance = 2, Url = "https://raw.githubusercontent.com/iccdjkkkkskskhdgdgegvbfbgncjjdudejdjvi/REBLAHARDCOREDI/refs/heads/main/Frostbite" },
+{ Name = "Shocker",    Interval = 35,  Chance = 100, Url = "https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/Shocker" },
+{ Name = "Limbo",      Interval = 170, Chance = 55, Url = "https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/Limbo" },
+{ Name = "Silence",    Interval = 220, Chance = 55, Url = "https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/Silence" },
+{ Name = "Deer God",   Interval = 300, Chance = 50, Url = "https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/DeerGod" },
+{ Name = "Cease",       Interval = 110, Chance = 80, Url = "https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/Cease" },
+{ Name = "Frostbite",       Interval = 10, Chance = 2, Url = "https://raw.githubusercontent.com/iccdjkkkkskskhdgdgegvbfbgncjjdudejdjvi/REBLAHARDCOREDI/refs/heads/main/Frostbite" },
 }
 
 local RoomEntities = {
-    { Name = "Ripper",      Interval = 120, Chance = 70, Url = "https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/Ripper" },
-    { Name = "Singularity", Interval = 80,  Chance = 60, Url = "https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/Singularity-1" },
-    { Name = "Rebound",     Interval = 185, Chance = 40, Url = "https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/Rebound" },
-    { Name = "Singularity-2",     Interval = 100, Chance = 55, Url = "https://raw.githubusercontent.com/vokfhehnbfhixiusushiicshshjjjssGSHHDXGX/REBLAHARDCOREDI/refs/heads/main/Singularity-2" },
+{ Name = "Ripper",      Interval = 120, Chance = 70, Url = "https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/Ripper" },
+{ Name = "Singularity", Interval = 80,  Chance = 60, Url = "https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/Singularity-1" },
+{ Name = "Rebound",     Interval = 185, Chance = 40, Url = "https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/Rebound" },
+{ Name = "Singularity-2",     Interval = 100, Chance = 55, Url = "https://raw.githubusercontent.com/vokfhehnbfhixiusushiicshshjjjssGSHHDXGX/REBLAHARDCOREDI/refs/heads/main/Singularity-2" },
 }
 
 for _, entity in ipairs(RoomEntities) do
-	task.spawn(function()
-		local lastEvaluatedRoom = tonumber(LatestRoom.Value) or 1
-		local lastTrigger = tick()
+task.spawn(function()
+local lastEvaluatedRoom = tonumber(LatestRoom.Value) or 1
+local lastTrigger = tick()
 
-		local function ProcessRoomCheck()
-			WaitCooldown()
+local function ProcessRoomCheck()  
+		WaitCooldown()  
+		local currentRoom = tonumber(LatestRoom.Value) or 1  
 
-			local currentRoom = tonumber(LatestRoom.Value) or 1
+		if currentRoom == lastEvaluatedRoom then  
+			return  
+		end  
 
-			if currentRoom == lastEvaluatedRoom then
-				return
-			end
+		lastEvaluatedRoom = currentRoom  
 
-			lastEvaluatedRoom = currentRoom
+		if tick() - lastTrigger < entity.Interval then  
+			return  
+		end  
 
-			if tick() - lastTrigger < entity.Interval then
-				return
-			end
+		lastTrigger = tick()  
 
-			lastTrigger = tick()
+		local roll = GetSyncedRoll(entity.Name .. "_Room_" .. currentRoom)  
+		if roll <= entity.Chance then  
+			SafeLoadFileCached(entity.Url)  
+		end  
+	end  
 
-			local roll = GetSyncedRoll(
-				entity.Name .. "_Room_" .. currentRoom
-			)
+	LatestRoom.Changed:Connect(ProcessRoomCheck)  
+end)
 
-			if roll <= entity.Chance then
-				SafeLoadFileCached(entity.Url)
-			end
-		end
-
-		LatestRoom.Changed:Connect(ProcessRoomCheck)
-	end)
 end
 
 game.ReplicatedStorage.GameData.LatestRoom.Changed:Wait()
 
-task.spawn(function() 
-loadstring(game:HttpGet("https://raw.githubusercontent.com/PAKKALCKKWKKJXIODKRBFHHAUJCJJJSNDJ/HAXRHCHHCHCHJSJSLKKKJDPQOIJXHBS/refs/heads/main/multimonstet"))() 
-end) 
-
+for _, entity in ipairs(TimeEntities) do
 task.spawn(function()
-	local currentTheme = theme or workspace:FindFirstChild("ThemebLla")
+local startTime = tick()
+local cycle = 0
 
-	if not currentTheme or not currentTheme:IsA("Sound") then
-		return
-	end
+while true do  
+		WaitCooldown()  
+		local elapsed = tick() - startTime  
 
-	local tween = TweenService:Create(
-		currentTheme,
-		TweenInfo.new(1.5, Enum.EasingStyle.Linear),
-		{Volume = 0}
-	)
+		if elapsed >= entity.Interval then  
+			startTime = tick()  
+			cycle += 1  
 
-	tween:Play()
-	tween.Completed:Wait()
+			local roll = GetSyncedRoll(entity.Name .. "_" .. cycle)  
+			if roll <= entity.Chance then  
+				if entity.Name == "Frostbite" then  
+					CooldownPaused = true  
+					  
+					task.spawn(function()  
+						SafeLoadFileCached(entity.Url)  
+					end)  
+					  
+					repeat  
+						task.wait(0.2)  
+					until getgenv().Frostbite == false  
+					  
+					CooldownPaused = false  
+				else  
+					SafeLoadFileCached(entity.Url)  
+				end  
+			end  
+		end  
 
-	if currentTheme and currentTheme.Parent then
-		currentTheme:Destroy()
-	end
+		task.wait(0.25)  
+	end  
 end)
 
-for _, entity in ipairs(TimeEntities) do
-	task.spawn(function()
-		local startTime = tick()
-		local cycle = 0
-
-		while true do
-			WaitCooldown()
-
-			local elapsed = tick() - startTime
-
-			if elapsed >= entity.Interval then
-				startTime = tick()
-				cycle += 1
-
-				local roll = GetSyncedRoll(entity.Name .. "_" .. cycle)
-
-				if roll <= entity.Chance then
-					SafeLoadFileCached(entity.Url)
-				end
-			end
-
-			task.wait(0.25)
-		end
-	end)
 end
 
 local CurrentRooms = workspace:WaitForChild("CurrentRooms")
 
 local conn
 conn = CurrentRooms.DescendantAdded:Connect(function(obj)
-	if obj:IsA("Model") and obj.Name == "61" then
-		conn:Disconnect()
+if obj:IsA("Model") and obj.Name == "61" then
+conn:Disconnect()
 
-		for _, entity in ipairs(RoomEntities) do
-			entity.Chance = math.min(entity.Chance + 25, 100)
-		end
+for _, entity in ipairs(RoomEntities) do  
+		entity.Chance = math.min(entity.Chance + 25, 100)  
+	end  
 
-		for _, entity in ipairs(TimeEntities) do
-			entity.Chance = math.min(entity.Chance + 25, 100)
-		end
+	for _, entity in ipairs(TimeEntities) do  
+		entity.Chance = math.min(entity.Chance + 25, 100)  
+	end  
 
-		local dark = Instance.new("Sound")
-		dark.SoundId = "https://github.com/cakmay227-svg/random/raw/refs/heads/main/lv_0_20260804063845.mp3?raw=true"
-		dark.Parent = workspace
-		dark.RollOffMaxDistance = 1000000000
-		dark.Volume = 2.5
-		dark:Play()
-		
-		local Players = game:GetService("Players")
-		local TweenService = game:GetService("TweenService")
-		local Lighting = game:GetService("Lighting")
-		local Debris = game:GetService("Debris")
+	local dark = Instance.new("Sound")  
+	dark.SoundId = "https://github.com/cakmay227-svg/random/raw/refs/heads/main/lv_0_20260804063845.mp3?raw=true"  
+	dark.Parent = workspace  
+	dark.RollOffMaxDistance = 1000000000  
+	dark.Volume = 2.5  
+	dark:Play()  
+	  
+	local Players = game:GetService("Players")  
+	local TweenService = game:GetService("TweenService")  
+	local Lighting = game:GetService("Lighting")  
+	local Debris = game:GetService("Debris")  
 
-		local LocalPlayer = Players.LocalPlayer
+	local LocalPlayer = Players.LocalPlayer  
 
-		task.spawn(function()
-			local screenGui = Instance.new("ScreenGui")
-			screenGui.Name = "Aihoi"
-			screenGui.IgnoreGuiInset = true
-			screenGui.DisplayOrder = 999999
-			screenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+	task.spawn(function()  
+		local screenGui = Instance.new("ScreenGui")  
+		screenGui.Name = "Aihoi"  
+		screenGui.IgnoreGuiInset = true  
+		screenGui.DisplayOrder = 999999  
+		screenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")  
 
-			local imageLabel = Instance.new("ImageLabel")
-			imageLabel.BackgroundTransparency = 1
-			imageLabel.BorderSizePixel = 0
-			imageLabel.AnchorPoint = Vector2.new(0.5, 0.5)
-			imageLabel.Position = UDim2.new(0.5, 0, 0.28, 0)
-			imageLabel.Size = UDim2.new(0, 225, 0, 225)
-			imageLabel.ScaleType = Enum.ScaleType.Stretch
-			imageLabel.ImageTransparency = 1
-			imageLabel.Image = "rbxassetid://97049603586965"
-			imageLabel.Visible = true
-			imageLabel.Parent = screenGui
+		local imageLabel = Instance.new("ImageLabel")  
+		imageLabel.BackgroundTransparency = 1  
+		imageLabel.BorderSizePixel = 0  
+		imageLabel.AnchorPoint = Vector2.new(0.5, 0.5)  
+		imageLabel.Position = UDim2.new(0.5, 0, 0.28, 0)  
+		imageLabel.Size = UDim2.new(0, 225, 0, 225)  
+		imageLabel.ScaleType = Enum.ScaleType.Stretch  
+		imageLabel.ImageTransparency = 1  
+		imageLabel.Image = "rbxassetid://97049603586965"  
+		imageLabel.Visible = true  
+		imageLabel.Parent = screenGui  
 
-			TweenService:Create(imageLabel, TweenInfo.new(1.5), {ImageTransparency = 0}):Play()
-			task.wait(14)
+		TweenService:Create(imageLabel, TweenInfo.new(1.5), {ImageTransparency = 0}):Play()  
+		task.wait(14)  
 
-			TweenService:Create(imageLabel, TweenInfo.new(2), {ImageTransparency = 1}):Play()
-			task.wait(2)
-			screenGui:Destroy()
-		end)
+		TweenService:Create(imageLabel, TweenInfo.new(2), {ImageTransparency = 1}):Play()  
+		task.wait(2)  
+		screenGui:Destroy()  
+	end)  
 
-		local processedObjects = {}
+	local processedObjects = {}  
 
-		local function disableLightObject(obj)
-			if not obj or not obj.Parent then return end
+	local function disableLightObject(obj)  
+		if not obj or not obj.Parent then return end  
 
-			if obj:IsA("Light") then
-				if obj.Enabled then
-					obj.Enabled = false
-				end
-				if not processedObjects[obj] then
-					processedObjects[obj] = true
-					obj:GetPropertyChangedSignal("Enabled"):Connect(function()
-						if obj.Enabled then
-							obj.Enabled = false
-						end
-					end)
-				end
-			elseif obj:IsA("BasePart") and obj.Material == Enum.Material.Neon then
-				obj.Material = Enum.Material.SmoothPlastic
-				if not processedObjects[obj] then
-					processedObjects[obj] = true
-					obj:GetPropertyChangedSignal("Material"):Connect(function()
-						if obj.Material == Enum.Material.Neon then
-							obj.Material = Enum.Material.SmoothPlastic
-						end
-					end)
-				end
-			elseif obj:IsA("ParticleEmitter") or obj:IsA("Beam") or obj:IsA("Highlight") then
-				if obj.Enabled then
-					obj.Enabled = false
-				end
-				if not processedObjects[obj] then
-					processedObjects[obj] = true
-					obj:GetPropertyChangedSignal("Enabled"):Connect(function()
-						if obj.Enabled then
-							obj.Enabled = false
-						end
-					end)
-				end
-			end
-		end
+		if obj:IsA("Light") then  
+			if obj.Enabled then  
+				obj.Enabled = false  
+			end  
+			if not processedObjects[obj] then  
+				processedObjects[obj] = true  
+				obj:GetPropertyChangedSignal("Enabled"):Connect(function()  
+					if obj.Enabled then  
+						obj.Enabled = false  
+					end  
+				end)  
+			end  
+		elseif obj:IsA("BasePart") and obj.Material == Enum.Material.Neon then  
+			obj.Material = Enum.Material.SmoothPlastic  
+			if not processedObjects[obj] then  
+				processedObjects[obj] = true  
+				obj:GetPropertyChangedSignal("Material"):Connect(function()  
+					if obj.Material == Enum.Material.Neon then  
+						obj.Material = Enum.Material.SmoothPlastic  
+					end  
+				end)  
+			end  
+		elseif obj:IsA("ParticleEmitter") or obj:IsA("Beam") or obj:IsA("Highlight") then  
+			if obj.Enabled then  
+				obj.Enabled = false  
+			end  
+			if not processedObjects[obj] then  
+				processedObjects[obj] = true  
+				obj:GetPropertyChangedSignal("Enabled"):Connect(function()  
+					if obj.Enabled then  
+						obj.Enabled = false  
+					end  
+				end)  
+			end  
+		end  
+	end  
 
-		task.spawn(function()
-			local currentRooms = workspace:WaitForChild("CurrentRooms", 15)
-			if currentRooms then
-				for _, obj in ipairs(currentRooms:GetDescendants()) do
-					disableLightObject(obj)
-				end
+	task.spawn(function()  
+		local currentRooms = workspace:WaitForChild("CurrentRooms", 15)  
+		if currentRooms then  
+			for _, obj in ipairs(currentRooms:GetDescendants()) do  
+				disableLightObject(obj)  
+			end  
 
-				currentRooms.DescendantAdded:Connect(function(obj)
-					disableLightObject(obj)
-				end)
-			end
-		end)
+			currentRooms.DescendantAdded:Connect(function(obj)  
+				disableLightObject(obj)  
+			end)  
+		end  
+	end)  
 
-		task.spawn(function()
-			while true do
-				task.wait(0.5)
-				local currentRooms = workspace:FindFirstChild("CurrentRooms")
-				if currentRooms then
-					for _, obj in ipairs(currentRooms:GetDescendants()) do
-						disableLightObject(obj)
-					end
-				end
-			end
-		end)
-	end
+	task.spawn(function()  
+		while true do  
+			task.wait(0.5)  
+			local currentRooms = workspace:FindFirstChild("CurrentRooms")  
+			if currentRooms then  
+				for _, obj in ipairs(currentRooms:GetDescendants()) do  
+					disableLightObject(obj)  
+				end  
+			end  
+		end  
+	end)  
+end
+
 end)
 
 local HerbConn
 HerbConn = CurrentRooms.DescendantAdded:Connect(function(obj)
-	if obj:IsA("Model") and obj.Name == "Green_Herb" then
-		HerbConn:Disconnect()
-		game.ReplicatedStorage.GameData.LatestRoom.Changed:Wait()
-		
-		local Players = game:GetService("Players")
-		local TweenService = game:GetService("TweenService")
-		local LocalPlayer = Players.LocalPlayer
+if obj:IsA("Model") and obj.Name == "Green_Herb" then
+HerbConn:Disconnect()
+game.ReplicatedStorage.GameData.LatestRoom.Changed:Wait()
 
-		local screenGui = Instance.new("ScreenGui")
-		screenGui.Name = "Oihai"
-		screenGui.IgnoreGuiInset = true
-		screenGui.DisplayOrder = 999999
-		screenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+local Players = game:GetService("Players")  
+	local TweenService = game:GetService("TweenService")  
+	local LocalPlayer = Players.LocalPlayer  
 
-		local imageLabel = Instance.new("ImageLabel")
-		imageLabel.BackgroundTransparency = 1
-		imageLabel.BorderSizePixel = 0
-		imageLabel.AnchorPoint = Vector2.new(0.5, 0.5)
-		imageLabel.Position = UDim2.new(0.5, 0, 0.28, 0)
-		imageLabel.Size = UDim2.new(0, 175, 0, 175)
-		imageLabel.ScaleType = Enum.ScaleType.Stretch
-		imageLabel.ImageTransparency = 1
-		imageLabel.Image = "rbxassetid://93615232779605"
-		imageLabel.Visible = true
-		imageLabel.Parent = screenGui
+	local screenGui = Instance.new("ScreenGui")  
+	screenGui.Name = "Oihai"  
+	screenGui.IgnoreGuiInset = true  
+	screenGui.DisplayOrder = 999999  
+	screenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")  
 
-		TweenService:Create(imageLabel, TweenInfo.new(1.5), {ImageTransparency = 0}):Play()
-		task.wait(14)
+	local imageLabel = Instance.new("ImageLabel")  
+	imageLabel.BackgroundTransparency = 1  
+	imageLabel.BorderSizePixel = 0  
+	imageLabel.AnchorPoint = Vector2.new(0.5, 0.5)  
+	imageLabel.Position = UDim2.new(0.5, 0, 0.28, 0)  
+	imageLabel.Size = UDim2.new(0, 175, 0, 175)  
+	imageLabel.ScaleType = Enum.ScaleType.Stretch  
+	imageLabel.ImageTransparency = 1  
+	imageLabel.Image = "rbxassetid://93615232779605"  
+	imageLabel.Visible = true  
+	imageLabel.Parent = screenGui  
 
-		TweenService:Create(imageLabel, TweenInfo.new(2), {ImageTransparency = 1}):Play()
-		task.wait(2)
-		screenGui:Destroy()
-	end
+	TweenService:Create(imageLabel, TweenInfo.new(1.5), {ImageTransparency = 0}):Play()  
+	task.wait(14)  
+
+	TweenService:Create(imageLabel, TweenInfo.new(2), {ImageTransparency = 1}):Play()  
+	task.wait(2)  
+	screenGui:Destroy()  
+end
+
 end)
 
 local StatueConn
 StatueConn = CurrentRooms.DescendantAdded:Connect(function(obj)
-	if obj:IsA("Model") and obj.Name == "Courtyard_Statue" then
-		StatueConn:Disconnect()
-		game.ReplicatedStorage.GameData.LatestRoom.Changed:Wait()
+if obj:IsA("Model") and obj.Name == "Courtyard_Statue" then
+StatueConn:Disconnect()
+game.ReplicatedStorage.GameData.LatestRoom.Changed:Wait()
 
-		local court = Instance.new("Sound")
-		court.SoundId = "https://github.com/cakmay227-svg/random/raw/refs/heads/main/YTDown.com_YouTube_DOORS-UNUSED-OST-Courtyard-Entrance_Media_CtXLnh9DgrI_001_1080p.mp3?raw=true"
-		court.Parent = workspace
-		court.RollOffMaxDistance = 1000000000
-		court.Volume = 1.3
-		court:Play()
-		
-		local Players = game:GetService("Players")
-		local TweenService = game:GetService("TweenService")
-		local LocalPlayer = Players.LocalPlayer
+local court = Instance.new("Sound")  
+	court.SoundId = "https://github.com/cakmay227-svg/random/raw/refs/heads/main/YTDown.com_YouTube_DOORS-UNUSED-OST-Courtyard-Entrance_Media_CtXLnh9DgrI_001_1080p.mp3?raw=true"  
+	court.Parent = workspace  
+	court.RollOffMaxDistance = 1000000000  
+	court.Volume = 1.3  
+	court:Play()  
+	  
+	local Players = game:GetService("Players")  
+	local TweenService = game:GetService("TweenService")  
+	local LocalPlayer = Players.LocalPlayer  
 
-		task.spawn(function()
-			local screenGui = Instance.new("ScreenGui")
-			screenGui.Name = "KAK"
-			screenGui.IgnoreGuiInset = true
-			screenGui.DisplayOrder = 999999
-			screenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+	task.spawn(function()  
+		local screenGui = Instance.new("ScreenGui")  
+		screenGui.Name = "KAK"  
+		screenGui.IgnoreGuiInset = true  
+		screenGui.DisplayOrder = 999999  
+		screenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")  
 
-			local imageLabel = Instance.new("ImageLabel")
-			imageLabel.BackgroundTransparency = 1
-			imageLabel.BorderSizePixel = 0
-			imageLabel.AnchorPoint = Vector2.new(0.5, 0.5)
-			imageLabel.Position = UDim2.new(0.5, 0, 0.28, 0)
-			imageLabel.Size = UDim2.new(0, 275, 0, 275)
-			imageLabel.ScaleType = Enum.ScaleType.Stretch
-			imageLabel.ImageTransparency = 1
-			imageLabel.Image = "rbxassetid://134668348117449"
-			imageLabel.Visible = true
-			imageLabel.Parent = screenGui
+		local imageLabel = Instance.new("ImageLabel")  
+		imageLabel.BackgroundTransparency = 1  
+		imageLabel.BorderSizePixel = 0  
+		imageLabel.AnchorPoint = Vector2.new(0.5, 0.5)  
+		imageLabel.Position = UDim2.new(0.5, 0, 0.28, 0)  
+		imageLabel.Size = UDim2.new(0, 275, 0, 275)  
+		imageLabel.ScaleType = Enum.ScaleType.Stretch  
+		imageLabel.ImageTransparency = 1  
+		imageLabel.Image = "rbxassetid://134668348117449"  
+		imageLabel.Visible = true  
+		imageLabel.Parent = screenGui  
 
-			TweenService:Create(imageLabel, TweenInfo.new(1.5), {ImageTransparency = 0}):Play()
-			task.wait(14)
+		TweenService:Create(imageLabel, TweenInfo.new(1.5), {ImageTransparency = 0}):Play()  
+		task.wait(14)  
 
-			TweenService:Create(imageLabel, TweenInfo.new(2), {ImageTransparency = 1}):Play()
-			task.wait(2)
-			screenGui:Destroy()
-		end)
-	end
+		TweenService:Create(imageLabel, TweenInfo.new(2), {ImageTransparency = 1}):Play()  
+		task.wait(2)  
+		screenGui:Destroy()  
+	end)  
+end
+
 end)
 
 local Room49Conn
 Room49Conn = CurrentRooms.DescendantAdded:Connect(function(obj)
-	if obj:IsA("Model") and obj.Name == "49" then
-		Room49Conn:Disconnect()
-		game.ReplicatedStorage.GameData.LatestRoom.Changed:Wait()
+if obj:IsA("Model") and obj.Name == "49" then
+Room49Conn:Disconnect()
+game.ReplicatedStorage.GameData.LatestRoom.Changed:Wait()
 
-		local court = Instance.new("Sound")
-		court.SoundId = "https://github.com/cakmay227-svg/random/raw/refs/heads/main/XRecorder_Edited_20260804_02%20(1).mp3?raw=true"
-		court.Parent = workspace
-		court.RollOffMaxDistance = 1000000000
-		court.Volume = 2
-		court:Play()
-		
-		local Players = game:GetService("Players")
-		local TweenService = game:GetService("TweenService")
-		local LocalPlayer = Players.LocalPlayer
+local court = Instance.new("Sound")  
+	court.SoundId = "https://github.com/cakmay227-svg/random/raw/refs/heads/main/XRecorder_Edited_20260804_02%20(1).mp3?raw=true"  
+	court.Parent = workspace  
+	court.RollOffMaxDistance = 1000000000  
+	court.Volume = 2  
+	court:Play()  
+	  
+	local Players = game:GetService("Players")  
+	local TweenService = game:GetService("TweenService")  
+	local LocalPlayer = Players.LocalPlayer  
 
-		task.spawn(function()
-			local screenGui = Instance.new("ScreenGui")
-			screenGui.Name = "jcdxx"
-			screenGui.IgnoreGuiInset = true
-			screenGui.DisplayOrder = 999999
-			screenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+	task.spawn(function()  
+		local screenGui = Instance.new("ScreenGui")  
+		screenGui.Name = "jcdxx"  
+		screenGui.IgnoreGuiInset = true  
+		screenGui.DisplayOrder = 999999  
+		screenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")  
 
-			local imageLabel = Instance.new("ImageLabel")
-			imageLabel.BackgroundTransparency = 1
-			imageLabel.BorderSizePixel = 0
-			imageLabel.AnchorPoint = Vector2.new(0.5, 0.5)
-			imageLabel.Position = UDim2.new(0.5, 0, 0.28, 0)
-			imageLabel.Size = UDim2.new(0, 275, 0, 275)
-			imageLabel.ScaleType = Enum.ScaleType.Stretch
-			imageLabel.ImageTransparency = 1
-			imageLabel.Image = "rbxassetid://84338874082390"
-			imageLabel.Visible = true
-			imageLabel.Parent = screenGui
+		local imageLabel = Instance.new("ImageLabel")  
+		imageLabel.BackgroundTransparency = 1  
+		imageLabel.BorderSizePixel = 0  
+		imageLabel.AnchorPoint = Vector2.new(0.5, 0.5)  
+		imageLabel.Position = UDim2.new(0.5, 0, 0.28, 0)  
+		imageLabel.Size = UDim2.new(0, 275, 0, 275)  
+		imageLabel.ScaleType = Enum.ScaleType.Stretch  
+		imageLabel.ImageTransparency = 1  
+		imageLabel.Image = "rbxassetid://84338874082390"  
+		imageLabel.Visible = true  
+		imageLabel.Parent = screenGui  
 
-			TweenService:Create(imageLabel, TweenInfo.new(1.5), {ImageTransparency = 0}):Play()
-			task.wait(14)
+		TweenService:Create(imageLabel, TweenInfo.new(1.5), {ImageTransparency = 0}):Play()  
+		task.wait(14)  
 
-			TweenService:Create(imageLabel, TweenInfo.new(2), {ImageTransparency = 1}):Play()
-			task.wait(2)
-			screenGui:Destroy()
-		end)
-	end
+		TweenService:Create(imageLabel, TweenInfo.new(2), {ImageTransparency = 1}):Play()  
+		task.wait(2)  
+		screenGui:Destroy()  
+	end)  
+end
+
 end)
 
 local Room99Conn
 Room99Conn = CurrentRooms.DescendantAdded:Connect(function(obj)
-	if obj:IsA("Model") and obj.Name == "99" then
-		Room99Conn:Disconnect()
-		game.ReplicatedStorage.GameData.LatestRoom.Changed:Wait()
-		
-		local Players = game:GetService("Players")
-		local TweenService = game:GetService("TweenService")
-		local LocalPlayer = Players.LocalPlayer
+if obj:IsA("Model") and obj.Name == "99" then
+Room99Conn:Disconnect()
+game.ReplicatedStorage.GameData.LatestRoom.Changed:Wait()
 
-		task.spawn(function()
-			local screenGui = Instance.new("ScreenGui")
-			screenGui.Name = "jcdxx"
-			screenGui.IgnoreGuiInset = true
-			screenGui.DisplayOrder = 999999
-			screenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+local Players = game:GetService("Players")  
+	local TweenService = game:GetService("TweenService")  
+	local LocalPlayer = Players.LocalPlayer  
 
-			local imageLabel = Instance.new("ImageLabel")
-			imageLabel.BackgroundTransparency = 1
-			imageLabel.BorderSizePixel = 0
-			imageLabel.AnchorPoint = Vector2.new(0.5, 0.5)
-			imageLabel.Position = UDim2.new(0.5, 0, 0.28, 0)
-			imageLabel.Size = UDim2.new(0, 275, 0, 275)
-			imageLabel.ScaleType = Enum.ScaleType.Stretch
-			imageLabel.ImageTransparency = 1
-			imageLabel.Image = "rbxassetid://117169090854499"
-			imageLabel.Visible = true
-			imageLabel.Parent = screenGui
+	task.spawn(function()  
+		local screenGui = Instance.new("ScreenGui")  
+		screenGui.Name = "jcdxx"  
+		screenGui.IgnoreGuiInset = true  
+		screenGui.DisplayOrder = 999999  
+		screenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")  
 
-			TweenService:Create(imageLabel, TweenInfo.new(1.5), {ImageTransparency = 0}):Play()
-			task.wait(14)
+		local imageLabel = Instance.new("ImageLabel")  
+		imageLabel.BackgroundTransparency = 1  
+		imageLabel.BorderSizePixel = 0  
+		imageLabel.AnchorPoint = Vector2.new(0.5, 0.5)  
+		imageLabel.Position = UDim2.new(0.5, 0, 0.28, 0)  
+		imageLabel.Size = UDim2.new(0, 275, 0, 275)  
+		imageLabel.ScaleType = Enum.ScaleType.Stretch  
+		imageLabel.ImageTransparency = 1  
+		imageLabel.Image = "rbxassetid://117169090854499"  
+		imageLabel.Visible = true  
+		imageLabel.Parent = screenGui  
 
-			TweenService:Create(imageLabel, TweenInfo.new(2), {ImageTransparency = 1}):Play()
-			task.wait(2)
-			screenGui:Destroy()
-		end)
-	end
+		TweenService:Create(imageLabel, TweenInfo.new(1.5), {ImageTransparency = 0}):Play()  
+		task.wait(14)  
+
+		TweenService:Create(imageLabel, TweenInfo.new(2), {ImageTransparency = 1}):Play()  
+		task.wait(2)  
+		screenGui:Destroy()  
+	end)  
+end
+
 end)
 
 local SEEK_REPLACEMENT_ID = "https://github.com/cakmay227-svg/random/raw/refs/heads/main/YTDown.com_YouTube_Seek-Hard-Mode-Ost_Media_cAjv2KH_Vc0_001_1080p.mp3?raw=true"
 
 local function setupSound(sound)
-    if not sound:IsA("Sound") then return end
+if not sound:IsA("Sound") then return end
 
-    if sound.Name == "SeekMusic" then
-        sound.SoundId = SEEK_REPLACEMENT_ID
-        sound.Volume = 2.2
-        sound:GetPropertyChangedSignal("SoundId"):Connect(function()
-            if sound.SoundId ~= SEEK_REPLACEMENT_ID then
-                sound.SoundId = SEEK_REPLACEMENT_ID
-            end
-        end)
-    end
+if sound.Name == "SeekMusic" then  
+    sound.SoundId = SEEK_REPLACEMENT_ID  
+    sound.Volume = 2.2  
+    sound:GetPropertyChangedSignal("SoundId"):Connect(function()  
+        if sound.SoundId ~= SEEK_REPLACEMENT_ID then  
+            sound.SoundId = SEEK_REPLACEMENT_ID  
+        end  
+    end)  
+end
+
 end
 
 for _, descendant in ipairs(workspace:GetDescendants()) do
-    setupSound(descendant)
+setupSound(descendant)
 end
 
 workspace.DescendantAdded:Connect(function(descendant)
-    setupSound(descendant)
+setupSound(descendant)
 end)
