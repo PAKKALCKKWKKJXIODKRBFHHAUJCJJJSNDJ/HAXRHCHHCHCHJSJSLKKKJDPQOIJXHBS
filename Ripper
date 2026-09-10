@@ -339,8 +339,6 @@ entity:SetCallback("OnStartMoving", function()
 
 		blaSound.Parent = workspace.RipperBla
 
-		gitSoundTemp:Destroy()
-
 		local ReallyNear = game.Workspace.RipperBla.Ripe.ReallyCloseStatic
 
 		local Github = GetGitSound("https://github.com/eoyoustme/Hardcore/blob/main/ripper%20static%20final.mp3?raw=true", "Ripper")
