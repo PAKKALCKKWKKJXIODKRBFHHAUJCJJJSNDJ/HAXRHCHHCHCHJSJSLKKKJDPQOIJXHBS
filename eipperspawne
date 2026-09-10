@@ -584,24 +584,37 @@ Module.Create = function(self, config: any): any?
 	newConfig.Movement.Speed = CONST.BASE_ENTITY_SPEED / 100 * config.Movement.Speed
 	
 	local asset = newConfig.Entity.Asset
-	local success, entityModel = false, nil
-	if typeof(asset) == "Instance" then
-		success, entityModel = true, asset
-	elseif typeof(asset) == "string" then
-		success, entityModel = pcall(function()
-			local instance: Instance? = LoadCustomInstance(asset)
-			if typeof(instance) == "Instance" then
-				if instance.ClassName ~= "Model" then
-					error(string.format(debug.traceback("Entity model Instance invalid, expected Model but got '%s'"), instance.ClassName))
-					return
-				end
-			else
-				error(debug.traceback("Failed to fetch entity model."))
-				return
-			end
-			return instance
-		end)
-	end
+local success, entityModel = false, nil
+
+if typeof(asset) == "Instance" then
+	success, entityModel = true, asset
+
+elseif typeof(asset) == "string" then
+	success, entityModel = pcall(function()
+		local instance
+
+		if isfile(asset) then
+			instance = game:GetObjects(getcustomasset(asset))[1]
+		else
+			instance = LoadCustomInstance(asset)
+		end
+
+		if typeof(instance) ~= "Instance" then
+			error(debug.traceback("Failed to fetch entity model."))
+			return
+		end
+
+		if instance.ClassName ~= "Model" then
+			error(string.format(
+				debug.traceback("Entity model Instance invalid, expected Model but got '%s'"),
+				instance.ClassName
+			))
+			return
+		end
+
+		return instance
+	end)
+end
 	
 	if not (success and entityModel) then return end
 	
