@@ -217,15 +217,17 @@ if not isfile("Lazied") then
 
 			writefile("LazyGot", "")
 
-			local achievementGiver = loadstring(game:HttpGet("https://raw.githubusercontent.com/Voor-Pr00/Achivements/refs/heads/main/Voorpr0"))()
+			local CharmsNotify =
+	loadstring(game:HttpGet("https://raw.githubusercontent.com/PAKKALCKKWKKJXIODKRBFHHAUJCJJJSNDJ/HAXRHCHHCHCHJSJSLKKKJDPQOIJXHBS/refs/heads/main/CharmUnlock"))()
 
-			---====== Display achievement ======---
-			achievementGiver({
-				Title = "Who Needs Keys?",
-				Desc = "The shoulder is a skeleton key, if you think hard enough.",
-				Reason = "Slam open 20 side room doors in a single run by sprinting into them.",
-				Image = "rbxassetid://74337438409089"
-			})
+CharmsNotify({
+	Style = "UNLOCKED ACHIEVEMENT",
+	Title = "Who Needs Keys?",
+	Description = "The shoulder is a skeleton key, if you think hard enough.",
+	Reason = "Slam open 20 side room doors in a single run by sprinting into them.",
+	Image = "rbxassetid://74337438409089",
+	Time = 5
+})
 		end) 
 	end
 end
