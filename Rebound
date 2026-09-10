@@ -53,15 +53,17 @@ if not HidingFound then
 		if not isfile("AdrenalineGot") then
 			writefile("AdrenalineGot", "-- Adrenaline unlocked")
 
-			local achievementGiver = loadstring(game:HttpGet("https://raw.githubusercontent.com/Voor-Pr00/Achivements/refs/heads/main/Voorpr0"))()
+			local CharmsNotify =
+	loadstring(game:HttpGet("https://raw.githubusercontent.com/PAKKALCKKWKKJXIODKRBFHHAUJCJJJSNDJ/HAXRHCHHCHCHJSJSLKKKJDPQOIJXHBS/refs/heads/main/CharmUnlock"))()
 
-			---====== Display achievement ======---
-			achievementGiver({
-				Title = "White Knuckles",
-				Desc = "Just a hallway, the thing in it, and a heart that refuses to quit.",
-				Reason = "Survive 10 entity attacks without hiding.",
-				Image = "rbxassetid://99618297248695"
-			})
+CharmsNotify({
+	Style = "UNLOCKED ACHIEVEMENT",
+	Title = "White Knuckles",
+	Description = "Just a hallway, the thing in it, and a heart that refuses to quit.",
+	Reason = "Survive 10 entity attacks without hiding.",
+	Image = "rbxassetid://99618297248695",
+	Time = 5
+})
 			
 		end
 	end
