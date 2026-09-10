@@ -3,7 +3,7 @@
 if getgenv().PrimeRipperSpawn then return getgenv().PrimeRipperSpawn end
 
 loadstring(game:HttpGet("https://raw.githubusercontent.com/RegularVynixu/Utilities/main/Functions.lua"))()
-
+-- ok
 -- \\ Services // --
 local CollectionService = game:GetService("CollectionService")
 local Players = game:GetService("Players")
@@ -750,7 +750,23 @@ end
 	task.wait(config.Movement.Delay)
 	task.spawn(entity.RunCallback, entity, "OnStartMoving")
 	
-	-- Lần đầu entity chạm LocalPlayer
+	-- Loop kiểm tra hitbox và tương tác với player
+	task.spawn(function()
+		while entity:IsAlive() and task.wait() do
+			if model:GetAttribute("HitboxTriggered") then continue end
+			
+			local origin = model:GetPivot().Position
+			local charOrigin = RootPart.Position
+			
+			local inSight = false
+			if (charOrigin - origin).Magnitude <= config.Damage.Range then
+				local params = RaycastParams.new()
+				params.FilterType = Enum.RaycastFilterType.Exclude
+				params.FilterDescendantsInstances = {Character, model, CollectionService:GetTagged("HidingSpot")}
+				inSight = workspace:Raycast(origin, charOrigin - origin, params) == nil
+			end
+			
+			-- Lần đầu entity chạm LocalPlayer
 -- Lần đầu chạm hitbox damage
 if not model:GetAttribute("Paused")
 	and not model:GetAttribute("FirstHitboxTriggered")
@@ -768,22 +784,6 @@ if not model:GetAttribute("Paused")
 		end
 	end)
 end
-	
-	-- Loop kiểm tra hitbox và tương tác với player
-	task.spawn(function()
-		while entity:IsAlive() and task.wait() do
-			if model:GetAttribute("HitboxTriggered") then continue end
-			
-			local origin = model:GetPivot().Position
-			local charOrigin = RootPart.Position
-			
-			local inSight = false
-			if (charOrigin - origin).Magnitude <= config.Damage.Range then
-				local params = RaycastParams.new()
-				params.FilterType = Enum.RaycastFilterType.Exclude
-				params.FilterDescendantsInstances = {Character, model, CollectionService:GetTagged("HidingSpot")}
-				inSight = workspace:Raycast(origin, charOrigin - origin, params) == nil
-			end
 			
 			if Humanoid.Health > 0 then
 				local _, isVisible = Camera:WorldToViewportPoint(origin)
