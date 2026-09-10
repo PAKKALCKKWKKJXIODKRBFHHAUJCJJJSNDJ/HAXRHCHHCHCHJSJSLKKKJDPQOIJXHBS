@@ -641,6 +641,7 @@ end
 		entityModel:SetAttribute(attr, val)
 	end
 	entityModel:SetAttribute("HitboxTriggered", false)
+	entityModel:SetAttribute("FirstHitboxTriggered", false)
 	
 	local c = Instance.new("Configuration")
 	c.Name = "RoomsEntered"
@@ -749,10 +750,29 @@ end
 	task.wait(config.Movement.Delay)
 	task.spawn(entity.RunCallback, entity, "OnStartMoving")
 	
+	-- Lần đầu entity chạm LocalPlayer
+-- Lần đầu chạm hitbox damage
+if not model:GetAttribute("Paused")
+	and not model:GetAttribute("FirstHitboxTriggered")
+	and model:GetAttribute("Damage")
+	and not model:GetAttribute("BeingBanished")
+	and (charOrigin - origin).Magnitude <= config.Damage.Range
+	and inSight then
+
+	model:SetAttribute("FirstHitboxTriggered", true)
+	model:SetAttribute("Paused", true)
+
+	task.delay(1.5, function()
+		if entity:IsAlive() then
+			model:SetAttribute("Paused", false)
+		end
+	end)
+end
+	
 	-- Loop kiểm tra hitbox và tương tác với player
 	task.spawn(function()
 		while entity:IsAlive() and task.wait() do
-			if model:GetAttribute("Paused") or model:GetAttribute("HitboxTriggered") then continue end
+			if model:GetAttribute("HitboxTriggered") then continue end
 			
 			local origin = model:GetPivot().Position
 			local charOrigin = RootPart.Position
@@ -815,16 +835,25 @@ end
 				end
 			end
 			
-			-- Kiểm tra hitbox bắt được LocalPlayer
-			if not model:GetAttribute("Paused") and not usedCrucifix then
-				local damage = config.Damage
-				if damage.Enabled and damage.Range > 0 and Humanoid.Health > 0 and (not Character:GetAttribute("Hiding") or damage.IgnoreHiding) and model:GetAttribute("Damage") and not model:GetAttribute("BeingBanished") and (charOrigin - origin).Magnitude <= damage.Range and inSight then
-					model:SetAttribute("Damage", false)
-					model:SetAttribute("HitboxTriggered", true) -- Đánh dấu hitbox đã bắt được player
-					DamagePlayer(entity)
-					break -- Ngừng vòng lặp kiểm tra
-				end
-			end
+	-- Kiểm tra hitbox bắt được LocalPlayer
+if not model:GetAttribute("Paused") and not usedCrucifix then
+	local damage = config.Damage
+
+	if damage.Enabled
+		and damage.Range > 0
+		and Humanoid.Health > 0
+		and Character:GetAttribute("Hiding") == true
+		and model:GetAttribute("Damage")
+		and not model:GetAttribute("BeingBanished")
+		and (charOrigin - origin).Magnitude <= damage.Range
+		and inSight then
+
+		model:SetAttribute("Damage", false)
+		model:SetAttribute("HitboxTriggered", true)
+		DamagePlayer(entity)
+		break
+	end
+end
 			
 			do
 				local camShake = config.CameraShake
