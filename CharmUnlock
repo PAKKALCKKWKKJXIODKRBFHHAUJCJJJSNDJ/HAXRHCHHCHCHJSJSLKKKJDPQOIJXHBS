@@ -1,0 +1,194 @@
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+
+local LocalPlayer = Players.LocalPlayer
+
+local function GetGitSound(GithubSnd, SoundName)
+					local url = GithubSnd
+					if not isfile(SoundName .. ".mp3") then
+						writefile(SoundName .. ".mp3", game:HttpGet(url))
+					end
+					local sound = Instance.new("Sound")
+					sound.SoundId = (getcustomasset or getsynasset)(SoundName .. ".mp3")
+					return sound
+				end
+				
+				local Charms = GetGitSound(
+	"https://github.com/lynguyen26031993-design/-u/raw/refs/heads/main/charm%20%20get.mp3",
+	"opvpdlkxjjcjkldjjhcjkds"
+)
+
+local function CharmsNotify(NotifyOptions)
+	NotifyOptions = NotifyOptions or {}
+
+	local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
+	local UIContainer =
+		PlayerGui:FindFirstChild("GlobalUI")
+		or PlayerGui:FindFirstChild("MainUI")
+
+	if not UIContainer then
+		return
+	end
+
+	local AchievementsHolder =
+		UIContainer:FindFirstChild("AchievementsHolder")
+
+	if not AchievementsHolder then
+		return
+	end
+
+	local Template =
+		AchievementsHolder:FindFirstChild("Achievement")
+
+	if not Template then
+		return
+	end
+
+	local Achievement = Template:Clone()
+
+	Achievement.Size = UDim2.new(0, 0, 0, 0)
+	Achievement.Frame.Position = UDim2.new(1.1, 0, 0, 0)
+	Achievement.Name = "LiveAchievement"
+	Achievement.Visible = true
+	
+	local BaseColor = Color3.fromRGB(122, 204, 255)
+local BaseH, _, _ = BaseColor:ToHSV()
+
+for _, Object in ipairs(Achievement:GetDescendants()) do
+	if Object:IsA("GuiObject") then
+		local Success, Color = pcall(function()
+			return Object.BackgroundColor3
+		end)
+
+		if Success and Color then
+			local _, Saturation, Value = Color:ToHSV()
+
+			Object.BackgroundColor3 =
+				Color3.fromHSV(BaseH, Saturation, Value)
+		end
+	end
+
+	if Object:IsA("TextLabel")
+		or Object:IsA("TextButton")
+		or Object:IsA("TextBox") then
+
+		local _, Saturation, Value =
+			Object.TextColor3:ToHSV()
+
+		Object.TextColor3 =
+			Color3.fromHSV(BaseH, Saturation, Value)
+	end
+
+	if Object:IsA("ImageLabel")
+		or Object:IsA("ImageButton") then
+
+		local _, Saturation, Value =
+			Object.ImageColor3:ToHSV()
+
+		Object.ImageColor3 =
+			Color3.fromHSV(BaseH, Saturation, Value)
+	end
+
+	if Object:IsA("UIStroke") then
+		local _, Saturation, Value =
+			Object.Color:ToHSV()
+
+		Object.Color =
+			Color3.fromHSV(BaseH, Saturation, Value)
+	end
+end
+
+	Achievement.Frame.TextLabel.Text =
+		NotifyOptions.Style or "NOTIFICATION"
+
+	Achievement.Frame.Details.Title.Text =
+		NotifyOptions.Title or "Sem Título"
+
+	Achievement.Frame.Details.Desc.Text =
+		NotifyOptions.Description or "Sem Descrição"
+
+	Achievement.Frame.Details.Reason.Text =
+		NotifyOptions.Reason or ""
+
+	Achievement.Frame.ImageLabel.Image =
+		(NotifyOptions.Image and NotifyOptions.Image ~= "")
+		and NotifyOptions.Image
+		or "rbxassetid://0"
+
+	Achievement.Parent = AchievementsHolder
+
+	local sound = Achievement:FindFirstChildWhichIsA("Sound") 
+	sound.SoundId = Charms.SoundId
+	sound.Volume = 2
+	
+	task.spawn(function() 
+	task.wait(0.3)
+	sound:Play()
+	end)
+
+	task.spawn(function()
+		Achievement:TweenSize(
+			UDim2.new(1, 0, 0.2, 0),
+			Enum.EasingDirection.In,
+			Enum.EasingStyle.Quad,
+			0.8,
+			true
+		)
+
+		task.wait(0.8)
+
+		Achievement.Frame:TweenPosition(
+			UDim2.new(0, 0, 0, 0),
+			Enum.EasingDirection.Out,
+			Enum.EasingStyle.Quad,
+			0.5,
+			true
+		)
+
+		TweenService:Create(
+			Achievement.Frame.Glow,
+			TweenInfo.new(
+				1,
+				Enum.EasingStyle.Quad,
+				Enum.EasingDirection.In
+			),
+			{
+				ImageTransparency = 1
+			}
+		):Play()
+
+		if typeof(NotifyOptions.Time) == "Instance" then
+			NotifyOptions.Time.Destroying:Wait()
+		else
+			task.wait(NotifyOptions.Time or 5)
+		end
+
+		if not Achievement.Parent then
+			return
+		end
+
+		Achievement.Frame:TweenPosition(
+			UDim2.new(1.1, 0, 0, 0),
+			Enum.EasingDirection.In,
+			Enum.EasingStyle.Quad,
+			0.5,
+			true
+		)
+
+		task.wait(0.5)
+
+		Achievement:TweenSize(
+			UDim2.new(1, 0, -0.1, 0),
+			Enum.EasingDirection.InOut,
+			Enum.EasingStyle.Quad,
+			0.5,
+			true
+		)
+
+		task.wait(0.5)
+
+		Achievement:Destroy()
+	end)
+end
+
+return CharmsNotify
