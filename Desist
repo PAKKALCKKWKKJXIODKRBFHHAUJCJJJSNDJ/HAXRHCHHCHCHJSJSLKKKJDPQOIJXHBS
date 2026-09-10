@@ -1,0 +1,187 @@
+local RS = game:GetService("ReplicatedStorage")
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+
+function light(tim,color0,color1)
+	local tweenservice = game:GetService("TweenService")
+	local info = TweenInfo.new(tim,Enum.EasingStyle.Linear)
+	for _ , light in pairs(game.Workspace.CurrentRooms:GetDescendants()) do
+		if light:IsA("Light") or light:IsA("SurfaceLight") or light:IsA("SpotLight") then
+			local target = {Color = color1}
+			local anim = tweenservice:Create(light,info,target)
+			anim:Play()
+		end
+		if light:IsA("MeshPart") and light.Material == Enum.Material.Neon  and light.Name ~= "Skybox" then
+			local target1 = {Color = color0}
+			local anim2 = tweenservice:Create(light,info,target1)
+			anim2:Play()
+		end
+	end
+end
+
+local scream = Instance.new("Sound") 
+    scream.SoundId = "rbxassetid://9125632539" 
+    scream.Volume = 3
+    scream.Parent = workspace
+    scream.PlaybackSpeed = 0.5
+    scream.Pitch = 0.35
+    scream:Play() 
+    
+    scream.Ended:Connect(function() 
+    scream:Destroy() 
+    end) 
+    
+    local light2 = Instance.new("Sound") 
+    light2.SoundId = "rbxassetid://166047422" 
+    light2.Volume = 2
+    light2.PlaybackSpeed = 1
+    light2.Pitch = 0.7
+    light2.Parent = workspace
+    light2:Play() 
+    
+    light2.Ended:Connect(function() 
+    light2:Destroy() 
+    end) 
+
+task.spawn(function()
+	light(0, Color3.fromRGB(255, 90, 5), Color3.fromRGB(255,155,0))
+end)
+
+task.wait(5)
+
+local LP = Players.LocalPlayer
+
+local function LoadModel(file, url)
+	if not isfile(file) then
+		writefile(file, game:HttpGet(url))
+	end
+
+	return game:GetObjects(getcustomasset(file))[1]
+end
+
+local LatestRoom = RS.GameData.LatestRoom
+local CurrentRooms = workspace.CurrentRooms
+
+local Room = CurrentRooms:FindFirstChild(tostring(LatestRoom.Value))
+if not Room then return end
+
+local RoomExit = Room:FindFirstChild("RoomExit")
+if not RoomExit then return end
+
+local _Idx57 = LoadModel(
+	"kckldkkxjcjjjd.txt",
+	"https://github.com/lynguyen26031993-design/-u/raw/refs/heads/main/Place_131351567799504_Model_Custom_Desisjjjt_1789052483.txt"
+)
+
+if not _Idx57 then return end
+
+_Idx57.Parent = workspace
+
+_Idx57.HSUR.CloseStatic.Playing = true
+_Idx57.HSUR.FarStatic.Playing = true
+
+_Idx57:PivotTo(RoomExit.CFrame)
+_Idx57:PivotTo(_Idx57:GetPivot() * CFrame.new(0, 0, 3))
+
+-- Chờ 3 giây trước khi bắt đầu entity
+task.wait(4)
+
+local FollowSpeed = 23
+local StopDistance = 13
+local MoveCooldown = 0.8
+
+local Cooldown = false
+local CooldownEnd = 0
+local Destroyed = false
+
+local FollowConnection
+
+-- Sau khi chờ 3 giây, entity hoạt động thêm 30 giây
+task.delay(30, function()
+	if Destroyed then return end
+
+	Destroyed = true
+
+	if FollowConnection then
+		FollowConnection:Disconnect()
+		FollowConnection = nil
+	end
+
+	if _Idx57 then
+		_Idx57:Destroy()
+	end
+end)
+
+-- Follow LocalPlayer
+FollowConnection = RunService.Heartbeat:Connect(function(dt)
+	if Destroyed or not _Idx57.Parent then
+		return
+	end
+
+	local Char = LP.Character
+	local HRP = Char and Char:FindFirstChild("HumanoidRootPart")
+	if not HRP then return end
+
+	local Pivot = _Idx57:GetPivot()
+	local Pos = Pivot.Position
+	local Target = HRP.Position
+
+	local Offset = Target - Pos
+	local Distance = Offset.Magnitude
+
+	-- Đang cooldown
+	if Cooldown then
+		-- Nếu player chạy cách hơn 8 studs thì bỏ cooldown ngay
+		if Distance > 8 then
+			Cooldown = false
+
+		-- Chưa hết cooldown thì đứng im
+		elseif os.clock() < CooldownEnd then
+			return
+
+		-- Cooldown hết
+		else
+			Cooldown = false
+		end
+	end
+
+	-- Di chuyển khi player cách xa StopDistance
+	if Distance > StopDistance then
+		local Direction = Offset.Unit
+		local Move = math.min(
+			FollowSpeed * dt,
+			Distance - StopDistance
+		)
+
+		local NewPos = Pos + Direction * Move
+
+		_Idx57:PivotTo(
+			CFrame.lookAt(NewPos, Target)
+		)
+
+		local NewDistance = (Target - NewPos).Magnitude
+
+		-- Entity vừa tới khoảng dừng
+		if NewDistance <= StopDistance then
+			Cooldown = true
+			CooldownEnd = os.clock() + MoveCooldown
+		end
+	end
+end)
+
+-- Damage khi LocalPlayer đứng im
+task.spawn(function()
+	while not Destroyed and _Idx57.Parent do
+		local Char = LP.Character
+		local Hum = Char and Char:FindFirstChildOfClass("Humanoid")
+
+		if Hum and Hum.Health > 0 then
+			if Hum.MoveDirection.Magnitude == 0 then
+				Hum:TakeDamage(2)
+				game.ReplicatedStorage.GameStats["Player_".. game.Players.LocalPlayer.Name].Total.DeathCause.Value = "Desist"
+			end
+		end
+
+		task.wait(0.05)
+	end
+end)
