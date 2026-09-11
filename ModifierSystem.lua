@@ -1,5 +1,6 @@
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
 
 local LP = Players.LocalPlayer
 local MainUI = LP:WaitForChild("PlayerGui"):WaitForChild("MainUI")
@@ -151,8 +152,20 @@ end
 
 end
 
+
 if ButtonModifiers and ModifierUI then
 	ButtonModifiers.Interactable = true
+	
+	local OldMouseBehavior = UserInputService.MouseBehavior
+
+ModifierUI:GetPropertyChangedSignal("Visible"):Connect(function()
+	if ModifierUI.Visible then
+		OldMouseBehavior = UserInputService.MouseBehavior
+		UserInputService.MouseBehavior = Enum.MouseBehavior.Default
+	else
+		UserInputService.MouseBehavior = OldMouseBehavior
+	end
+end)
 
 	ModifierUI:GetPropertyChangedSignal("Visible"):Connect(function()
 		if not BreakingStarted then
@@ -990,4 +1003,5 @@ for _, Object in ipairs(MainUI:GetChildren()) do
 	end
 end
 
+UserInputService.MouseBehavior = Enum.MouseBehavior.LockCenter
 breaking3:Destroy() 
