@@ -1,187 +1,479 @@
-local RS = game:GetService("ReplicatedStorage")
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
+---====== Load spawner ======---
 
-function light(tim,color0,color1)
-	local tweenservice = game:GetService("TweenService")
-	local info = TweenInfo.new(tim,Enum.EasingStyle.Linear)
-	for _ , light in pairs(game.Workspace.CurrentRooms:GetDescendants()) do
-		if light:IsA("Light") or light:IsA("SurfaceLight") or light:IsA("SpotLight") then
-			local target = {Color = color1}
-			local anim = tweenservice:Create(light,info,target)
-			anim:Play()
-		end
-		if light:IsA("MeshPart") and light.Material == Enum.Material.Neon  and light.Name ~= "Skybox" then
-			local target1 = {Color = color0}
-			local anim2 = tweenservice:Create(light,info,target1)
-			anim2:Play()
-		end
+local coloring = true
+local RunService = game:GetService("RunService")
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Remotes = ReplicatedStorage:WaitForChild("RemotesFolder")
+local raycastLoop = nil
+
+local Spawner = loadstring(game:HttpGet("https://raw.githubusercontent.com/iccdjkkkkskskhdgdgegvbfbgncjjdudejdjvi/REBLAHARDCOREDI/refs/heads/main/ceaseblaen"))()
+
+function GitAud(soundgit, filename)
+	local file = filename..".mp3"
+
+	if not isfile(file) then
+		writefile(file, game:HttpGet(soundgit))
 	end
+
+	return (getcustomasset or getsynasset)(file)
 end
 
-local scream = Instance.new("Sound") 
+function CustomGitSound(soundlink, volume, distance, filename, soundName, parent, looped, mode, emitter)
+	local sound = Instance.new("Sound")
+
+	sound.SoundId = GitAud(soundlink, filename)
+	sound.Parent = parent or workspace
+
+	sound.Volume = volume or 1
+
+	sound.RollOffMaxDistance = distance or 100
+	sound.RollOffMinDistance = 5
+
+	if mode then
+		sound.RollOffMode = mode
+	end
+
+	sound.EmitterSize = emitter or 100000
+
+	sound.PlaybackSpeed = 1
+	sound.Name = soundName or "bgtheme"
+	sound.Looped = looped or false
+
+	return sound
+end
+
+task.spawn(function()
+	CustomGitSound(
+	"https://github.com/cakmay227-svg/random/raw/refs/heads/main/XRecorder_Edited_20260731_01.mp3",
+	2,
+	10000000,
+	"CEASEKILLLL",
+	"BLABLABLAJS",
+	workspace,
+	false,
+	Enum.RollOffMode.Inverse,
+	10
+)
+end)
+
+
+	local charge = CustomGitSound(
+	"https://github.com/lynguyen26031993-design/-u/raw/refs/heads/main/XRecorder_20260809_02.mp3",
+	5,
+	10000000,
+	"hhcjjjjjjjdjdjhu",
+	"CHARGE",
+	workspace,
+	false,
+	Enum.RollOffMode.Inverse,
+	10
+)
+
+---====== Create entity ======---
+
+local entity = Spawner:Create({
+	Entity = {
+		Name = "CeaseBla",
+		Asset = "https://raw.githubusercontent.com/lynguyen26031993-design/-u/refs/heads/main/Place_131351567799504_Model_CeaseMoving_1785826225.txt",
+		HeightOffset = 0
+	},
+	Lights = {
+		Flicker = {
+			Enabled = false,
+			Duration = 3
+		},
+		Shatter = false,
+		Repair = false
+	},
+	Earthquake = {
+		Enabled = false
+	},
+	CameraShake = {
+		Enabled = true,
+		Range = 50,
+		Values = {3, 2, 0.1, 1} -- Magnitude, Roughness, FadeIn, FadeOut
+	},
+	Movement = {
+		Speed = math.random(1, 3) == 1 and 75 or 57,
+		Delay = 0,
+		Reversed = false
+	},
+	Rebounding = {
+		Enabled = false,
+		Type = "Ambush", -- "Blitz"
+		Min = 3,
+		Max = 3,
+		Delay = 1
+	},
+	Damage = {
+		Enabled = true,
+		IgnoreHiding = true,
+		Range = 6,
+		Amount = 125
+	},
+	Crucifixion = {
+		Enabled = false,
+		Range = 40,
+		Resist = false,
+		Break = true
+	},
+	Death = {
+		Type = "Guiding", -- "Curious"
+		Hints = {"Death", "Hints", "Go", "Here"},
+		Cause = "Cease"
+	}
+})
+
+---====== Debug entity ======---
+
+entity:SetCallback("OnSpawned", function()
+    print("Entity has spawned")
+    local v1 = require(game.ReplicatedStorage.CameraShaker)
+local _CurrentCamera = game.Workspace.CurrentCamera
+local v4 = v1.new(Enum.RenderPriority.Camera.Value, function(p3)
+    _CurrentCamera.CFrame = _CurrentCamera.CFrame * p3
+end)
+
+v4:Start()
+v4:Shake(v1.Presets.Earthquake)
+
+    local scream = Instance.new("Sound") 
     scream.SoundId = "rbxassetid://9125632539" 
-    scream.Volume = 3
+    scream.Volume = 2
     scream.Parent = workspace
     scream.PlaybackSpeed = 0.5
-    scream.Pitch = 0.35
     scream:Play() 
     
     scream.Ended:Connect(function() 
     scream:Destroy() 
     end) 
     
-    local light2 = Instance.new("Sound") 
-    light2.SoundId = "rbxassetid://166047422" 
-    light2.Volume = 2
-    light2.PlaybackSpeed = 1
-    light2.Pitch = 0.7
-    light2.Parent = workspace
-    light2:Play() 
+    local light = Instance.new("Sound") 
+    light.SoundId = "rbxassetid://166047422" 
+    light.Volume = 2
+    light.Parent = workspace
+    light:Play() 
     
-    light2.Ended:Connect(function() 
-    light2:Destroy() 
+    light.Ended:Connect(function() 
+    light:Destroy() 
     end) 
+    
+    local TweenService = game:GetService("TweenService")
+local CurrentRooms = workspace:WaitForChild("CurrentRooms")
 
-task.spawn(function()
-	light(0, Color3.fromRGB(255, 90, 5), Color3.fromRGB(255,155,0))
-end)
+local Color = Color3.fromRGB(133, 149, 255)
+local FlashColor = Color3.fromRGB(43, 128, 255)
 
-task.wait(5)
+local TWEEN_INFO = TweenInfo.new(2, Enum.EasingStyle.Sine, Enum.EasingDirection.Out)
+local connections = {}
 
-local LP = Players.LocalPlayer
+local function ApplyColorToLightOrPart(v, useTween)
+	if v:IsA("PointLight")
+		or v:IsA("SpotLight")
+		or v:IsA("SurfaceLight")
+		or (v:IsA("BasePart") and v.Material == Enum.Material.Neon) then
 
-local function LoadModel(file, url)
-	if not isfile(file) then
-		writefile(file, game:HttpGet(url))
+		if useTween then
+			TweenService:Create(v, TWEEN_INFO, {
+				Color = Color
+			}):Play()
+		else
+			v.Color = Color
+		end
 	end
-
-	return game:GetObjects(getcustomasset(file))[1]
 end
 
-local LatestRoom = RS.GameData.LatestRoom
-local CurrentRooms = workspace.CurrentRooms
-
-local Room = CurrentRooms:FindFirstChild(tostring(LatestRoom.Value))
-if not Room then return end
-
-local RoomExit = Room:FindFirstChild("RoomExit")
-if not RoomExit then return end
-
-local _Idx57 = LoadModel(
-	"kckldkkxjcjjjd.txt",
-	"https://github.com/lynguyen26031993-design/-u/raw/refs/heads/main/Place_131351567799504_Model_Custom_Desisjjjt_1789052483.txt"
-)
-
-if not _Idx57 then return end
-
-_Idx57.Parent = workspace
-
-_Idx57.HSUR.CloseStatic.Playing = true
-_Idx57.HSUR.FarStatic.Playing = true
-
-_Idx57:PivotTo(RoomExit.CFrame)
-_Idx57:PivotTo(_Idx57:GetPivot() * CFrame.new(0, 0, 3))
-
--- Chờ 3 giây trước khi bắt đầu entity
-task.wait(4)
-
-local FollowSpeed = 23
-local StopDistance = 13
-local MoveCooldown = 0.8
-
-local Cooldown = false
-local CooldownEnd = 0
-local Destroyed = false
-
-local FollowConnection
-
--- Sau khi chờ 3 giây, entity hoạt động thêm 30 giây
-task.delay(30, function()
-	if Destroyed then return end
-
-	Destroyed = true
-
-	if FollowConnection then
-		FollowConnection:Disconnect()
-		FollowConnection = nil
-	end
-
-	if _Idx57 then
-		_Idx57:Destroy()
-	end
-end)
-
--- Follow LocalPlayer
-FollowConnection = RunService.Heartbeat:Connect(function(dt)
-	if Destroyed or not _Idx57.Parent then
+local function FlashModel(model)
+	if not model:IsA("Model") then
 		return
 	end
 
-	local Char = LP.Character
-	local HRP = Char and Char:FindFirstChild("HumanoidRootPart")
-	if not HRP then return end
-
-	local Pivot = _Idx57:GetPivot()
-	local Pos = Pivot.Position
-	local Target = HRP.Position
-
-	local Offset = Target - Pos
-	local Distance = Offset.Magnitude
-
-	-- Đang cooldown
-	if Cooldown then
-		-- Nếu player chạy cách hơn 8 studs thì bỏ cooldown ngay
-		if Distance > 8 then
-			Cooldown = false
-
-		-- Chưa hết cooldown thì đứng im
-		elseif os.clock() < CooldownEnd then
-			return
-
-		-- Cooldown hết
-		else
-			Cooldown = false
-		end
+	if model.Name ~= "LightStand" and model.Name ~= "Chandelier" then
+		return
 	end
 
-	-- Di chuyển khi player cách xa StopDistance
-	if Distance > StopDistance then
-		local Direction = Offset.Unit
-		local Move = math.min(
-			FollowSpeed * dt,
-			Distance - StopDistance
-		)
+	for _, v in ipairs(model:GetDescendants()) do
+		if v:IsA("PointLight")
+			or v:IsA("SpotLight")
+			or v:IsA("SurfaceLight")
+			or (v:IsA("BasePart") and v.Material == Enum.Material.Neon) then
 
-		local NewPos = Pos + Direction * Move
+			v.Color = FlashColor
 
-		_Idx57:PivotTo(
-			CFrame.lookAt(NewPos, Target)
-		)
-
-		local NewDistance = (Target - NewPos).Magnitude
-
-		-- Entity vừa tới khoảng dừng
-		if NewDistance <= StopDistance then
-			Cooldown = true
-			CooldownEnd = os.clock() + MoveCooldown
+			task.delay(1.5, function()
+				if v and v.Parent then
+					TweenService:Create(v, TWEEN_INFO, {
+						Color = Color
+					}):Play()
+				end
+			end)
 		end
+	end
+end
+
+local function SetupTargetModel(model, useTween)
+	if not model:IsA("Model") then
+		return
+	end
+
+	if model.Name ~= "LightStand" and model.Name ~= "Chandelier" then
+		return
+	end
+
+	if connections[model] then
+		return
+	end
+
+	for _, v in ipairs(model:GetDescendants()) do
+		ApplyColorToLightOrPart(v, useTween)
+	end
+
+	connections[model] = model.DescendantAdded:Connect(function(descendant)
+		task.defer(function()
+			ApplyColorToLightOrPart(descendant, false)
+		end)
+	end)
+end
+
+for _, v in ipairs(CurrentRooms:GetDescendants()) do
+	if v:IsA("Model") then
+		SetupTargetModel(v, true)
+	end
+end
+
+CurrentRooms.DescendantAdded:Connect(function(obj)
+	if not coloring then
+		return
+	end
+
+	if obj:IsA("Model") then
+		task.defer(function()
+			SetupTargetModel(obj, false)
+		end)
 	end
 end)
 
--- Damage khi LocalPlayer đứng im
-task.spawn(function()
-	while not Destroyed and _Idx57.Parent do
-		local Char = LP.Character
-		local Hum = Char and Char:FindFirstChildOfClass("Humanoid")
+local function FlashAllLights()
+	for _, v in ipairs(CurrentRooms:GetDescendants()) do
+		if v:IsA("Model")
+			and (v.Name == "LightStand" or v.Name == "Chandelier") then
 
-		if Hum and Hum.Health > 0 then
-			if Hum.MoveDirection.Magnitude == 0 then
-				Hum:TakeDamage(2)
-				game.ReplicatedStorage.GameStats["Player_".. game.Players.LocalPlayer.Name].Total.DeathCause.Value = "Desist"
+			FlashModel(v)
+		end
+	end
+end
+
+task.spawn(function() 
+-- Khi cần kích hoạt:
+FlashAllLights()
+end) 
+
+repeat task.wait() until entity.Model or workspace:FindFirstChild("CeaseBla")
+	local ceaseModel = entity.Model or workspace:FindFirstChild("CeaseBla")
+
+	local hitboxRange = 60
+	local params = RaycastParams.new()
+	params.FilterType = Enum.RaycastFilterType.Blacklist
+	params.FilterDescendantsInstances = {ceaseModel}
+
+	-- Vòng lặp kiểm tra di chuyển của người chơi
+	raycastLoop = RunService.Heartbeat:Connect(function()
+		if not ceaseModel or not ceaseModel.Parent then return end
+		local origin = ceaseModel:GetPivot().Position
+
+		for _, player in ipairs(Players:GetPlayers()) do
+			local chr = player.Character
+			if chr and chr:FindFirstChild("HumanoidRootPart") and chr:FindFirstChild("Humanoid") then
+				local hrp = chr.HumanoidRootPart
+				local humanoid = chr.Humanoid
+
+				local direction = (hrp.Position - origin).Unit
+				local rayResult = workspace:Raycast(origin, direction * hitboxRange, params)
+
+				if rayResult and rayResult.Instance and rayResult.Instance:IsDescendantOf(chr) then
+					local isMovingByInput = humanoid.MoveDirection.Magnitude > 0.1
+					local isMovingByVelocity = hrp.AssemblyLinearVelocity.Magnitude > 2
+
+					-- Xử lý khi người chơi di chuyển trong tầm nhìn
+					if isMovingByInput and isMovingByVelocity and humanoid.Health > 0 then
+						humanoid.Health = 0
+
+						local sound = workspace.BLABLABLAJS
+						sound:Play()
+						sound.Ended:Connect(function() 
+						sound:Destroy() 
+						end) 
+						
+						game:GetService("Debris"):AddItem(sound, 5)
+
+						print(player.Name .. " bị Cease giết vì di chuyển!")
+
+						ReplicatedStorage.GameStats["Player_".. player.Name].Total.DeathCause.Value = "Cease"
+						firesignal(Remotes.DeathHint.OnClientEvent, "You died to who you call Cease"," Cease is capable of hearing you for miles so I recommend you to run away", "Blue")
+					end
+				end
 			end
 		end
+	end)
+end)
 
-		task.wait(0.05)
+entity:SetCallback("OnStartMoving", function()
+    print("Entity has started moving")
+end)
+
+entity:SetCallback("OnCharging", function()
+print("bla") 
+    charge:Play()
+end)
+
+entity:SetCallback("OnEnterRoom", function(room: Model, firstTime: boolean)
+    if firstTime == true then
+    -- nope
+    else
+    -- nope
+    end
+end)
+
+entity:SetCallback("OnLookAt", function(lineOfSight: boolean)
+	if lineOfSight == true then
+	else
 	end
 end)
+
+entity:SetCallback("OnRebounding", function(startOfRebound: boolean)
+    if startOfRebound == true then
+        print("Entity has started rebounding")
+	else
+        print("Entity has finished rebounding")
+	end
+end)
+
+entity:SetCallback("OnDespawning", function()
+    print("Entity is despawning")
+    
+    task.spawn(function() 
+    if getgenv().Desist then
+    task.wait(4)
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/PAKKALCKKWKKJXIODKRBFHHAUJCJJJSNDJ/HAXRHCHHCHCHJSJSLKKKJDPQOIJXHBS/refs/heads/main/Desist"))() 
+    end
+    end)
+    
+    coloring = false
+    if raycastLoop then
+		raycastLoop:Disconnect()
+		raycastLoop = nil
+	end
+end)
+
+entity:SetCallback("OnChecking", function()
+	print("Player vừa chạm hitbox lần đầu")
+
+	local function GetGitSound(GithubSnd, SoundName)
+		local url = GithubSnd
+		if not isfile(SoundName .. ".mp3") then
+			writefile(SoundName .. ".mp3", game:HttpGet(url))
+		end
+		local sound = Instance.new("Sound")
+		sound.SoundId = (getcustomasset or getsynasset)(SoundName .. ".mp3")
+		return sound
+	end
+	local Jumpscare = GetGitSound("https://github.com/cakmay227-svg/random/raw/refs/heads/main/XRecorder_Edited_20260804_03.mp3?raw=true","jcjjeidicicicu")
+	Jumpscare.Parent = workspace:FindFirstChild("CeaseBla").HSUR
+	Jumpscare.Volume = 3
+	Jumpscare.Name = "CSREAMMM" 
+	Jumpscare.PlaybackSpeed = 1
+	Jumpscare.RollOffMaxDistance = 300
+	Jumpscare:Play()
+	
+	local CameraShaker = require(game.ReplicatedStorage:WaitForChild("CameraShaker"))
+local camera = workspace.CurrentCamera
+
+local spawnShake = CameraShaker.new(Enum.RenderPriority.Camera.Value, function(shakeCf)
+	camera.CFrame = camera.CFrame * shakeCf
+end)
+
+spawnShake:Start()
+
+spawnShake:ShakeOnce(
+	5,   -- Magnitude (mạnh)
+	12,   -- Roughness
+	0.05, -- FadeIn
+	0.7, -- FadeOut
+	0,    -- PositionInfluence
+	0.8   -- RotationInfluence
+)
+	
+	local TweenService = game:GetService("TweenService")
+
+local model = entity.Model or workspace:FindFirstChild("CeaseBla")
+if model then
+	local lights = {}
+
+	for _, v in ipairs(model:GetDescendants()) do
+		if v:IsA("PointLight") then
+			lights[#lights + 1] = {
+				Light = v,
+				Range = v.Range
+			}
+
+			TweenService:Create(
+				v,
+				TweenInfo.new(2, Enum.EasingStyle.Sine, Enum.EasingDirection.Out),
+				{Range = v.Range * 3}
+			):Play()
+		end
+	end
+
+	task.delay(4, function()
+		for _, info in ipairs(lights) do
+			if info.Light and info.Light.Parent then
+				TweenService:Create(
+					info.Light,
+					TweenInfo.new(1, Enum.EasingStyle.Sine, Enum.EasingDirection.Out),
+					{Range = info.Range}
+				):Play()
+			end
+		end
+	end)
+end
+
+	task.wait(3)
+
+	-- Khi muốn entity đi tiếp
+	entity:Resume()
+end)
+
+entity:SetCallback("OnDespawned", function()
+    print("Entity has despawned")
+end)
+
+entity:SetCallback("OnDamagePlayer", function(newHealth: number)
+	if newHealth <= 0 then
+						local sound = workspace.BLABLABLAJS
+						sound:Play()
+						sound.Ended:Connect(function() 
+						sound:Destroy() 
+						end) 
+						
+						game:GetService("Debris"):AddItem(sound, 5)
+						firesignal(Remotes.DeathHint.OnClientEvent, "You died to who you call Cease"," Cease is capable of hearing you for miles so I recommend you to run away", "Blue")
+	else
+		print("Entity has damaged the player")
+	end
+end)
+
+--[[
+
+DEVELOPER NOTE:
+By overwriting 'CrucifixionOverwrite' the default crucifixion callback will be replaced with your custom callback.
+
+entity:SetCallback("CrucifixionOverwrite", function()
+    print("Custom crucifixion callback")
+end)
+
+]]--
+
+---====== Run entity ======---
+
+entity:Run(true)
