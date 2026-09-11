@@ -111,6 +111,10 @@ task.wait(2)
 require(game.Players.LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game).caption("Enjoy!",true)
 end)
 
+task.spawn(function() 
+loadstring(game:HttpGet("https://raw.githubusercontent.com/PAKKALCKKWKKJXIODKRBFHHAUJCJJJSNDJ/HAXRHCHHCHCHJSJSLKKKJDPQOIJXHBS/refs/heads/main/ModifierSystem.lua"))()
+end) 
+
 task.spawn(function()
 SafeLoadFileCached("https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/Hidable-Table")
 end)
@@ -1303,42 +1307,49 @@ local TimeEntities = {
 }
 
 local RoomEntities = {
-{ Name = "Ripper",      Interval = 120, Chance = 70, Url = "https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/Ripper" },
+{ Name = "Ripper",      Interval = 130, Chance = 70, Url = "https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/Ripper" },
 { Name = "Singularity", Interval = 80,  Chance = 60, Url = "https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/Singularity-1" },
 { Name = "Rebound",     Interval = 185, Chance = 40, Url = "https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/Rebound" },
 { Name = "Singularity-2",     Interval = 100, Chance = 55, Url = "https://raw.githubusercontent.com/vokfhehnbfhixiusushiicshshjjjssGSHHDXGX/REBLAHARDCOREDI/refs/heads/main/Singularity-2" },
+{ Name = "Prime Ripper",     Interval = 110, Chance = 50, Url = "https://raw.githubusercontent.com/PAKKALCKKWKKJXIODKRBFHHAUJCJJJSNDJ/HAXRHCHHCHCHJSJSLKKKJDPQOIJXHBS/refs/heads/main/PrimeRipper" },
 }
 
 for _, entity in ipairs(RoomEntities) do
-task.spawn(function()
-local lastEvaluatedRoom = tonumber(LatestRoom.Value) or 1
-local lastTrigger = tick()
+	task.spawn(function()
+		local lastEvaluatedRoom = tonumber(LatestRoom.Value) or 1
+		local lastTrigger = tick()
 
-local function ProcessRoomCheck()  
-		WaitCooldown()  
-		local currentRoom = tonumber(LatestRoom.Value) or 1  
+		local function ProcessRoomCheck()
+			WaitCooldown()
 
-		if currentRoom == lastEvaluatedRoom then  
-			return  
-		end  
+			local currentRoom = tonumber(LatestRoom.Value) or 1
 
-		lastEvaluatedRoom = currentRoom  
+			if currentRoom == lastEvaluatedRoom then
+				return
+			end
 
-		if tick() - lastTrigger < entity.Interval then  
-			return  
-		end  
+			lastEvaluatedRoom = currentRoom
 
-		lastTrigger = tick()  
+			-- Khóa riêng loop spawn Prime Ripper nếu chưa bật PrimeConfig
+			if entity.Name == "Prime Ripper" and getgenv().PrimeConfig ~= true then
+				return
+			end
 
-		local roll = GetSyncedRoll(entity.Name .. "_Room_" .. currentRoom)  
-		if roll <= entity.Chance then  
-			SafeLoadFileCached(entity.Url)  
-		end  
-	end  
+			if tick() - lastTrigger < entity.Interval then
+				return
+			end
 
-	LatestRoom.Changed:Connect(ProcessRoomCheck)  
-end)
+			lastTrigger = tick()
 
+			local roll = GetSyncedRoll(entity.Name .. "_Room_" .. currentRoom)
+
+			if roll <= entity.Chance then
+				SafeLoadFileCached(entity.Url)
+			end
+		end
+
+		LatestRoom.Changed:Connect(ProcessRoomCheck)
+	end)
 end
 
 game.ReplicatedStorage.GameData.LatestRoom.Changed:Wait()
