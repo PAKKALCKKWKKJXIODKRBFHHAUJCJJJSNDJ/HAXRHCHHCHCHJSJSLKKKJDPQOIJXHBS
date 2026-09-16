@@ -1307,6 +1307,7 @@ local TimeEntities = {
 { Name = "Deer God",   Interval = 300, Chance = 50, Url = "https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/DeerGod" },
 { Name = "Cease",       Interval = 110, Chance = 80, Url = "https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/Cease" },
 { Name = "Frostbite",       Interval = 10, Chance = 2, Url = "https://raw.githubusercontent.com/iccdjkkkkskskhdgdgegvbfbgncjjdudejdjvi/REBLAHARDCOREDI/refs/heads/main/Frostbite" },
+{ Name = "Multimonster",       Interval = 20, Chance = 6, Url = "https://raw.githubusercontent.com/PAKKALCKKWKKJXIODKRBFHHAUJCJJJSNDJ/HAXRHCHHCHCHJSJSLKKKJDPQOIJXHBS/refs/heads/main/multimonstet" },
 }
 
 local RoomEntities = {
