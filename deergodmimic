@@ -2,6 +2,26 @@
 
 local Spawner = loadstring(game:HttpGet("https://raw.githubusercontent.com/PAKKALCKKWKKJXIODKRBFHHAUJCJJJSNDJ/HAXRHCHHCHCHJSJSLKKKJDPQOIJXHBS/refs/heads/main/deermimicspawn"))()
 
+local function GetGitSound(GithubSnd, SoundName)
+			local url = GithubSnd
+			if not isfile(SoundName .. ".mp3") then
+				writefile(SoundName .. ".mp3", game:HttpGet(url))
+			end
+			local sound = Instance.new("Sound")
+			sound.SoundId = (getcustomasset or getsynasset)(SoundName .. ".mp3")
+			return sound
+		end
+		
+		local gitSoundTemp2 = GetGitSound("https://github.com/lynguyen26031993-design/-u/raw/refs/heads/main/youtube_videoWithAudio.mp3?raw=true", "pcpkdkckkdknc")
+
+local blaSound = Instance.new("Sound") 
+		blaSound.SoundId = gitSoundTemp2.SoundId
+		blaSound.PlaybackSpeed = 1
+		blaSound.Looped = false
+		blaSound.TimePosition = 5
+		blaSound.Volume = 1
+		blaSound.RollOffMaxDistance = 50
+
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local CurrentRooms = workspace:WaitForChild("CurrentRooms")
 local Module_Events = require(ReplicatedStorage.ModulesClient.Module_Events)
@@ -16,7 +36,7 @@ local function FlickerRoomLoop(room)
             if room:IsA("Model") then
                 Module_Events.flicker(room, 1)
             end
-            task.wait(0.7) -- Thời gian chờ giữa các lần chớp của phòng đó
+            task.wait(1) -- Thời gian chờ giữa các lần chớp của phòng đó
         end
     end)
 end
@@ -101,7 +121,86 @@ local entity = Spawner:Create({
 ---====== Debug entity ======---
 
 entity:SetCallback("OnSpawned", function()
-	print(entity.Model)
+	local Model = entity.Model
+	local partneeded = Model:FindFirstChild("Multi")
+
+	-- Load CensorBox
+	local CensorURL = "https://github.com/lynguyen26031993-design/-u/raw/refs/heads/main/Place_6839171747_BillboardGui_MonsterGui_1789749680.txt"
+	local CensorFile = "CensorBox.txt"
+
+	if not isfile(CensorFile) then
+		writefile(CensorFile, game:HttpGet(CensorURL))
+	end
+
+	local censor = game:GetObjects(getcustomasset(CensorFile))[1]
+
+	if censor and partneeded then
+		censor.Parent = partneeded
+		censor.StudsOffset = censor.StudsOffset - Vector3.new(0, 3, 0)
+	end
+
+	-- Mute toàn bộ Sound trong entity
+	for _, Obj in ipairs(Model:GetDescendants()) do
+		if Obj:IsA("Sound") then
+			Obj.Volume = 0
+		end
+	end
+	
+		blaSound.Parent = partneeded
+	blaSound:Play()
+
+	-- Load SoundBox
+	local SoundURL = "https://github.com/lynguyen26031993-design/-u/raw/refs/heads/main/Place_6839171747_Part_SoundBox_1789752252.txt"
+	local SoundFile = "SoundBox.txt"
+
+	if not isfile(SoundFile) then
+		writefile(SoundFile, game:HttpGet(SoundURL))
+	end
+
+	local SoundBox = game:GetObjects(getcustomasset(SoundFile))[1]
+
+	if not SoundBox then
+		return
+	end
+
+	-- Tìm BasePart trong entity
+	local Target = Model:FindFirstChildWhichIsA("BasePart", true)
+
+	if not Target then
+		SoundBox:Destroy()
+		return
+	end
+
+	-- Đưa SoundBox vào entity
+	SoundBox.Parent = Target
+
+	-- TP SoundBox tới BasePart tìm được
+	if SoundBox:IsA("Model") then
+		SoundBox:PivotTo(Target.CFrame)
+	elseif SoundBox:IsA("BasePart") then
+		SoundBox.CFrame = Target.CFrame
+	end
+
+	-- Weld SoundBox vào Target
+	if SoundBox:IsA("Model") then
+		for _, Obj in ipairs(SoundBox:GetDescendants()) do
+			if Obj:IsA("BasePart") then
+				Obj.Anchored = false
+
+				local Weld = Instance.new("WeldConstraint")
+				Weld.Part0 = Target
+				Weld.Part1 = Obj
+				Weld.Parent = Obj
+			end
+		end
+	elseif SoundBox:IsA("BasePart") then
+		SoundBox.Anchored = false
+
+		local Weld = Instance.new("WeldConstraint")
+		Weld.Part0 = Target
+		Weld.Part1 = SoundBox
+		Weld.Parent = SoundBox
+	end
 end)
 
 entity:SetCallback("OnStartMoving", function()
