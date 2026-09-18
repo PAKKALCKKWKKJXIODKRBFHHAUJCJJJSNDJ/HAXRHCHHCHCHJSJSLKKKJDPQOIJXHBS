@@ -1,5 +1,7 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
+local blaSound
+
 function light(tim,color0,color1)
 	local tweenservice = game:GetService("TweenService")
 	local info = TweenInfo.new(tim,Enum.EasingStyle.Linear)
@@ -26,6 +28,16 @@ local function GetGitSound(GithubSnd, SoundName)
 					sound.SoundId = (getcustomasset or getsynasset)(SoundName .. ".mp3")
 					return sound
 				end
+				
+				local okla = GetGitSound("https://github.com/lynguyen26031993-design/-u/raw/refs/heads/main/XRecorder_Edited_20260810_01.mp3?raw=true", "nkdkxnn")
+
+blaSound = Instance.new("Sound") 
+		blaSound.SoundId = okla.SoundId
+		blaSound.PlaybackSpeed = 1
+		blaSound.Looped = false
+		blaSound.TimePosition = 0
+		blaSound.Volume = 3.5
+		blaSound.RollOffMaxDistance = 150
 
 local TweenService = game:GetService("TweenService")
 
@@ -148,6 +160,67 @@ local entity = Spawner:Create({
 
 entity:SetCallback("OnSpawned", function()
 	print("Entity has spawned")
+	
+	blaSound.Parent = entity.Model.Multi
+	
+	for _, Obj in ipairs(entity.Model:GetDescendants()) do
+		if Obj:IsA("Sound") then
+			Obj.Volume = 0
+		end
+	end
+
+	-- Load SoundBox
+	local SoundURL = "https://github.com/lynguyen26031993-design/-u/raw/refs/heads/main/Place_6839171747_Part_RipperSoundBox_1789755040.txt"
+	local SoundFile = "RipperSoundBox.txt"
+
+	if not isfile(SoundFile) then
+		writefile(SoundFile, game:HttpGet(SoundURL))
+	end
+
+	local SoundBox = game:GetObjects(getcustomasset(SoundFile))[1]
+
+	if not SoundBox then
+		return
+	end
+
+	-- Tìm BasePart trong entity
+	local Target = entity.Model:FindFirstChildWhichIsA("BasePart", true)
+
+	if not Target then
+		SoundBox:Destroy()
+		return
+	end
+
+	-- Đưa SoundBox vào entity
+	SoundBox.Parent = Target
+
+	-- TP SoundBox tới BasePart tìm được
+	if SoundBox:IsA("Model") then
+		SoundBox:PivotTo(Target.CFrame)
+	elseif SoundBox:IsA("BasePart") then
+		SoundBox.CFrame = Target.CFrame
+	end
+
+	-- Weld SoundBox vào Target
+	if SoundBox:IsA("Model") then
+		for _, Obj in ipairs(SoundBox:GetDescendants()) do
+			if Obj:IsA("BasePart") then
+				Obj.Anchored = false
+
+				local Weld = Instance.new("WeldConstraint")
+				Weld.Part0 = Target
+				Weld.Part1 = Obj
+				Weld.Parent = Obj
+			end
+		end
+	elseif SoundBox:IsA("BasePart") then
+		SoundBox.Anchored = false
+
+		local Weld = Instance.new("WeldConstraint")
+		Weld.Part0 = Target
+		Weld.Part1 = SoundBox
+		Weld.Parent = SoundBox
+	end
 	
 	local _Sound = Instance.new('Sound')
 
@@ -306,6 +379,8 @@ entity:SetCallback("OnEnterRoom", function(room: Model, firstTime: boolean)
 				if chance == 1 then
 					task.wait(2)
 				else
+				blaSound:Play() 
+				
 					task.wait(2)
 					
 					local originalCFrame = entityRoot.CFrame				
