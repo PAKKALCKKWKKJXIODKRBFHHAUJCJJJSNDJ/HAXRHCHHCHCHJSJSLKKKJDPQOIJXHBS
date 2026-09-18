@@ -3,104 +3,104 @@ local Players = game:GetService("Players")
 getgenv().multi = true
 getgenv().spam = false
 local fringeFrame
-
+local Caption
 local function Blank() 
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
+	local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-local GameData = ReplicatedStorage:WaitForChild("GameData")
-local LatestRoom = GameData:WaitForChild("LatestRoom")
-local CurrentRooms = workspace:WaitForChild("CurrentRooms")
+	local GameData = ReplicatedStorage:WaitForChild("GameData")
+	local LatestRoom = GameData:WaitForChild("LatestRoom")
+	local CurrentRooms = workspace:WaitForChild("CurrentRooms")
 
-local function GetCurrentRoom()
-	return CurrentRooms:FindFirstChild(tostring(LatestRoom.Value))
-end
+	local function GetCurrentRoom()
+		return CurrentRooms:FindFirstChild(tostring(LatestRoom.Value))
+	end
 
-local function GetModels(room)
-	local models = {}
+	local function GetModels(room)
+		local models = {}
 
-	for _, v in ipairs(room:GetDescendants()) do
-		if v:IsA("Model") then
-			local cf, size = v:GetBoundingBox()
+		for _, v in ipairs(room:GetDescendants()) do
+			if v:IsA("Model") then
+				local cf, size = v:GetBoundingBox()
 
-			if size.X > 0 and size.Y > 0 and size.Z > 0 then
-				table.insert(models, {
-					Model = v,
-					CFrame = cf,
-					Size = size
-				})
+				if size.X > 0 and size.Y > 0 and size.Z > 0 then
+					table.insert(models, {
+						Model = v,
+						CFrame = cf,
+						Size = size
+					})
+				end
 			end
+		end
+
+		return models
+	end
+
+	local room = GetCurrentRoom()
+
+	if not room then
+		return
+	end
+
+	local models = GetModels(room)
+
+	if #models == 0 then
+		return
+	end
+
+	local amount = math.min(math.random(5, 10), #models)
+
+	local selected = {}
+
+	while #selected < amount do
+		local data = models[math.random(1, #models)]
+
+		if not table.find(selected, data) then
+			table.insert(selected, data)
 		end
 	end
 
-	return models
-end
+	for _, data in ipairs(selected) do
+		local Part = Instance.new("Part")
+		Part.Name = "EntityBillboardPart"
+		Part.Anchored = true
+		Part.CanCollide = false
+		Part.CanTouch = false
+		Part.CanQuery = false
+		Part.Transparency = 1
 
-local room = GetCurrentRoom()
+		local size = data.Size
 
-if not room then
-	return
-end
+		Part.Size = Vector3.new(
+			math.max(size.X, 0.1),
+			math.max(size.Y, 0.1),
+			math.max(size.Z, 0.1)
+		)
 
-local models = GetModels(room)
+		Part.CFrame = data.CFrame
+		Part.Parent = workspace
 
-if #models == 0 then
-	return
-end
+		local Billboard = Instance.new("BillboardGui")
+		Billboard.Name = "EntityBillboard"
+		Billboard.AlwaysOnTop = false
+		Billboard.Size = UDim2.fromOffset(
+			math.max(size.X * 10, 1),
+			math.max(size.Y * 10, 1)
+		)
+		Billboard.StudsOffset = Vector3.new(0, 3, 0)
+		Billboard.MaxDistance = math.huge
+		Billboard.Adornee = Part
+		Billboard.Parent = Part
 
-local amount = math.min(math.random(5, 10), #models)
-
-local selected = {}
-
-while #selected < amount do
-	local data = models[math.random(1, #models)]
-
-	if not table.find(selected, data) then
-		table.insert(selected, data)
+		local Frame = Instance.new("Frame")
+		Frame.Name = "Background"
+		Frame.BackgroundColor3 = Color3.new(0, 0, 0)
+		Frame.BackgroundTransparency = 0
+		Frame.BorderSizePixel = 0
+		Frame.Size = UDim2.fromScale(1, 1)
+		Frame.Position = UDim2.fromScale(0.5, 0.5)
+		Frame.AnchorPoint = Vector2.new(0.5, 0.5)
+		Frame.Parent = Billboard
 	end
-end
-
-for _, data in ipairs(selected) do
-	local Part = Instance.new("Part")
-	Part.Name = "EntityBillboardPart"
-	Part.Anchored = true
-	Part.CanCollide = false
-	Part.CanTouch = false
-	Part.CanQuery = false
-	Part.Transparency = 1
-
-	local size = data.Size
-
-	Part.Size = Vector3.new(
-		math.max(size.X, 0.1),
-		math.max(size.Y, 0.1),
-		math.max(size.Z, 0.1)
-	)
-
-	Part.CFrame = data.CFrame
-	Part.Parent = workspace
-
-	local Billboard = Instance.new("BillboardGui")
-	Billboard.Name = "EntityBillboard"
-	Billboard.AlwaysOnTop = false
-	Billboard.Size = UDim2.fromOffset(
-		math.max(size.X * 10, 1),
-		math.max(size.Y * 10, 1)
-	)
-	Billboard.StudsOffset = Vector3.new(0, 3, 0)
-	Billboard.MaxDistance = math.huge
-	Billboard.Adornee = Part
-	Billboard.Parent = Part
-
-	local Frame = Instance.new("Frame")
-	Frame.Name = "Background"
-	Frame.BackgroundColor3 = Color3.new(0, 0, 0)
-	Frame.BackgroundTransparency = 0
-	Frame.BorderSizePixel = 0
-	Frame.Size = UDim2.fromScale(1, 1)
-	Frame.Position = UDim2.fromScale(0.5, 0.5)
-	Frame.AnchorPoint = Vector2.new(0.5, 0.5)
-	Frame.Parent = Billboard
-end
 end
 
 local ScriptCache = {}
@@ -171,86 +171,91 @@ local stop = false
 
 camera.DescendantAdded:Connect(function(v)
 	if v.Name == "DeathBackgroundBlue"
-    and getgenv().MultiKilled ~= nil
-    and getgenv().MultiKilled == true then
+		and getgenv().MultiKilled ~= nil
+		and getgenv().MultiKilled == true then
+
 		local sound = workspace:FindFirstChild("A60Theme", true)
-local sound2 = workspace:FindFirstChild("SemiIntense", true)
-local sound3 = workspace:FindFirstChild("Intense", true)
-local sound4 = workspace:FindFirstChild("Final", true)
-local sound5 = static
-getgenv().spam = false
+		local sound2 = workspace:FindFirstChild("SemiIntense", true)
+		local sound3 = workspace:FindFirstChild("Intense", true)
+		local sound4 = workspace:FindFirstChild("Final", true)
+		local sound5 = static
+
+		getgenv().spam = false
 
 		if sound and sound:IsA("Sound") then
-	task.spawn(ScriptCache["3ARCHITECTS"])
+			task.spawn(ScriptCache["3ARCHITECTS"])
 
-for _, v in ipairs(workspace:GetDescendants()) do
-	if v:IsA("Sound") and not v:IsDescendantOf(camera) then
-		v.Volume = 0
-	end
-end
+			for _, v in ipairs(workspace:GetDescendants()) do
+				if v:IsA("Sound") and not v:IsDescendantOf(camera) then
+					v.Volume = 0
+				end
+			end
 
-workspace.DescendantAdded:Connect(function(v)
-	if v:IsA("Sound") and not v:IsDescendantOf(camera) then
-		v.Volume = 0
-	end
-end)
-		
-		stop = true
-		
+			workspace.DescendantAdded:Connect(function(v)
+				if v:IsA("Sound") and not v:IsDescendantOf(camera) then
+					v.Volume = 0
+				end
+			end)
+
+			stop = true
+
 			if sound and sound:IsA("Sound") then
-	TweenService:Create(
-		sound,
-		TweenInfo.new(1.5, Enum.EasingStyle.Linear),
-		{Volume = 0}
-	):Play()
-end
+				TweenService:Create(
+					sound,
+					TweenInfo.new(1.5, Enum.EasingStyle.Linear),
+					{Volume = 0}
+				):Play()
+			end
 
-if sound2 and sound2:IsA("Sound") then
-	TweenService:Create(
-		sound2,
-		TweenInfo.new(1.5, Enum.EasingStyle.Linear),
-		{Volume = 0}
-	):Play()
-end
+			if sound2 and sound2:IsA("Sound") then
+				TweenService:Create(
+					sound2,
+					TweenInfo.new(1.5, Enum.EasingStyle.Linear),
+					{Volume = 0}
+				):Play()
+			end
 
-if sound3 and sound3:IsA("Sound") then
-	TweenService:Create(
-		sound3,
-		TweenInfo.new(1.5, Enum.EasingStyle.Linear),
-		{Volume = 0}
-	):Play()
-end
+			if sound3 and sound3:IsA("Sound") then
+				TweenService:Create(
+					sound3,
+					TweenInfo.new(1.5, Enum.EasingStyle.Linear),
+					{Volume = 0}
+				):Play()
+			end
 
-if sound4 and sound4:IsA("Sound") then
-	TweenService:Create(
-		sound4,
-		TweenInfo.new(1.5, Enum.EasingStyle.Linear),
-		{Volume = 0}
-	):Play()
-end
+			if sound4 and sound4:IsA("Sound") then
+				TweenService:Create(
+					sound4,
+					TweenInfo.new(1.5, Enum.EasingStyle.Linear),
+					{Volume = 0}
+				):Play()
+			end
 
-if sound5 and sound5:IsA("Sound") then
-	TweenService:Create(
-		sound5,
-		TweenInfo.new(1.5, Enum.EasingStyle.Linear),
-		{Volume = 0}
-	):Play()
-end
+			if sound5 and sound5:IsA("Sound") then
+				TweenService:Create(
+					sound5,
+					TweenInfo.new(1.5, Enum.EasingStyle.Linear),
+					{Volume = 0}
+				):Play()
+			end
 		end
 	end
 end)
 
 local function GetGitSound(GithubSnd, SoundName)
-					local url = GithubSnd
-					if not isfile(SoundName .. ".mp3") then
-						writefile(SoundName .. ".mp3", game:HttpGet(url))
-					end
-					local sound = Instance.new("Sound")
-					sound.SoundId = (getcustomasset or getsynasset)(SoundName .. ".mp3")
-					return sound
-				end
-				
-				local Github = GetGitSound(
+	local url = GithubSnd
+
+	if not isfile(SoundName .. ".mp3") then
+		writefile(SoundName .. ".mp3", game:HttpGet(url))
+	end
+
+	local sound = Instance.new("Sound")
+	sound.SoundId = (getcustomasset or getsynasset)(SoundName .. ".mp3")
+
+	return sound
+end
+
+local Github = GetGitSound(
 	"https://raw.githubusercontent.com/PAKKALCKKWKKJXIODKRBFHHAUJCJJJSNDJ/HAXRHCHHCHCHJSJSLKKKJDPQOIJXHBS/refs/heads/main/multimonster%20calm%20wip.mp3",
 	"okkjjjjxjjdcf"
 )
@@ -260,9 +265,11 @@ breaking.SoundId = Github.SoundId
 breaking.PlaybackSpeed = 1
 breaking.Parent = workspace
 breaking.Looped = false
-breaking.Name = "A60Theme" 
+breaking.Name = "A60Theme"
 breaking.RollOffMaxDistance = 1000000000
 breaking.Volume = 1
+
+local BreakingOriginalVolume = 1
 
 local Github22 = GetGitSound(
 	"https://raw.githubusercontent.com/PAKKALCKKWKKJXIODKRBFHHAUJCJJJSNDJ/HAXRHCHHCHCHJSJSLKKKJDPQOIJXHBS/refs/heads/main/multi%20semi-intense%20variant.mp3.oga.mp3",
@@ -278,6 +285,8 @@ breaking2.Name = "SemiIntense"
 breaking2.RollOffMaxDistance = 1000000000
 breaking2.Volume = 1
 
+local Breaking2OriginalVolume = 1
+
 local Github234 = GetGitSound(
 	"https://github.com/lynguyen26031993-design/-u/raw/refs/heads/main/Puuse.mp3",
 	"pppoigddfvhjhb"
@@ -291,6 +300,8 @@ breaking3.Looped = true
 breaking3.Name = "Intense"
 breaking3.RollOffMaxDistance = 1000000000
 breaking3.Volume = 1
+
+local Breaking3OriginalVolume = 1
 
 local Github666 = GetGitSound(
 	"https://github.com/lynguyen26031993-design/-u/raw/refs/heads/main/final%20fakeout.mp3",
@@ -306,6 +317,8 @@ breaking4.Name = "Final"
 breaking4.RollOffMaxDistance = 1000000000
 breaking4.Volume = 1.3
 
+local Breaking4OriginalVolume = 1.3
+
 local Ok = GetGitSound(
 	"https://raw.githubusercontent.com/PAKKALCKKWKKJXIODKRBFHHAUJCJJJSNDJ/HAXRHCHHCHCHJSJSLKKKJDPQOIJXHBS/refs/heads/main/Lhouijie%20Almendras%20-%20glitcheffectphase2%20-%201786806518250%202026-08-15%2019_08.mp3",
 	"okcjsopppkknx"
@@ -320,12 +333,70 @@ breaking5.Name = "Spawn"
 breaking5.RollOffMaxDistance = 1000000000
 breaking5.Volume = 2.5
 
-breaking.Ended:Connect(function() 
+local Breaking5OriginalVolume = 2.5
 
-				task.wait(1)
+breaking.Ended:Connect(function()
+	task.wait(1)
 
+	if not stop and breaking3.Parent then
+		breaking3:Play()
+	end
+end)
+
+local HaltTriggered = false
+local MusicTransitionTriggered = false
+
+local function MuteBreakingSounds()
+	breaking.Volume = 0
+	breaking2.Volume = 0
+	breaking3.Volume = 0
+	breaking4.Volume = 0
+	breaking5.Volume = 0
+end
+
+local function HaltMusic()
+	if HaltTriggered then
+		return
+	end
+
+	HaltTriggered = true
+
+	MuteBreakingSounds()
+
+	task.spawn(function()
+		repeat
+			task.wait()
+		until not workspace:FindFirstChild("A60ButHalt", true)
+
+		task.wait(math.random(6, 7))
+
+		if breaking2.Volume == 0 then
+			breaking2.Volume = Breaking2OriginalVolume
 			breaking2:Play()
-			end) 
+		end
+	end)
+end
+
+local function TriggerBreaking2()
+	if MusicTransitionTriggered or HaltTriggered then
+		return
+	end
+
+	MusicTransitionTriggered = true
+
+	task.spawn(function()
+		if breaking3.IsPlaying then
+			breaking3:Stop()
+		end
+
+		task.wait(math.random(8, 12))
+
+		if not HaltTriggered and breaking2.Parent then
+			breaking2.Volume = Breaking2OriginalVolume
+			breaking2:Play()
+		end
+	end)
+end
 
 --[[
     Script Name: GlitchUIEffectDirect
@@ -339,262 +410,308 @@ local LocalPlayer = Players.LocalPlayer
 
 local Artifacts = {}
 
--- Hàm tạo viền màu (fringe) cho artifact
 local function makeFringe(parent, hue, height, positionY)
-    fringeFrame = Instance.new("Frame")
-    fringeFrame.BackgroundColor3 = Color3.fromHSV(hue, 1, 1)
-    fringeFrame.BorderSizePixel = 0
-    fringeFrame.BackgroundTransparency = 0.15
-    fringeFrame.Size = UDim2.new(1, 0, 0, height)
-    fringeFrame.Position = UDim2.new(0, 0, 0, positionY)
-    fringeFrame.Parent = parent
-    return fringeFrame
+	fringeFrame = Instance.new("Frame")
+	fringeFrame.BackgroundColor3 = Color3.fromHSV(hue, 1, 1)
+	fringeFrame.BorderSizePixel = 0
+	fringeFrame.BackgroundTransparency = 0.15
+	fringeFrame.Size = UDim2.new(1, 0, 0, height)
+	fringeFrame.Position = UDim2.new(0, 0, 0, positionY)
+	fringeFrame.Parent = parent
+
+	return fringeFrame
 end
 
--- Hàm render từng artifact dựa vào thông số (spec)
 local function renderArtifact(parent, spec)
-    if spec.t == "bar" then
-        local barFrame = Instance.new("Frame")
-        barFrame.Name = "TearArtifact"
-        barFrame.BackgroundColor3 = Color3.new(0, 0, 0)
-        barFrame.BorderSizePixel = 0
-        barFrame.BackgroundTransparency = spec.tr
-        barFrame.Size = UDim2.new(1.1, 0, 0, spec.h)
-        barFrame.Position = UDim2.new(-0.05, 0, spec.y, 0)
-        barFrame.Rotation = spec.r
-        barFrame.Parent = parent
-        
-        local thickness = math.max(1, math.floor(spec.h / 3))
-        makeFringe(barFrame, spec.hue, thickness, -thickness)
-        if spec.fr == 2 then
-            makeFringe(barFrame, (spec.hue + 0.33) % 1, thickness, spec.h)
-        end
-        return barFrame
-    elseif spec.t == "brightline" then
-        local lineFrame = Instance.new("Frame")
-        lineFrame.Name = "TearArtifact"
-        lineFrame.BackgroundColor3 = Color3.fromHSV(spec.hue, 1, 1)
-        lineFrame.BorderSizePixel = 0
-        lineFrame.BackgroundTransparency = spec.tr
-        lineFrame.Size = UDim2.new(1.1, 0, 0, spec.h)
-        lineFrame.Position = UDim2.new(-0.05, 0, spec.y, 0)
-        
-        local gradient = Instance.new("UIGradient")
-        gradient.Color = ColorSequence.new({
-            ColorSequenceKeypoint.new(0, Color3.fromHSV(spec.hue, 1, 1)),
-            ColorSequenceKeypoint.new(0.5, Color3.fromHSV(spec.hue2, 1, 1)),
-            ColorSequenceKeypoint.new(1, Color3.fromHSV(spec.hue, 1, 1))
-        })
-        gradient.Parent = lineFrame
-        lineFrame.Parent = parent
-        return lineFrame
-    elseif spec.t == "block" then
-        local blockFrame = Instance.new("Frame")
-        blockFrame.Name = "TearArtifact"
-        blockFrame.BackgroundColor3 = Color3.new(0, 0, 0)
-        blockFrame.BorderSizePixel = 0
-        blockFrame.BackgroundTransparency = spec.tr
-        blockFrame.Size = UDim2.new(0, spec.w, 0, spec.h)
-        blockFrame.Position = UDim2.new(spec.x, 0, spec.y, 0)
-        blockFrame.Parent = parent
-        
-        local stroke = Instance.new("UIStroke")
-        stroke.Color = Color3.fromHSV(spec.hue, 1, 1)
-        stroke.Thickness = math.random(1, 2)
-        stroke.Transparency = 0.25
-        stroke.Parent = blockFrame
-        return blockFrame
-    elseif spec.t == "strip" then
-        local stripFrame = Instance.new("Frame")
-        stripFrame.Name = "TearArtifact"
-        stripFrame.BackgroundColor3 = Color3.new(0, 0, 0)
-        stripFrame.BorderSizePixel = 0
-        stripFrame.BackgroundTransparency = spec.tr
-        stripFrame.Size = UDim2.new(spec.w, 0, 0, spec.h)
-        stripFrame.Position = UDim2.new(spec.x, 0, spec.y, 0)
-        stripFrame.Parent = parent
-        
-        makeFringe(stripFrame, spec.hue, 1, -1)
-        makeFringe(stripFrame, (spec.hue + 0.45) % 1, 1, stripFrame.AbsoluteSize.Y)
-        return stripFrame
-    end
+	if spec.t == "bar" then
+		local barFrame = Instance.new("Frame")
+		barFrame.Name = "TearArtifact"
+		barFrame.BackgroundColor3 = Color3.new(0, 0, 0)
+		barFrame.BorderSizePixel = 0
+		barFrame.BackgroundTransparency = spec.tr
+		barFrame.Size = UDim2.new(1.1, 0, 0, spec.h)
+		barFrame.Position = UDim2.new(-0.05, 0, spec.y, 0)
+		barFrame.Rotation = spec.r
+		barFrame.Parent = parent
+
+		local thickness = math.max(1, math.floor(spec.h / 3))
+
+		makeFringe(barFrame, spec.hue, thickness, -thickness)
+
+		if spec.fr == 2 then
+			makeFringe(barFrame, (spec.hue + 0.33) % 1, thickness, spec.h)
+		end
+
+		return barFrame
+
+	elseif spec.t == "brightline" then
+		local lineFrame = Instance.new("Frame")
+		lineFrame.Name = "TearArtifact"
+		lineFrame.BackgroundColor3 = Color3.fromHSV(spec.hue, 1, 1)
+		lineFrame.BorderSizePixel = 0
+		lineFrame.BackgroundTransparency = spec.tr
+		lineFrame.Size = UDim2.new(1.1, 0, 0, spec.h)
+		lineFrame.Position = UDim2.new(-0.05, 0, spec.y, 0)
+
+		local gradient = Instance.new("UIGradient")
+
+		gradient.Color = ColorSequence.new({
+			ColorSequenceKeypoint.new(0, Color3.fromHSV(spec.hue, 1, 1)),
+			ColorSequenceKeypoint.new(0.5, Color3.fromHSV(spec.hue2, 1, 1)),
+			ColorSequenceKeypoint.new(1, Color3.fromHSV(spec.hue, 1, 1))
+		})
+
+		gradient.Parent = lineFrame
+		lineFrame.Parent = parent
+
+		return lineFrame
+
+	elseif spec.t == "block" then
+		local blockFrame = Instance.new("Frame")
+		blockFrame.Name = "TearArtifact"
+		blockFrame.BackgroundColor3 = Color3.new(0, 0, 0)
+		blockFrame.BorderSizePixel = 0
+		blockFrame.BackgroundTransparency = spec.tr
+		blockFrame.Size = UDim2.new(0, spec.w, 0, spec.h)
+		blockFrame.Position = UDim2.new(spec.x, 0, spec.y, 0)
+		blockFrame.Parent = parent
+
+		local stroke = Instance.new("UIStroke")
+		stroke.Color = Color3.fromHSV(spec.hue, 1, 1)
+		stroke.Thickness = math.random(1, 2)
+		stroke.Transparency = 0.25
+		stroke.Parent = blockFrame
+
+		return blockFrame
+
+	elseif spec.t == "strip" then
+		local stripFrame = Instance.new("Frame")
+		stripFrame.Name = "TearArtifact"
+		stripFrame.BackgroundColor3 = Color3.new(0, 0, 0)
+		stripFrame.BorderSizePixel = 0
+		stripFrame.BackgroundTransparency = spec.tr
+		stripFrame.Size = UDim2.new(spec.w, 0, 0, spec.h)
+		stripFrame.Position = UDim2.new(spec.x, 0, spec.y, 0)
+		stripFrame.Parent = parent
+
+		makeFringe(stripFrame, spec.hue, 1, -1)
+		makeFringe(stripFrame, (spec.hue + 0.45) % 1, 1, stripFrame.AbsoluteSize.Y)
+
+		return stripFrame
+	end
 end
 
--- Lấy hoặc tạo ScreenGui chứa hiệu ứng
 local function getOrCreateFXGui()
-    local playerGui = LocalPlayer:FindFirstChildOfClass("PlayerGui")
-    if not playerGui then return nil end
-    
-    local fxGui = playerGui:FindFirstChild("MultiMonsterFX")
-    if not fxGui then
-        fxGui = Instance.new("ScreenGui")
-        fxGui.Name = "MultiMonsterFX"
-        fxGui.ResetOnSpawn = false
-        fxGui.IgnoreGuiInset = true
-        fxGui.DisplayOrder = 5
-        fxGui.Parent = playerGui
-    end
-    return fxGui
+	local playerGui = LocalPlayer:FindFirstChildOfClass("PlayerGui")
+
+	if not playerGui then
+		return nil
+	end
+
+	local fxGui = playerGui:FindFirstChild("MultiMonsterFX")
+
+	if not fxGui then
+		fxGui = Instance.new("ScreenGui")
+		fxGui.Name = "MultiMonsterFX"
+		fxGui.ResetOnSpawn = false
+		fxGui.IgnoreGuiInset = true
+		fxGui.DisplayOrder = 5
+		fxGui.Parent = playerGui
+	end
+
+	return fxGui
 end
 
--- Render lại toàn bộ artifact hiện tại
 local function RenderAllArtifacts()
-    local fxGui = getOrCreateFXGui()
-    if not fxGui then return end
-    
-    for _, child in ipairs(fxGui:GetChildren()) do
-        if child.Name == "TearArtifact" then
-            child:Destroy()
-        end
-    end
-    
-    for i = #Artifacts, 1, -1 do
-        local artifactData = Artifacts[i]
-        if artifactData.expireAt and artifactData.expireAt <= os.clock() then
-            table.remove(Artifacts, i)
-        else
-            local artifactInstance = renderArtifact(fxGui, artifactData)
-            if artifactInstance then
-                local timeLeft = artifactData.expireAt - os.clock()
-                task.delay(math.max(timeLeft, 0), function()
-                    if artifactInstance.Parent then
-                        for _, descendant in ipairs(artifactInstance:GetDescendants()) do
-                            if descendant:IsA("Frame") then
-                                TweenService:Create(descendant, TweenInfo.new(2.5), {BackgroundTransparency = 1}):Play()
-                            elseif descendant:IsA("UIStroke") then
-                                TweenService:Create(descendant, TweenInfo.new(2.5), {Transparency = 1}):Play()
-                            end
-                        end
-                        TweenService:Create(artifactInstance, TweenInfo.new(2.5), {BackgroundTransparency = 1}):Play()
-                        Debris:AddItem(artifactInstance, 2.6)
-                    end
-                    local index = table.find(Artifacts, artifactData)
-                    if index then
-                        table.remove(Artifacts, index)
-                    end
-                end)
-            end
-        end
-    end
+	local fxGui = getOrCreateFXGui()
+
+	if not fxGui then
+		return
+	end
+
+	for _, child in ipairs(fxGui:GetChildren()) do
+		if child.Name == "TearArtifact" then
+			child:Destroy()
+		end
+	end
+
+	for i = #Artifacts, 1, -1 do
+		local artifactData = Artifacts[i]
+
+		if artifactData.expireAt and artifactData.expireAt <= os.clock() then
+			table.remove(Artifacts, i)
+		else
+			local artifactInstance = renderArtifact(fxGui, artifactData)
+
+			if artifactInstance then
+				local timeLeft = artifactData.expireAt - os.clock()
+
+				task.delay(math.max(timeLeft, 0), function()
+					if artifactInstance.Parent then
+						for _, descendant in ipairs(artifactInstance:GetDescendants()) do
+							if descendant:IsA("Frame") then
+								TweenService:Create(
+									descendant,
+									TweenInfo.new(2.5),
+									{BackgroundTransparency = 1}
+								):Play()
+
+							elseif descendant:IsA("UIStroke") then
+								TweenService:Create(
+									descendant,
+									TweenInfo.new(2.5),
+									{Transparency = 1}
+								):Play()
+							end
+						end
+
+						TweenService:Create(
+							artifactInstance,
+							TweenInfo.new(2.5),
+							{BackgroundTransparency = 1}
+						):Play()
+
+						Debris:AddItem(artifactInstance, 2.6)
+					end
+
+					local index = table.find(Artifacts, artifactData)
+
+					if index then
+						table.remove(Artifacts, index)
+					end
+				end)
+			end
+		end
+	end
 end
 
--- Tạo thông số ngẫu nhiên cho artifact
 local function randomArtifactSpec()
-    local randType = math.random(1, 10)
-    local randHue = math.random()
-    
-    if randType <= 4 then
-        return {
-            t = "bar",
-            y = math.random(),
-            h = math.random(2, 6),
-            tr = math.random(0, 20) / 100,
-            r = math.random(1, 10) == 1 and 0.4 or 0,
-            hue = randHue,
-            fr = math.random(1, 2)
-        }
-    elseif randType <= 7 then
-        return {
-            t = "brightline",
-            y = math.random(),
-            h = math.random(1, 3),
-            tr = math.random(10, 35) / 100,
-            hue = randHue,
-            hue2 = (randHue + math.random(25, 60) / 100) % 1
-        }
-    elseif randType <= 9 then
-        return {
-            t = "strip",
-            x = math.random(0, 60) / 100,
-            y = math.random(),
-            w = math.random(25, 65) / 100,
-            h = math.random(8, 24),
-            tr = math.random(5, 30) / 100,
-            hue = randHue
-        }
-    else
-        return {
-            t = "block",
-            x = math.random(0, 90) / 100,
-            y = math.random(),
-            w = math.random(30, 90),
-            h = math.random(20, 60),
-            tr = math.random(0, 20) / 100,
-            hue = randHue
-        }
-    end
+	local randType = math.random(1, 10)
+	local randHue = math.random()
+
+	if randType <= 4 then
+		return {
+			t = "bar",
+			y = math.random(),
+			h = math.random(2, 6),
+			tr = math.random(0, 20) / 100,
+			r = math.random(1, 10) == 1 and 0.4 or 0,
+			hue = randHue,
+			fr = math.random(1, 2)
+		}
+
+	elseif randType <= 7 then
+		return {
+			t = "brightline",
+			y = math.random(),
+			h = math.random(1, 3),
+			tr = math.random(10, 35) / 100,
+			hue = randHue,
+			hue2 = (randHue + math.random(25, 60) / 100) % 1
+		}
+
+	elseif randType <= 9 then
+		return {
+			t = "strip",
+			x = math.random(0, 60) / 100,
+			y = math.random(),
+			w = math.random(25, 65) / 100,
+			h = math.random(8, 24),
+			tr = math.random(5, 30) / 100,
+			hue = randHue
+		}
+
+	else
+		return {
+			t = "block",
+			x = math.random(0, 90) / 100,
+			y = math.random(),
+			w = math.random(30, 90),
+			h = math.random(20, 60),
+			tr = math.random(0, 20) / 100,
+			hue = randHue
+		}
+	end
 end
 
--- Thêm số lượng artifact mới và hiển thị
 local function AddArtifacts(count)
-    local fxGui = getOrCreateFXGui()
-    
-    for _ = 1, count do
-        if #Artifacts >= 16 then
-            return
-        end
-        
-        local artifactData = randomArtifactSpec()
-        artifactData.expireAt = os.clock() + 18
-        table.insert(Artifacts, artifactData)
-        
-        if fxGui then
-            local artifactInstance = renderArtifact(fxGui, artifactData)
-            if artifactInstance then
-                local timeLeft = artifactData.expireAt - os.clock()
-                task.delay(math.max(timeLeft, 0), function()
-                    if artifactInstance.Parent then
-                        for _, descendant in ipairs(artifactInstance:GetDescendants()) do
-                            if descendant:IsA("Frame") then
-                                TweenService:Create(descendant, TweenInfo.new(2.5), {BackgroundTransparency = 1}):Play()
-                            elseif descendant:IsA("UIStroke") then
-                                TweenService:Create(descendant, TweenInfo.new(2.5), {Transparency = 1}):Play()
-                            end
-                        end
-                        TweenService:Create(artifactInstance, TweenInfo.new(2.5), {BackgroundTransparency = 1}):Play()
-                        Debris:AddItem(artifactInstance, 2.6)
-                    end
-                    local index = table.find(Artifacts, artifactData)
-                    if index then
-                        table.remove(Artifacts, index)
-                    end
-                end)
-            end
-        end
-    end
+	local fxGui = getOrCreateFXGui()
+
+	for _ = 1, count do
+		if #Artifacts >= 16 then
+			return
+		end
+
+		local artifactData = randomArtifactSpec()
+		artifactData.expireAt = os.clock() + 18
+
+		table.insert(Artifacts, artifactData)
+
+		if fxGui then
+			local artifactInstance = renderArtifact(fxGui, artifactData)
+
+			if artifactInstance then
+				local timeLeft = artifactData.expireAt - os.clock()
+
+				task.delay(math.max(timeLeft, 0), function()
+					if artifactInstance.Parent then
+						for _, descendant in ipairs(artifactInstance:GetDescendants()) do
+							if descendant:IsA("Frame") then
+								TweenService:Create(
+									descendant,
+									TweenInfo.new(2.5),
+									{BackgroundTransparency = 1}
+								):Play()
+
+							elseif descendant:IsA("UIStroke") then
+								TweenService:Create(
+									descendant,
+									TweenInfo.new(2.5),
+									{Transparency = 1}
+								):Play()
+							end
+						end
+
+						TweenService:Create(
+							artifactInstance,
+							TweenInfo.new(2.5),
+							{BackgroundTransparency = 1}
+						):Play()
+
+						Debris:AddItem(artifactInstance, 2.6)
+					end
+
+					local index = table.find(Artifacts, artifactData)
+
+					if index then
+						table.remove(Artifacts, index)
+					end
+				end)
+			end
+		end
+	end
 end
 
-
-task.spawn(function() 
-while not stop do
-	AddArtifacts(1)
-
-	task.wait(math.random(10, 15))
-end
-end) 
-
-task.spawn(function() 
-	AddArtifacts(5)
-	end) 
-
-local Players = game:GetService("Players")
+task.spawn(function()
+	while not stop do
+		AddArtifacts(1)
+		task.wait(math.random(10, 15))
+	end
+end)
 
 local MainFrame = Players.LocalPlayer.PlayerGui
-    :WaitForChild("MainUI")
-    :WaitForChild("MainFrame")
+	:WaitForChild("MainUI")
+	:WaitForChild("MainFrame")
 
 local file = "A60Caption.txt"
+
 local url = "https://raw.githubusercontent.com/lynguyen26031993-design/-u/refs/heads/main/Place_131351567799504_TextLabel_A60Caption_1786338277.txt"
 
 if not isfile(file) then
-    writefile(file, game:HttpGet(url))
+	writefile(file, game:HttpGet(url))
 end
 
 local objects = game:GetObjects(getcustomasset(file))
-
-task.wait(3)
-
-breaking:Play()
 
 local caption
 
@@ -608,7 +725,7 @@ for _, v in ipairs(objects) do
 	end
 end
 
-local function Caption(text, duration)
+Caption = function(text, duration)
 	task.spawn(function()
 		if not caption then
 			return
@@ -625,123 +742,536 @@ local function Caption(text, duration)
 	end)
 end
 
-Caption("long time no see, old friend.", 3)
+if math.random(1, 2) == 1 then
+task.spawn(function()
+	AddArtifacts(5)
+end)
 
-game.ReplicatedStorage.GameData.LatestRoom.Changed:Wait()
-game.ReplicatedStorage.GameData.LatestRoom.Changed:Wait()
+---====== Load spawner ======---
 
-local TweenService = game:GetService("TweenService")
+local Spawner = loadstring(game:HttpGet("https://raw.githubusercontent.com/PAKKALCKKWKKJXIODKRBFHHAUJCJJJSNDJ/HAXRHCHHCHCHJSJSLKKKJDPQOIJXHBS/refs/heads/main/a60spanwritsslf"))()
+
+---====== Create entity ======---
+
+local entity = Spawner:Create({
+	Entity = {
+		Name = "A60Real",
+		Asset = "https://github.com/lynguyen26031993-design/-u/raw/refs/heads/main/Place_131351567799504_Model_A60Real_1789050841.txt",
+		HeightOffset = 0
+	},
+	Lights = {
+		Flicker = {
+			Enabled = false,
+			Duration = 3
+		},
+		Shatter = false,
+		Repair = false
+	},
+	Earthquake = {
+		Enabled = false
+	},
+	CameraShake = {
+		Enabled = true,
+		Range = 50,
+		Values = {7, 5, 0.1, 1} -- Magnitude, Roughness, FadeIn, FadeOut
+	},
+	Movement = {
+		Speed = 180,
+		Delay = 1,
+		Reversed = false
+	},
+	Rebounding = {
+		Enabled = false,
+		Type = "Ambush", -- "Blitz"
+		Min = 3,
+		Max = 3,
+		Delay = 1
+	},
+	Damage = {
+		Enabled = true,
+		IgnoreHiding = true,
+		Range = 40,
+		Amount = 0.0001
+	},
+	Crucifixion = {
+		Enabled = false,
+		Range = 40,
+		Resist = false,
+		Break = true
+	},
+	Death = {
+		Type = "Guiding", -- "Curious"
+		Hints = {"Death", "Hints", "Go", "Here"},
+		Cause = "Multimonster"
+	}
+})
+
+---====== Debug entity ======---
+
+entity:SetCallback("OnSpawned", function()
+    print("Entity has spawned")
+end)
+
+entity:SetCallback("OnStartMoving", function()
+    print("Entity has started moving")
+    task.spawn(function() 
+	loadstring(game:HttpGet("https://raw.githubusercontent.com/iccdjkkkkskskhdgdgegvbfbgncjjdudejdjvi/REBLAHARDCOREDI/refs/heads/main/Flingingstuff"))() 
+	end) 
+end)
+
+entity:SetCallback("OnEnterRoom", function(room: Model, firstTime: boolean)
+    if firstTime == true then
+    -- nope
+    else
+    -- nope
+    end
+end)
+
+entity:SetCallback("OnLookAt", function(lineOfSight: boolean)
+	if lineOfSight == true then
+	else
+	end
+end)
+
+entity:SetCallback("OnRebounding", function(startOfRebound: boolean)
+    if startOfRebound == true then
+        print("Entity has started rebounding")
+	else
+        print("Entity has finished rebounding")
+	end
+end)
+
+entity:SetCallback("OnDespawning", function()
+    print("Entity is despawning")
+    
+    task.wait(1)
+    
+    if game.Players.LocalPlayer.Character.Humanoid.Health > 0 then
+    getgenv().approvedbya60 = true
+    Caption("glad you're paying attention.", 3)
+    end
+    
+end)
+
+entity:SetCallback("OnDespawned", function()
+    print("Entity has despawned")
+end)
+
+entity:SetCallback("OnDamagePlayer", function(newHealth: number)
+	if newHealth <= 0 then
+	else
+		print("Entity has damaged the player")
+		
+		local Players = game:GetService("Players")
+
+local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+
+if character:GetAttribute("Hiding") ~= true then
+	-- kích họa
+	print("Hiding detected!")
+	
+	getgenv().MultiKilled = true
+	
+	local Players = game:GetService("Players")
+
+local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoid = character:WaitForChild("Humanoid")
+
+humanoid.Health = 0
+		
+		local Players = game:GetService("Players")
+		local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+		local LocalPlayer = Players.LocalPlayer
+		local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
+		local Remotes = ReplicatedStorage:WaitForChild("RemotesFolder")
+
+		local DeathTypes = {
+			["Yellow"] = {"yellow", "curious"},
+			["Blue"] = {"blue", "guiding"}
+		}
+
+		local function DeathHint(hints, deathType)
+			if typeof(hints) ~= "table" or #hints == 0 then
+				return
+			end
+
+			local MainUI = PlayerGui:WaitForChild("MainUI")
+			local Death = MainUI:WaitForChild("Death")
+
+			Death:GetPropertyChangedSignal("Visible"):Wait()
+
+			deathType = tostring(deathType or "Guiding"):lower()
+
+			local colour
+
+			for name, values in next, DeathTypes do
+				if table.find(values, deathType) then
+					colour = name
+					break
+				end
+			end
+
+			if not colour then
+				local MainGame = MainUI:WaitForChild("Initiator"):WaitForChild("Main_Game")
+				local Health = MainGame:WaitForChild("Health")
+				local Music = Health:WaitForChild("Music")
+
+				for _, c in next, Music:GetChildren() do
+					if c.Name:lower() == deathType then
+						colour = c.Name
+						break
+					end
+				end
+			end
+
+			colour = colour or "Blue"
+
+			if firesignal then
+				firesignal(
+					Remotes.DeathHint.OnClientEvent,
+					hints,
+					colour
+				)
+			end
+		end
+
+		DeathHint({
+			"", "", "", "", "", "", "", ""
+		}, "Guiding")
+end
+	end
+end)
+
+--[[
+
+DEVELOPER NOTE:
+By overwriting 'CrucifixionOverwrite' the default crucifixion callback will be replaced with your custom callback.
+
+entity:SetCallback("CrucifixionOverwrite", function()
+    print("Custom crucifixion callback")
+end)
+
+]]--
+
+---====== Run entity ======---
 
 task.spawn(function() 
-Caption("i will always watch over you.", 3)
+entity:Run(true)
 end) 
 
-ScriptCache["CeaseMimic"]()
-
 repeat
-	task.wait()
-until not workspace:FindFirstChild("CeaseMimic", true)
+			task.wait()
+		until getgenv().approvedbya60
+		else
+		local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
--- SCRIPT BÊN DƯỚI
+local CurrentRooms = workspace:WaitForChild("CurrentRooms")
+local LatestRoom = ReplicatedStorage.GameData:WaitForChild("LatestRoom")
+local Module_Events = require(ReplicatedStorage.ModulesClient.Module_Events)
 
-game.ReplicatedStorage.GameData.LatestRoom.Changed:Wait()
+local Room = CurrentRooms:FindFirstChild(tostring(LatestRoom.Value))
 
-TweenService:Create(
-	breaking,
-	TweenInfo.new(2, Enum.EasingStyle.Linear),
-	{Volume = 2}
-):Play()
+if Room then
+	Module_Events.flicker(Room, 1)
+end
 
-task.wait(3)
-Caption("let's try another one.", 3)
-task.wait(0.8)
-task.spawn(function() 
-task.wait(8)
+		local TweenService = game:GetService("TweenService")
 
-task.spawn(Blank)
-end)
+local CurrentRooms = workspace:WaitForChild("CurrentRooms")
 
-ScriptCache["RipperMimic"]()
+for _, Obj in ipairs(CurrentRooms:GetDescendants()) do
+	if Obj:IsA("BasePart") and Obj.Material == Enum.Material.Neon then
+		local OriginalColor = Obj.Color
+
+		Obj.Color = Color3.new(1, 0, 0)
+
+		TweenService:Create(
+			Obj,
+			TweenInfo.new(1, Enum.EasingStyle.Linear),
+			{
+				Color = OriginalColor
+			}
+		):Play()
+
+	elseif Obj:IsA("PointLight")
+		or Obj:IsA("SpotLight")
+		or Obj:IsA("SurfaceLight") then
+
+		local OriginalColor = Obj.Color
+
+		Obj.Color = Color3.new(1, 0, 0)
+
+		TweenService:Create(
+			Obj,
+			TweenInfo.new(1, Enum.EasingStyle.Linear),
+			{
+				Color = OriginalColor
+			}
+		):Play()
+	end
+end
+		
+		if math.random(1, 2) == 1 then
+		Caption("nice to see you again, old friend.", 3)
+		else
+		Caption("don't fail this time.", 3)
+		end
+end
+
+breaking:Play()
+
+local MimicCaptions = {
+	"let's try another one.",
+	"i will always watch over you.", 
+	"this is fun. let's try another one.", 
+	"having fun?"
+}
+
+local RandomCaptions = {
+	"found you.",
+	"which one was your favorite?",
+	"this place intrigues me.",
+	"i see you.", 
+	"expendable.", 
+	"we meet again.", 
+	"i see all, but you'll see nothing.", 
+	"remember me?", 
+	"everywhere you go, everywhere i am.",
+	"i remember you, expendable." 
+}
+
+-- Random thứ tự 2 nhóm caption
+for i = #MimicCaptions, 2, -1 do
+	local j = math.random(1, i)
+	MimicCaptions[i], MimicCaptions[j] = MimicCaptions[j], MimicCaptions[i]
+end
+
+for i = #RandomCaptions, 2, -1 do
+	local j = math.random(1, i)
+	RandomCaptions[i], RandomCaptions[j] = RandomCaptions[j], RandomCaptions[i]
+end
+
+local MimicCaptionIndex = 1
+local RandomCaptionIndex = 1
+
+local function TriggerMimicCaption()
+	if MimicCaptionIndex > #MimicCaptions then
+		return
+	end
+
+	Caption(MimicCaptions[MimicCaptionIndex], 3)
+	MimicCaptionIndex += 1
+end
+
+local function TriggerRandomCaption()
+	if RandomCaptionIndex > #RandomCaptions then
+		return
+	end
+
+	Caption(RandomCaptions[RandomCaptionIndex], 3)
+	RandomCaptionIndex += 1
+end
 
 task.spawn(function()
-	task.wait(math.random(30, 60))
+	while RandomCaptionIndex <= #RandomCaptions do
+		task.wait(math.random(15, 25))
 
-	local captions = {
-		"this place intrigues me.",
-		"which one was your favorite?", 
-		"old friend."
-	}
-
-	local index = math.random(1, #captions)
-	local text = table.remove(captions, index)
-
-	Caption(text, 3)
+		if RandomCaptionIndex <= #RandomCaptions then
+			TriggerRandomCaption()
+		end
+	end
 end)
 
-repeat
-	task.wait()
-until not workspace:FindFirstChild("A60ButRipper", true)
-
--- SCRIPT BÊN DƯỚI
-
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-
-local latestRoom = ReplicatedStorage.GameData.LatestRoom.Value
-local room = workspace.CurrentRooms:FindFirstChild(tostring(latestRoom))
-
-				game.ReplicatedStorage.GameData.LatestRoom.Changed:Wait()
-				game.ReplicatedStorage.GameData.LatestRoom.Changed:Wait()
-
-local finalTween = TweenService:Create(
-	breaking2,
-	TweenInfo.new(2, Enum.EasingStyle.Linear),
-	{Volume = 0}
-)
-
-finalTween:Play()
-
-finalTween.Completed:Wait()
-
-breaking2:Pause()
-breaking3:Play()
-
-ScriptCache["ReboundMimic"]()
-
-repeat
-	task.wait()
-until not workspace:FindFirstChild("A60ButRebound", true)
-
--- SCRIPT BÊN DƯỚI
-
 game.ReplicatedStorage.GameData.LatestRoom.Changed:Wait()
 game.ReplicatedStorage.GameData.LatestRoom.Changed:Wait()
 
-local blablo = TweenService:Create(
-	breaking3,
-	TweenInfo.new(1, Enum.EasingStyle.Linear),
-	{Volume = 0}
-)
+--==================================================
+-- RANDOM INITIAL MIMIC SEQUENCE
+--==================================================
 
-blablo:Play()
+local InitialAmount = math.random(4, 5)
 
-task.spawn(function() 
+local FirstTwoScripts = {
+	"CeaseMimic",
+	"RipperMimic", 
+		"DeerMimic"
+}
+
+local LaterScripts = {
+	"SilenceMimic",
+	"ReboundMimic",
+	"HaltMimic"
+}
+
+local SelectedInitialScripts = {}
+
+-- Spawn 1 và 2: chỉ Cease / Ripper, không lặp
+for i = 1, math.min(2, InitialAmount) do
+	local index = math.random(1, #FirstTwoScripts)
+	local selected = table.remove(FirstTwoScripts, index)
+
+	table.insert(SelectedInitialScripts, selected)
+end
+
+-- Spawn 3 trở đi: chỉ Silence / Deer / Rebound / Halt
+for i = 3, InitialAmount do
+	if #LaterScripts > 0 then
+		local index = math.random(1, #LaterScripts)
+		local selected = table.remove(LaterScripts, index)
+
+		table.insert(SelectedInitialScripts, selected)
+	end
+end
+
+local function StopAllBreakingSounds()
+	breaking:Stop()
+	breaking2:Stop()
+	breaking3:Stop()
+	breaking4:Stop()
+	breaking5:Stop()
+end
+
+local function TweenAllBreakingSoundsToZero()
+	local Sounds = {
+		breaking,
+		breaking2,
+		breaking3,
+		breaking4,
+		breaking5
+	}
+
+	local Tweens = {}
+
+	for _, sound in ipairs(Sounds) do
+		if sound and sound.Parent then
+			local tween = TweenService:Create(
+				sound,
+				TweenInfo.new(2, Enum.EasingStyle.Linear),
+				{Volume = 0}
+			)
+
+			table.insert(Tweens, tween)
+			tween:Play()
+		end
+	end
+
+	for _, tween in ipairs(Tweens) do
+		tween.Completed:Wait()
+	end
+end
+
+local function RunInitialMimic(name)
+
+	if name == "HaltMimic" then
+
+		HaltMusic()
+
+		ScriptCache["HaltMimic"]()
+
+		game.ReplicatedStorage.GameData.LatestRoom.Changed:Wait()
+		game.ReplicatedStorage.GameData.LatestRoom.Changed:Wait()
+		game.ReplicatedStorage.GameData.LatestRoom.Changed:Wait()
+
+	elseif name == "CeaseMimic" then
+	
+		task.spawn(TriggerMimicCaption)
+
+		ScriptCache["CeaseMimic"]()
+
+		repeat
+			task.wait()
+		until not workspace:FindFirstChild("CeaseMimic", true)
+
+		game.ReplicatedStorage.GameData.LatestRoom.Changed:Wait()
+
+	elseif name == "RipperMimic" then
+	
+		task.spawn(TriggerMimicCaption)
+
+		ScriptCache["RipperMimic"]()
+		
+		task.spawn(function() 
+		task.wait(3)
+		Blank()
+		end)
+
+		repeat
+			task.wait()
+		until not workspace:FindFirstChild("A60ButRipper", true)
+
+		game.ReplicatedStorage.GameData.LatestRoom.Changed:Wait()
+		game.ReplicatedStorage.GameData.LatestRoom.Changed:Wait()
+
+	elseif name == "SilenceMimic" then
+
+	
+			StopAllBreakingSounds()
+
+		ScriptCache["SilenceMimic"]()
+
+		repeat
+			task.wait()
+		until not workspace:FindFirstChild("A60ButSilence", true)
+
+		game.ReplicatedStorage.GameData.LatestRoom.Changed:Wait()
+
+	elseif name == "ReboundMimic" then
+
+			TweenAllBreakingSoundsToZero()
+			StopAllBreakingSounds()
+
+			ScriptCache["ReboundMimic"]()
+
+			if breaking3.Parent then
+				breaking3.Volume = Breaking3OriginalVolume
+				breaking3:Play()
+			end
+		
+			ScriptCache["ReboundMimic"]()
+
+		repeat
+			task.wait()
+		until not workspace:FindFirstChild("A60ButRebound", true)
+
+		game.ReplicatedStorage.GameData.LatestRoom.Changed:Wait()
+		game.ReplicatedStorage.GameData.LatestRoom.Changed:Wait()
+
+	elseif name == "DeerMimic" then
+
+		ScriptCache["DeerMimic"]()
+
+		repeat
+			task.wait()
+		until not workspace:FindFirstChild("A60ButDeer", true)
+
+		game.ReplicatedStorage.GameData.LatestRoom.Changed:Wait()
+	end
+end
+
+-- Chạy sequence đã chọn
+for i = 1, #SelectedInitialScripts do
+	RunInitialMimic(SelectedInitialScripts[i])
+end
+
+--==================================================
+-- CHUYỂN SANG PHASE 2
+--==================================================
+
+-- Chờ room tiếp theo
 game.ReplicatedStorage.GameData.LatestRoom.Changed:Wait()
-game.ReplicatedStorage.GameData.LatestRoom.Changed:Wait()
-game.ReplicatedStorage.GameData.LatestRoom.Changed:Wait()
 
-ScriptCache["SilenceMimic"]()
+-- Stop toàn bộ breaking sound
+breaking:Stop()
+breaking2:Stop()
+breaking3:Stop()
+breaking5.Volume = 1
 
-repeat
-	task.wait()
-until not workspace:FindFirstChild("A60ButSilence", true)
-
--- SCRIPT BÊN DƯỚI
-
-game.ReplicatedStorage.GameData.LatestRoom.Changed:Wait()
-
-task.wait(2)
 Caption("this was fun.", 3)
 
+-- Chờ room tiếp theo
 task.wait(7)
 
 Caption("just kidding. pay attention.", 3)
@@ -750,112 +1280,117 @@ task.wait(0.5)
 
 getgenv().spam = true
 
-task.spawn(function() 
-local Players = game:GetService("Players")
-local TweenService = game:GetService("TweenService")
+task.spawn(function()
+	local Players = game:GetService("Players")
+	local TweenService = game:GetService("TweenService")
 
-local LP = Players.LocalPlayer
-local LatestRoom = game.ReplicatedStorage.GameData.LatestRoom
+	local LP = Players.LocalPlayer
+	local LatestRoom = game.ReplicatedStorage.GameData.LatestRoom
 
-local Gui = Instance.new("ScreenGui")
-Gui.Parent = LP.PlayerGui
-Gui.IgnoreGuiInset = true
+	local Gui = Instance.new("ScreenGui")
+	Gui.Parent = LP.PlayerGui
+	Gui.IgnoreGuiInset = true
 
-local Text = Instance.new("TextLabel")
-Text.Size = UDim2.new(0, 200, 0, 50)
-Text.Position = UDim2.new(0.5, -100, 0, 20)
-Text.BackgroundTransparency = 1
-Text.TextColor3 = Color3.fromRGB(204, 204, 204)
-Text.Text = "A-15"
-Text.TextSize = 50
-Text.Font = Enum.Font.Oswald
-Text.Parent = Gui
+	local Text = Instance.new("TextLabel")
+	Text.Size = UDim2.new(0, 200, 0, 50)
+	Text.Position = UDim2.new(0.5, -100, 0, 20)
+	Text.BackgroundTransparency = 1
+	Text.TextColor3 = Color3.fromRGB(204, 204, 204)
+	Text.Text = "A-15"
+	Text.TextSize = 50
+	Text.Font = Enum.Font.Oswald
+	Text.Parent = Gui
 
-local Number = 15
+	local Number = 15
 
-while Number > 1 do
+	while Number > 1 do
+		LatestRoom.Changed:Wait()
+
+		Number -= 1
+		Text.Text = "A-" .. Number
+	end
+
 	LatestRoom.Changed:Wait()
 
-	Number -= 1
-	Text.Text = "A-" .. Number
-end
+	getgenv().spam = false
 
-LatestRoom.Changed:Wait()
+	local blajd = TweenService:Create(
+		Text,
+		TweenInfo.new(1),
+		{TextTransparency = 1}
+	)
 
-getgenv().spam = false
+	blajd:Play()
+	blajd.Completed:Wait()
 
-local blajd = TweenService:Create(
-	Text,
-	TweenInfo.new(1),
-	{TextTransparency = 1}
-)
+	Gui:Destroy()
 
-blajd:Play()
-blajd.Completed:Wait()
+	repeat
+		task.wait()
+	until not (
+		workspace:FindFirstChild("A60ButSilence", true)
+		or workspace:FindFirstChild("A60ButRebound1", true)
+		or workspace:FindFirstChild("A60ButRipper", true)
+		or workspace:FindFirstChild("A60ButDeer", true)
+		or workspace:FindFirstChild("CeaseMimic", true)
+	)
 
-Gui:Destroy()
+	local jchd = TweenService:Create(
+		breaking4,
+		TweenInfo.new(2),
+		{Volume = 0}
+	)
 
-repeat
-	task.wait()
-until not (
-	workspace:FindFirstChild("A60ButSilence", true)
-	or workspace:FindFirstChild("A60ButRebound1", true)
-	or workspace:FindFirstChild("A60ButRipper", true)
-	or workspace:FindFirstChild("A60ButDeer", true)
-	or workspace:FindFirstChild("CeaseMimic", true)
-)
+	jchd:Play()
 
-local jchd = TweenService:Create(
-	breaking4,
-	TweenInfo.new(2),
-	{Volume = 0}
-)
+	task.spawn(function()
+		jchd.Completed:Wait()
 
-jchd:Play()
+		breaking4:Destroy()
+		breaking:Destroy()
+		breaking2:Destroy()
+		breaking3:Destroy()
+		breaking5:Destroy()
+	end)
 
-task.spawn(function()
-	jchd.Completed:Wait()
-
-	breaking4:Destroy()
-	breaking:Destroy()
-	breaking2:Destroy()
-	breaking3:Destroy()
-	breaking5:Destroy()
+	getgenv().multi = false
 end)
-
-getgenv().multi = false
-end) 
 
 local CameraShaker = require(game.ReplicatedStorage:WaitForChild("CameraShaker"))
 local camera = workspace.CurrentCamera
 
-local spawnShake = CameraShaker.new(Enum.RenderPriority.Camera.Value, function(shakeCf)
-	camera.CFrame = camera.CFrame * shakeCf
-end)
+local spawnShake = CameraShaker.new(
+	Enum.RenderPriority.Camera.Value,
+	function(shakeCf)
+		camera.CFrame = camera.CFrame * shakeCf
+	end
+)
 
 spawnShake:Start()
 
 spawnShake:ShakeOnce(
-	10,   -- Magnitude (mạnh)
-	3,   -- Roughness
-	0.05, -- FadeIn
-	1, -- FadeOut
-	0,    -- PositionInfluence
-	0.8   -- RotationInfluence
+	10,
+	3,
+	0.05,
+	1,
+	0,
+	0.8
 )
 
-task.spawn(function() 
-AddArtifacts(3)
+task.spawn(function()
+	AddArtifacts(3)
 end)
 
+breaking4.Volume = 1.3
 breaking4:Play()
-task.spawn(function() 
-ScriptCache["DeerMimic"]()
-end) 
+
+--==================================================
+-- RANDOM SPAM SYSTEM
+--==================================================
 
 local RandomScripts = {}
 
-local WaitModels = {
+local SpamWaitModels = {
 	RipperMimic = "A60ButRipper",
 	CeaseMimic = "CeaseMimic",
 	SilenceMimic = "A60ButSilence",
@@ -878,7 +1413,7 @@ end
 getgenv().RipperMimi = true
 
 local function WaitEntityDone(name)
-	local modelName = WaitModels[name]
+	local modelName = SpamWaitModels[name]
 
 	if not modelName then
 		return
@@ -895,7 +1430,7 @@ end
 
 task.spawn(function()
 	while getgenv().spam do
-		task.wait(math.random(4, 10))
+		task.wait(math.random(7, 15))
 
 		if #RandomScripts > 0 then
 			breaking5:Play()
@@ -915,6 +1450,3 @@ task.spawn(function()
 		end
 	end
 end)
-end)
-
-ScriptCache["HaltMimic"]()
