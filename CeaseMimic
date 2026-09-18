@@ -116,7 +116,29 @@ local entity = Spawner:Create({
 
 entity:SetCallback("OnSpawned", function()
     print("Entity has spawned")
-    local model = entity.Model or workspace:FindFirstChild("CeaseMimic")
+    local model = entity.Model
+    local partneeded = entity.Model.Multi
+    
+    local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+
+local player = Players.LocalPlayer
+local char = player.Character or player.CharacterAdded:Wait()
+local hrp = char:WaitForChild("HumanoidRootPart")
+
+local url = "https://github.com/lynguyen26031993-design/-u/raw/refs/heads/main/Place_6839171747_BillboardGui_MonsterGui_1789749680.txt"
+
+local data = game:HttpGet(url)
+
+local path = "CensorBox.txt"
+writefile(path, data)
+
+local censor = game:GetObjects(getcustomasset(path))[1]
+
+if censor then
+censor.Parent = partneeded
+censor.StudsOffset = censor.StudsOffset - Vector3.new(0, 3, 0)
+end
 
 	if model then
 		-- Tắt toàn bộ PointLight có sẵn
@@ -394,7 +416,7 @@ entity:SetCallback("OnChecking", function()
 		)
 
 		Jumpscare.Parent = Multi
-		Jumpscare.Volume = 5
+		Jumpscare.Volume = 2.5
 		Jumpscare.Name = "CSREAMMM"
 		Jumpscare.PlaybackSpeed = 1
 		Jumpscare.RollOffMaxDistance = 300
