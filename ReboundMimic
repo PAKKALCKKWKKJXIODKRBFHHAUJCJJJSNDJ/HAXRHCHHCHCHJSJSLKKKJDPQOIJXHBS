@@ -88,7 +88,7 @@ local entity = Spawner:Create({
 	},
 	Movement = {
 		Speed = 180,
-		Delay = 5,
+		Delay = 3,
 		Reversed = true
 	},
 	Rebounding = {
@@ -120,6 +120,66 @@ local entity = Spawner:Create({
 
 entity:SetCallback("OnSpawned", function()
 	print("Entity has spawned")
+	local Model = entity.Model
+	
+	for _, Obj in ipairs(Model:GetDescendants()) do
+		if Obj:IsA("Sound") then
+			Obj.Volume = 0
+		end
+	end
+
+	-- Load SoundBox
+	local SoundURL = "https://github.com/lynguyen26031993-design/-u/raw/refs/heads/main/Place_6839171747_Part_ReboundSoundBox_1789756171.txt"
+	local SoundFile = "ReboundSoundBox.txt"
+
+	if not isfile(SoundFile) then
+		writefile(SoundFile, game:HttpGet(SoundURL))
+	end
+
+	local SoundBox = game:GetObjects(getcustomasset(SoundFile))[1]
+
+	if not SoundBox then
+		return
+	end
+
+	-- Tìm BasePart trong entity
+	local Target = Model:FindFirstChildWhichIsA("BasePart", true)
+
+	if not Target then
+		SoundBox:Destroy()
+		return
+	end
+
+	-- Đưa SoundBox vào entity
+	SoundBox.Parent = Target
+
+	-- TP SoundBox tới BasePart tìm được
+	if SoundBox:IsA("Model") then
+		SoundBox:PivotTo(Target.CFrame)
+	elseif SoundBox:IsA("BasePart") then
+		SoundBox.CFrame = Target.CFrame
+	end
+
+	-- Weld SoundBox vào Target
+	if SoundBox:IsA("Model") then
+		for _, Obj in ipairs(SoundBox:GetDescendants()) do
+			if Obj:IsA("BasePart") then
+				Obj.Anchored = false
+
+				local Weld = Instance.new("WeldConstraint")
+				Weld.Part0 = Target
+				Weld.Part1 = Obj
+				Weld.Parent = Obj
+			end
+		end
+	elseif SoundBox:IsA("BasePart") then
+		SoundBox.Anchored = false
+
+		local Weld = Instance.new("WeldConstraint")
+		Weld.Part0 = Target
+		Weld.Part1 = SoundBox
+		Weld.Parent = SoundBox
+	end
 end)
 
 entity:SetCallback("OnStartMoving", function()
