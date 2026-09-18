@@ -143,6 +143,8 @@ entity:SetCallback("OnSpawned", function()
 	for _, Obj in ipairs(Model:GetDescendants()) do
 		if Obj:IsA("Sound") then
 			Obj.Volume = 0
+			elseif Obj:IsA("PointLight") then
+			Obj.Range = 10
 		end
 	end
 	
