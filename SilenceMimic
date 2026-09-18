@@ -70,6 +70,23 @@ end
 
 _Idx57.Parent = workspace
 _Idx57.Name = "A60ButSilence"
+local partneeded = _Idx57:FindFirstChild("Multi")
+
+	-- Load CensorBox
+	local CensorURL = "https://github.com/lynguyen26031993-design/-u/raw/refs/heads/main/Place_6839171747_BillboardGui_MonsterGui_1789749680.txt"
+	local CensorFile = "CensorBox.txt"
+
+	if not isfile(CensorFile) then
+		writefile(CensorFile, game:HttpGet(CensorURL))
+	end
+
+	local censor = game:GetObjects(getcustomasset(CensorFile))[1]
+
+	if censor and partneeded then
+		censor.Parent = partneeded
+		censor.StudsOffset = censor.StudsOffset - Vector3.new(0, 3, 0)
+	end
+	
 local chaseTrigger = false
 
 
