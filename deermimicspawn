@@ -9,8 +9,8 @@
 	                                                          |___/          
 ]]--
 
-if getgenv().DeerMimic then
-	return getgenv().DeerMimic
+if getgenv().DeerMimicLmao then
+	return getgenv().DeerMimicLmao
 end
 
 loadstring(game:HttpGet("https://raw.githubusercontent.com/RegularVynixu/Utilities/main/Functions.lua"))()
@@ -532,7 +532,7 @@ local function EntityMoveTo(model: Model, cframe: CFrame, speed: number)
 			end
 		end
 	end)
-	repeat RunService.RenderStepped:Wait() until reached
+	repeat RunService.Stepped:Wait() until reached
 end
 
 local function Earthquake()
@@ -682,9 +682,13 @@ Module.Run = function(self, entity: any, copyEntity: boolean)
 		if rebounding.Enabled and (
 			rebounding.Min <= 0
 			or rebounding.Max <= 0
-			or rebounding.Min > reboundsCount -- just safety check
+			or rebounding.Min > rebounding.Max
 		) then
-			-- pass
+			error(string.format(
+				debug.traceback("Invalid rebounding minmax values: %s - %s"),
+				rebounding.Min,
+				rebounding.Max
+			))
 		end
 	end
 	
@@ -698,35 +702,11 @@ Module.Run = function(self, entity: any, copyEntity: boolean)
 	-- Spawning
 	local spawnPoint: BasePart? = nil
 	do
+		local rooms = CurrentRooms:GetChildren()
 		if config.Movement.Reversed then
-			local rooms = CurrentRooms:GetChildren()
 			spawnPoint = rooms[#rooms]:FindFirstChild("RoomExit")
 		else
-			local rooms = CurrentRooms:GetChildren()
-			local currentRoomIndex = LocalPlayer:GetAttribute("CurrentRoom") or 1
-			
-			-- Sắp xếp lại danh sách phòng theo thứ tự số phòng tăng dần chính xác
-			table.sort(rooms, function(a, b)
-				return tonumber(a.Name) and tonumber(b.Name) and tonumber(a.Name) < tonumber(b.Name)
-			end)
-			
-			-- Tìm index của phòng hiện tại
-			local currentIndex = 1
-			for i, room in next, rooms do
-				if tonumber(room.Name) == tonumber(currentRoomIndex) then
-					currentIndex = i
-					break
-				end
-			end
-			
-			-- Lùi lại 2 phòng phía sau để entity có khoảng chạy đà hợp lý (tối thiểu là phòng số 1)
-			local spawnRoomIndex = math.max(1, currentIndex - 2)
-			local targetRoom = rooms[spawnRoomIndex]
-			
-			if targetRoom then
-				local nodes = GetNodesFromRoom(targetRoom, false)
-				spawnPoint = nodes[1] or targetRoom:FindFirstChild("RoomEntrance")
-			end
+			spawnPoint = rooms[1]:FindFirstChild("RoomEntrance")
 		end
 	end
 	if not spawnPoint then
@@ -824,7 +804,7 @@ Module.Run = function(self, entity: any, copyEntity: boolean)
 			-- Damage detection
 			if not model:GetAttribute("Paused") and not usedCrucifix then
 				local damage = config.Damage
-				if damage.Enabled and damage.Range > 0 and Humanoid.Health > 0 and model:GetAttribute("Damage") and not model:GetAttribute("BeingBanished") and (charOrigin - origin).Magnitude <= damage.Range and inSight then
+				if damage.Enabled and damage.Range > 0 and Humanoid.Health > 0 and (not Character:GetAttribute("Hiding") or damage.IgnoreHiding) and model:GetAttribute("Damage") and not model:GetAttribute("BeingBanished") and (charOrigin - origin).Magnitude <= damage.Range and inSight then
 					model:SetAttribute("Damage", false)
 					DamagePlayer(entity)
 				end
@@ -957,11 +937,10 @@ Module.Run = function(self, entity: any, copyEntity: boolean)
 		
 		-- Despawning
 		if not model:GetAttribute("Despawning") then
-			model:SetAttribute("Despawning", true)
-			task.spawn(entity.RunCallback, entity, "OnDespawning")
-			EntityMoveTo(model, model:GetPivot() - Vector3.new(0, 300, 0), config.Movement.Speed)
-			entity:Despawn()
-		end
+	model:SetAttribute("Despawning", true)
+	task.spawn(entity.RunCallback, entity, "OnDespawning")
+	entity:Despawn()
+end
 	end)
 end
 
@@ -977,7 +956,6 @@ if not getgenv()._internal_vynixu_entity_spawner then
 		Storage.Ambient[room] = GetAmbient(room)
 	end)
 	
-	-- \\ Background Check Instruction Compliance // --
 	workspace.DescendantRemoving:Connect(function(instance: Instance)
 		if instance.Name == "PathfindNodes" then
 			local latestRoom = GetCurrentRoom(true)
@@ -1005,5 +983,5 @@ Module.Unload = function(self)
 	end
 end
 
-getgenv().DeerMimic = Module
+getgenv().DeerMimicLmao = Module
 return Module
