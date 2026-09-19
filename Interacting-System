@@ -426,11 +426,47 @@ task.spawn(function()
 				hum.AutoRotate = false  
 				hrp.Anchored = true  
 
-				TweenService:Create(  
-					hrp,  
-					TweenInfo.new(0.7, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out),  
-					{CFrame = targetCF}  
-				):Play()  
+				local wee = TweenService:Create(
+	hrp,
+	TweenInfo.new(0.7, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out),
+	{CFrame = targetCF}
+)
+
+wee:Play()
+				
+				local Players = game:GetService("Players")
+
+	local LocalPlayer = Players.LocalPlayer
+	local Char = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+	local Hum = Char:WaitForChild("Humanoid")
+	local HRP = Char:WaitForChild("HumanoidRootPart")
+
+task.spawn(function()
+	
+
+	local Anim = Instance.new("Animation")
+	Anim.AnimationId = "rbxassetid://18759987341"
+
+	local Track = Hum:LoadAnimation(Anim)
+	Track:AdjustSpeed(0.3)
+	Track:Play()
+
+	task.wait(0.3)
+
+	Track:AdjustSpeed(0)
+
+task.wait(0.3)
+
+Track:AdjustSpeed(0.5)
+
+task.wait(0.59)
+
+	task.wait(0.01)
+wee:Cancel() 
+		HRP.CFrame = HRP.CFrame + HRP.CFrame.LookVector * 8  
+	
+Track:Stop() 
+end)
 
 				task.delay(0.3, function()  
 					if not clone.Parent then  
@@ -455,7 +491,7 @@ task.spawn(function()
 				task.delay(0.4, function()  
 					if hrp.Parent then  
 						hrp.Anchored = false  
-						hum.AutoRotate = true  
+						hum.AutoRotate = true
 					end  
 				end)  
 			end)  
@@ -626,11 +662,50 @@ local targetCF = CFrame.lookAt(targetPos, cf.Position)
 hum.AutoRotate = false
 hrp.Anchored = true
 
-TweenService:Create(
+local wee = TweenService:Create(
 	hrp,
 	TweenInfo.new(0.7, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out),
 	{CFrame = targetCF}
-):Play()
+)
+
+wee:Play()
+
+local Players = game:GetService("Players")
+
+	local LocalPlayer = Players.LocalPlayer
+	local Char = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+	local Hum = Char:WaitForChild("Humanoid")
+	local HRP = Char:WaitForChild("HumanoidRootPart")
+
+task.spawn(function()
+	
+
+	local Anim = Instance.new("Animation")
+	Anim.AnimationId = "rbxassetid://18759987341"
+
+	local Track = Hum:LoadAnimation(Anim)
+	Track:AdjustSpeed(0.3)
+	Track:Play()
+
+	task.wait(0.3)
+
+	Track:AdjustSpeed(0)
+
+task.wait(0.3)
+
+Track:AdjustSpeed(0.5)
+
+task.wait(0.59)
+
+	task.wait(0.01)
+	
+	wee:Cancel() 
+		HRP.CFrame = HRP.CFrame + HRP.CFrame.LookVector * 8  
+		
+Track:Stop() 
+
+
+end)
 
 task.delay(0.3, function()
 	if not door.Parent then
