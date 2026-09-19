@@ -730,6 +730,9 @@ StartGuidingAnimation()
 StartMisAnimation()
 StartCuriousAnimation()
 
+local r = math.random(1,3)
+
+if r == 1 then
 task.wait(4)
 if not deathActive or not HasDeathBackground() then return end
 
@@ -769,6 +772,55 @@ task.wait(4)
 if not deathActive or not HasDeathBackground() then return end
 
 task.spawn(TypeGuiding, "Stay near the others. And keep your eyes off it when you can.")
+elseif r == 2 then
+
+task.wait(4)
+if not deathActive or not HasDeathBackground() then return end
+
+task.spawn(TypeCurious, "Still cataloguing. It refuses to stay one thing long enough to")
+
+task.wait(4)
+if not deathActive or not HasDeathBackground() then return end
+
+task.spawn(TypeGuiding, "Then don't name it. Outlast it. ")
+
+task.wait(6)
+if not deathActive or not HasDeathBackground() then return end
+
+task.spawn(TypeMis, "I almost had it. For a second, I had it.")
+
+task.wait(5)
+if not deathActive or not HasDeathBackground() then return end
+
+task.spawn(TypeGuiding, "There was nothing more we could do from here.")
+
+task.wait(5)
+if not deathActive or not HasDeathBackground() then return end
+
+task.spawn(TypeMis, "Next run. Next run I will be faster.")
+task.wait(7)
+elseif r == 3 then
+task.wait(4)
+if not deathActive or not HasDeathBackground() then return end
+
+task.spawn(TypeCurious, "Every copy it wears is slightly wrong.")
+
+task.wait(6)
+if not deathActive or not HasDeathBackground() then return end
+
+task.spawn(TypeGuiding, "If something feels wrong, treat it as")
+
+task.wait(6)
+if not deathActive or not HasDeathBackground() then return end
+
+task.spawn(TypeMis, "Or just run. Running also works. ")
+
+task.wait(6)
+if not deathActive or not HasDeathBackground() then return end
+
+task.spawn(TypeGuiding, "We'll be watching. We always are. ")
+task.wait(7)
+end
 
 local Players = game:GetService("Players")
 local gui2 = Instance.new("ScreenGui")
