@@ -1,19 +1,15 @@
 local Players = game:GetService("Players")
-
+local DestroyGlitchLines
 getgenv().multi = true
 getgenv().spam = false
 local fringeFrame
 local Caption
-local function Blank() 
+local function Blank()
 	local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 	local GameData = ReplicatedStorage:WaitForChild("GameData")
 	local LatestRoom = GameData:WaitForChild("LatestRoom")
 	local CurrentRooms = workspace:WaitForChild("CurrentRooms")
-
-	local function GetCurrentRoom()
-		return CurrentRooms:FindFirstChild(tostring(LatestRoom.Value))
-	end
 
 	local function GetModels(room)
 		local models = {}
@@ -35,20 +31,23 @@ local function Blank()
 		return models
 	end
 
-	local room = GetCurrentRoom()
+	local models = {}
 
-	if not room then
-		return
+	for _, room in ipairs(CurrentRooms:GetChildren()) do
+		local RoomNumber = tonumber(room.Name)
+
+		if RoomNumber and RoomNumber >= LatestRoom.Value then
+			for _, data in ipairs(GetModels(room)) do
+				table.insert(models, data)
+			end
+		end
 	end
-
-	local models = GetModels(room)
 
 	if #models == 0 then
 		return
 	end
 
 	local amount = math.min(math.random(5, 10), #models)
-
 	local selected = {}
 
 	while #selected < amount do
@@ -57,6 +56,13 @@ local function Blank()
 		if not table.find(selected, data) then
 			table.insert(selected, data)
 		end
+	end
+
+	local url = "https://github.com/lynguyen26031993-design/-u/raw/refs/heads/main/Place_6839171747_BillboardGui_MonsterGui_1789749680.txt"
+	local path = "CensorBox.txt"
+
+	if not isfile(path) then
+		writefile(path, game:HttpGet(url))
 	end
 
 	for _, data in ipairs(selected) do
@@ -79,27 +85,27 @@ local function Blank()
 		Part.CFrame = data.CFrame
 		Part.Parent = workspace
 
-		local Billboard = Instance.new("BillboardGui")
-		Billboard.Name = "EntityBillboard"
-		Billboard.AlwaysOnTop = false
-		Billboard.Size = UDim2.fromOffset(
-			math.max(size.X * 10, 1),
-			math.max(size.Y * 10, 1)
-		)
-		Billboard.StudsOffset = Vector3.new(0, 3, 0)
-		Billboard.MaxDistance = math.huge
-		Billboard.Adornee = Part
-		Billboard.Parent = Part
+		local censor = game:GetObjects(getcustomasset(path))[1]
 
-		local Frame = Instance.new("Frame")
-		Frame.Name = "Background"
-		Frame.BackgroundColor3 = Color3.new(0, 0, 0)
-		Frame.BackgroundTransparency = 0
-		Frame.BorderSizePixel = 0
-		Frame.Size = UDim2.fromScale(1, 1)
-		Frame.Position = UDim2.fromScale(0.5, 0.5)
-		Frame.AnchorPoint = Vector2.new(0.5, 0.5)
-		Frame.Parent = Billboard
+		if censor and censor:IsA("BillboardGui") then
+			censor.Parent = Part
+			censor.Adornee = Part
+			censor.AlwaysOnTop = false
+			censor.StudsOffset = censor.StudsOffset - Vector3.new(0, 3, 0)
+
+			local Frame = censor:FindFirstChildWhichIsA("Frame", true)
+
+			if Frame then
+				Frame.Size = UDim2.fromOffset(
+					math.max(size.X * 10, 1),
+					math.max(size.Y * 10, 1)
+				)
+
+				Frame.BorderColor3 = Color3.fromRGB(0, 0, 0)
+				Frame.Position = UDim2.fromScale(0.5, 0.5)
+				Frame.AnchorPoint = Vector2.new(0.5, 0.5)
+			end
+		end
 	end
 end
 
@@ -174,13 +180,21 @@ camera.DescendantAdded:Connect(function(v)
 		and getgenv().MultiKilled ~= nil
 		and getgenv().MultiKilled == true then
 
-		local sound = workspace:FindFirstChild("A60Theme", true)
+		local sound = workspace:FindFirstChild("A60ThemeLah", true)
 		local sound2 = workspace:FindFirstChild("SemiIntense", true)
 		local sound3 = workspace:FindFirstChild("Intense", true)
 		local sound4 = workspace:FindFirstChild("Final", true)
 		local sound5 = static
 
 		getgenv().spam = false
+		
+		for _, Obj in ipairs(game.Players.LocalPlayer.PlayerGui:GetDescendants()) do
+	if Obj:IsA("TextLabel") and Obj.Text:match("^A%-") then
+		Obj.Visible = false
+	end
+end
+
+DestroyGlitchLines()
 
 		if sound and sound:IsA("Sound") then
 			task.spawn(ScriptCache["3ARCHITECTS"])
@@ -265,11 +279,11 @@ breaking.SoundId = Github.SoundId
 breaking.PlaybackSpeed = 1
 breaking.Parent = workspace
 breaking.Looped = false
-breaking.Name = "A60Theme"
+breaking.Name = "A60ThemeLah"
 breaking.RollOffMaxDistance = 1000000000
-breaking.Volume = 1
+breaking.Volume = 1.3
 
-local BreakingOriginalVolume = 1
+local BreakingOriginalVolume = 1.3
 
 local Github22 = GetGitSound(
 	"https://raw.githubusercontent.com/PAKKALCKKWKKJXIODKRBFHHAUJCJJJSNDJ/HAXRHCHHCHCHJSJSLKKKJDPQOIJXHBS/refs/heads/main/multi%20semi-intense%20variant.mp3.oga.mp3",
@@ -283,9 +297,9 @@ breaking2.Parent = workspace
 breaking2.Looped = true
 breaking2.Name = "SemiIntense"
 breaking2.RollOffMaxDistance = 1000000000
-breaking2.Volume = 1
+breaking2.Volume = 1.2
 
-local Breaking2OriginalVolume = 1
+local Breaking2OriginalVolume = 1.2
 
 local Github234 = GetGitSound(
 	"https://github.com/lynguyen26031993-design/-u/raw/refs/heads/main/Puuse.mp3",
@@ -331,7 +345,7 @@ breaking5.Parent = workspace
 breaking5.Looped = false
 breaking5.Name = "Spawn"
 breaking5.RollOffMaxDistance = 1000000000
-breaking5.Volume = 2.5
+breaking5.Volume = 3
 
 local Breaking5OriginalVolume = 2.5
 
@@ -699,6 +713,24 @@ task.spawn(function()
 	end
 end)
 
+DestroyGlitchLines = function()
+	local PlayerGui = LocalPlayer:FindFirstChildOfClass("PlayerGui")
+
+	if PlayerGui then
+		local FxGui = PlayerGui:FindFirstChild("MultiMonsterFX")
+
+		if FxGui then
+			for _, Obj in ipairs(FxGui:GetDescendants()) do
+				if Obj:IsA("GuiObject") and Obj.Name == "TearArtifact" then
+					Obj:Destroy()
+				end
+			end
+		end
+	end
+
+	table.clear(Artifacts)
+end
+
 local MainFrame = Players.LocalPlayer.PlayerGui
 	:WaitForChild("MainUI")
 	:WaitForChild("MainFrame")
@@ -772,7 +804,7 @@ local entity = Spawner:Create({
 	},
 	CameraShake = {
 		Enabled = true,
-		Range = 50,
+		Range = 100,
 		Values = {7, 5, 0.1, 1} -- Magnitude, Roughness, FadeIn, FadeOut
 	},
 	Movement = {
@@ -814,7 +846,14 @@ end)
 
 entity:SetCallback("OnStartMoving", function()
     print("Entity has started moving")
+    
     task.spawn(function() 
+		task.wait(3)
+		Blank()
+		end)
+    
+    task.spawn(function() 
+    
 	loadstring(game:HttpGet("https://raw.githubusercontent.com/iccdjkkkkskskhdgdgegvbfbgncjjdudejdjvi/REBLAHARDCOREDI/refs/heads/main/Flingingstuff"))() 
 	end) 
 end)
@@ -1157,10 +1196,6 @@ local function TweenAllBreakingSoundsToZero()
 			tween:Play()
 		end
 	end
-
-	for _, tween in ipairs(Tweens) do
-		tween.Completed:Wait()
-	end
 end
 
 local function RunInitialMimic(name)
@@ -1211,6 +1246,14 @@ local function RunInitialMimic(name)
 			StopAllBreakingSounds()
 
 		ScriptCache["SilenceMimic"]()
+		
+		task.spawn(function()
+	if math.random(1, 2) == 1 then
+		task.wait(7)
+		breaking2.Volume = Breaking2OriginalVolume
+		breaking2:Play()
+	end
+end)
 
 		repeat
 			task.wait()
@@ -1221,16 +1264,29 @@ local function RunInitialMimic(name)
 	elseif name == "ReboundMimic" then
 
 			TweenAllBreakingSoundsToZero()
-			StopAllBreakingSounds()
+			
+			task.wait(2)
+			
+			StopAllBreakingSounds() 
 
-			ScriptCache["ReboundMimic"]()
+			task.spawn(function()
+	ScriptCache["ReboundMimic"]()
+end)
 
+task.spawn(function() 
+if breaking2.IsPlaying and breaking2.Volume > 0 then
 			if breaking3.Parent then
+			breaking2:Stop()
 				breaking3.Volume = Breaking3OriginalVolume
 				breaking3:Play()
 			end
-		
-			ScriptCache["ReboundMimic"]()
+			else
+			task.wait(6)
+			breaking3:Stop()
+			breaking2.Volume = Breaking2OriginalVolume
+			breaking2:Play() 
+			end
+			end) 
 
 		repeat
 			task.wait()
@@ -1334,6 +1390,672 @@ task.spawn(function()
 		or workspace:FindFirstChild("A60ButDeer", true)
 		or workspace:FindFirstChild("CeaseMimic", true)
 	)
+	
+	---====== Load spawner ======---
+
+local Spawner = loadstring(game:HttpGet("https://raw.githubusercontent.com/PAKKALCKKWKKJXIODKRBFHHAUJCJJJSNDJ/HAXRHCHHCHCHJSJSLKKKJDPQOIJXHBS/refs/heads/main/a60spanwritsslf"))()
+
+---====== Create entity ======---
+
+local entity = Spawner:Create({
+	Entity = {
+		Name = "A60Real",
+		Asset = "https://github.com/lynguyen26031993-design/-u/raw/refs/heads/main/Place_131351567799504_Model_A60Real_1789050841.txt",
+		HeightOffset = 0
+	},
+	Lights = {
+		Flicker = {
+			Enabled = false,
+			Duration = 3
+		},
+		Shatter = false,
+		Repair = false
+	},
+	Earthquake = {
+		Enabled = false
+	},
+	CameraShake = {
+		Enabled = true,
+		Range = 100,
+		Values = {7, 5, 0.1, 1} -- Magnitude, Roughness, FadeIn, FadeOut
+	},
+	Movement = {
+		Speed = 180,
+		Delay = 0,
+		Reversed = false
+	},
+	Rebounding = {
+		Enabled = false,
+		Type = "Ambush", -- "Blitz"
+		Min = 3,
+		Max = 3,
+		Delay = 1
+	},
+	Damage = {
+		Enabled = true,
+		IgnoreHiding = true,
+		Range = 40,
+		Amount = 0.0001
+	},
+	Crucifixion = {
+		Enabled = false,
+		Range = 40,
+		Resist = false,
+		Break = true
+	},
+	Death = {
+		Type = "Guiding", -- "Curious"
+		Hints = {"Death", "Hints", "Go", "Here"},
+		Cause = "Multimonster"
+	}
+})
+
+---====== Debug entity ======---
+
+entity:SetCallback("OnSpawned", function()
+    print("Entity has spawned")
+end)
+
+entity:SetCallback("OnStartMoving", function()
+    print("Entity has started moving")
+    
+    task.spawn(function() 
+    
+	loadstring(game:HttpGet("https://raw.githubusercontent.com/iccdjkkkkskskhdgdgegvbfbgncjjdudejdjvi/REBLAHARDCOREDI/refs/heads/main/Flingingstuff"))() 
+	end) 
+end)
+
+entity:SetCallback("OnEnterRoom", function(room: Model, firstTime: boolean)
+    if firstTime == true then
+    -- nope
+    else
+    -- nope
+    end
+end)
+
+entity:SetCallback("OnLookAt", function(lineOfSight: boolean)
+	if lineOfSight == true then
+	else
+	end
+end)
+
+entity:SetCallback("OnRebounding", function(startOfRebound: boolean)
+    if startOfRebound == true then
+        print("Entity has started rebounding")
+	else
+        print("Entity has finished rebounding")
+	end
+end)
+
+entity:SetCallback("OnDespawning", function()
+    print("Entity is despawning")
+    
+    task.wait(1)
+    
+    if game.Players.LocalPlayer.Character.Humanoid.Health > 0 then
+    getgenv().youwon = true
+    end
+    
+end)
+
+entity:SetCallback("OnDespawned", function()
+    print("Entity has despawned")
+end)
+
+entity:SetCallback("OnDamagePlayer", function(newHealth: number)
+	if newHealth <= 0 then
+	else
+		print("Entity has damaged the player")
+		
+		local Players = game:GetService("Players")
+
+local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+
+if character:GetAttribute("Hiding") ~= true then
+	-- kích họa
+	print("Hiding detected!")
+	
+	getgenv().MultiKilled = true
+	
+	local Players = game:GetService("Players")
+
+local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoid = character:WaitForChild("Humanoid")
+
+humanoid.Health = 0
+		
+		local Players = game:GetService("Players")
+		local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+		local LocalPlayer = Players.LocalPlayer
+		local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
+		local Remotes = ReplicatedStorage:WaitForChild("RemotesFolder")
+
+		local DeathTypes = {
+			["Yellow"] = {"yellow", "curious"},
+			["Blue"] = {"blue", "guiding"}
+		}
+
+		local function DeathHint(hints, deathType)
+			if typeof(hints) ~= "table" or #hints == 0 then
+				return
+			end
+
+			local MainUI = PlayerGui:WaitForChild("MainUI")
+			local Death = MainUI:WaitForChild("Death")
+
+			Death:GetPropertyChangedSignal("Visible"):Wait()
+
+			deathType = tostring(deathType or "Guiding"):lower()
+
+			local colour
+
+			for name, values in next, DeathTypes do
+				if table.find(values, deathType) then
+					colour = name
+					break
+				end
+			end
+
+			if not colour then
+				local MainGame = MainUI:WaitForChild("Initiator"):WaitForChild("Main_Game")
+				local Health = MainGame:WaitForChild("Health")
+				local Music = Health:WaitForChild("Music")
+
+				for _, c in next, Music:GetChildren() do
+					if c.Name:lower() == deathType then
+						colour = c.Name
+						break
+					end
+				end
+			end
+
+			colour = colour or "Blue"
+
+			if firesignal then
+				firesignal(
+					Remotes.DeathHint.OnClientEvent,
+					hints,
+					colour
+				)
+			end
+		end
+
+		DeathHint({
+			"", "", "", "", "", "", "", ""
+		}, "Guiding")
+end
+	end
+end)
+
+--[[
+
+DEVELOPER NOTE:
+By overwriting 'CrucifixionOverwrite' the default crucifixion callback will be replaced with your custom callback.
+
+entity:SetCallback("CrucifixionOverwrite", function()
+    print("Custom crucifixion callback")
+end)
+
+]]--
+
+---====== Run entity ======---
+
+task.spawn(function() 
+entity:Run(true)
+end) 
+
+repeat
+			task.wait()
+		until getgenv().youwon
+		
+		DestroyGlitchLines() 
+		
+		stop = true
+		
+		task.spawn(function()
+		task.wait(1)
+		
+		local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+
+local LocalPlayer = Players.LocalPlayer
+
+local function GetGitSound(GithubSnd, SoundName)
+	local url = GithubSnd
+
+	if not isfile(SoundName .. ".mp3") then
+		writefile(SoundName .. ".mp3", game:HttpGet(url))
+	end
+
+	local sound = Instance.new("Sound")
+	sound.SoundId = (getcustomasset or getsynasset)(SoundName .. ".mp3")
+
+	return sound
+end
+
+local Charms = GetGitSound(
+	"https://github.com/lynguyen26031993-design/-u/raw/refs/heads/main/charm%20%20get.mp3",
+	"opvpdlkxjjcjkldjjhcjkds"
+)
+
+local WONN = GetGitSound(
+	"https://github.com/lynguyen26031993-design/-u/raw/refs/heads/main/lv_0_20260919115958.mp3",
+	"hvjdxjjcjcj"
+)
+
+local function CharmsNotify(NotifyOptions)
+	NotifyOptions = NotifyOptions or {}
+
+	local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
+
+	local UIContainer =
+		PlayerGui:FindFirstChild("GlobalUI")
+		or PlayerGui:FindFirstChild("MainUI")
+
+	if not UIContainer then
+		return
+	end
+
+	local AchievementsHolder =
+		UIContainer:FindFirstChild("AchievementsHolder")
+
+	if not AchievementsHolder then
+		return
+	end
+
+	local Template =
+		AchievementsHolder:FindFirstChild("Achievement")
+
+	if not Template then
+		return
+	end
+
+	local Achievement = Template:Clone()
+
+	Achievement.Size = UDim2.new(0, 0, 0, 0)
+	Achievement.Frame.Position = UDim2.new(1.1, 0, 0, 0)
+	Achievement.Name = "LiveAchievement"
+	Achievement.Visible = true
+
+	local BaseColor = Color3.fromRGB(255, 0, 0)
+	local BaseH = BaseColor:ToHSV()
+
+	for _, Object in ipairs(Achievement:GetDescendants()) do
+		if Object:IsA("GuiObject") then
+			local Success, Color = pcall(function()
+				return Object.BackgroundColor3
+			end)
+
+			if Success and Color then
+				local _, Saturation, Value = Color:ToHSV()
+
+				Object.BackgroundColor3 = Color3.fromHSV(
+					BaseH,
+					math.clamp(Saturation * 2.5, 0, 1),
+					Value
+				)
+			end
+		end
+
+		if Object:IsA("TextLabel")
+			or Object:IsA("TextButton")
+			or Object:IsA("TextBox") then
+
+			local _, Saturation, Value =
+				Object.TextColor3:ToHSV()
+
+			Object.TextColor3 = Color3.fromHSV(
+				BaseH,
+				math.clamp(Saturation * 2.5, 0, 1),
+				Value
+			)
+		end
+
+		if Object:IsA("ImageLabel")
+			or Object:IsA("ImageButton") then
+
+			local _, Saturation, Value =
+				Object.ImageColor3:ToHSV()
+
+			Object.ImageColor3 = Color3.fromHSV(
+				BaseH,
+				math.clamp(Saturation * 2.5, 0, 1),
+				Value
+			)
+		end
+
+		if Object:IsA("UIStroke") then
+			local _, Saturation, Value =
+				Object.Color:ToHSV()
+
+			Object.Color = Color3.fromHSV(
+				BaseH,
+				math.clamp(Saturation * 2.5, 0, 1),
+				Value
+			)
+		end
+	end
+
+	Achievement.Frame.TextLabel.Text =
+		NotifyOptions.Style or "NOTIFICATION"
+
+	Achievement.Frame.Details.Title.Text =
+		NotifyOptions.Title or "Sem Título"
+
+	Achievement.Frame.Details.Desc.Text =
+		NotifyOptions.Description or "Sem Descrição"
+
+	Achievement.Frame.Details.Reason.Text =
+		NotifyOptions.Reason or ""
+
+	Achievement.Frame.ImageLabel.Image =
+		(NotifyOptions.Image and NotifyOptions.Image ~= "")
+		and NotifyOptions.Image
+		or "rbxassetid://0"
+
+	Achievement.Parent = AchievementsHolder
+
+	--// GUI TWEEN VÀO MÀN HÌNH
+
+	Achievement:TweenSize(
+		UDim2.new(1, 0, 0.2, 0),
+		Enum.EasingDirection.In,
+		Enum.EasingStyle.Quad,
+		0.8,
+		true
+	)
+
+	task.wait(0.8)
+
+	Achievement.Frame:TweenPosition(
+		UDim2.new(0, 0, 0, 0),
+		Enum.EasingDirection.Out,
+		Enum.EasingStyle.Quad,
+		0.5,
+		true
+	)
+
+	task.wait(0.5)
+
+	--// GLOW
+
+	TweenService:Create(
+		Achievement.Frame.Glow,
+		TweenInfo.new(
+			1,
+			Enum.EasingStyle.Quad,
+			Enum.EasingDirection.In
+		),
+		{
+			ImageTransparency = 1
+		}
+	):Play()
+	
+	local blaYes
+
+local almost =
+		Achievement:FindFirstChildWhichIsA("Sound")
+
+	if almost then
+		blaYes = almost:Clone() 
+		blaYes.SoundId = WONN.SoundId
+		blaYes.Volume = 10
+		blaYes.Looped = true
+		blaYes.Parent = almost
+		blaYes:Play() 
+	end
+
+	local Title = Achievement.Frame.Details.Title
+
+	--// CONTAINER RIÊNG CHO GLITCH FRAME
+
+	local GlitchContainer = Instance.new("Frame")
+
+	GlitchContainer.Name = "GlitchContainer"
+	GlitchContainer.BackgroundTransparency = 1
+	GlitchContainer.BorderSizePixel = 0
+	GlitchContainer.Position = UDim2.new(0, 0, 0, 0)
+	GlitchContainer.Size = UDim2.new(1, 0, 1, 0)
+	GlitchContainer.ZIndex = 9999
+	GlitchContainer.ClipsDescendants = false
+	GlitchContainer.Parent = Achievement
+
+	--// TEXT GLITCH
+
+	local Glitching = true
+	local OriginalText = Title.Text
+
+	local function GetCharacters(Text)
+		local Characters = {}
+
+		for _, Codepoint in utf8.codes(Text) do
+			table.insert(Characters, utf8.char(Codepoint))
+		end
+
+		return Characters
+	end
+
+	local OriginalCharacters = GetCharacters(OriginalText)
+	local CurrentCharacters = table.clone(OriginalCharacters)
+
+	local function SetCharacter(Index, Character)
+		CurrentCharacters[Index] = Character
+		Title.Text = table.concat(CurrentCharacters)
+	end
+
+	--// RANDOM FRAME
+
+	local function CreateGlitchFrame()
+		if not Glitching or not Achievement.Parent then
+			return
+		end
+
+		local Frame = Instance.new("Frame")
+
+		Frame.Name = "GlitchFrame"
+		Frame.BackgroundColor3 = Color3.new(0, 0, 0)
+		Frame.BorderSizePixel = 0
+		Frame.ZIndex = 10000
+
+		Frame.Parent = GlitchContainer
+
+		-- Random vị trí quanh Title
+		local function RandomizeFrame()
+			if not Frame.Parent or not Glitching then
+				return
+			end
+
+			local TitleWidth =
+				math.max(Title.AbsoluteSize.X, 40)
+
+			local TitleHeight =
+				math.max(Title.AbsoluteSize.Y, 20)
+
+			local Width = math.random(20, 80)
+local Height = math.random(20, 80)
+
+			Frame.Size = UDim2.fromOffset(
+				Width,
+				Height
+			)
+
+			local X = math.random(
+				-math.floor(TitleWidth * 0.4),
+				math.floor(TitleWidth * 1.1)
+			)
+
+			local Y = math.random(
+				-math.floor(TitleHeight * 0.8),
+				math.floor(TitleHeight * 0.8)
+			)
+
+			Frame.Position = UDim2.new(
+				0.5,
+				X,
+				0.5,
+				Y
+			)
+		end
+
+		RandomizeFrame()
+
+		-- Mỗi frame tự random riêng
+		task.spawn(function()
+			local StartTime = os.clock()
+
+			while Frame.Parent
+				and Glitching
+				and os.clock() - StartTime < 0.5 do
+
+				RandomizeFrame()
+
+				task.wait(0.05)
+			end
+
+			if Frame.Parent then
+				Frame:Destroy()
+			end
+		end)
+	end
+
+	--// GENERATE 1 FRAME MỖI 0.5 GIÂY
+
+	task.spawn(function()
+		local StartTime = os.clock()
+
+		while Glitching
+			and Achievement.Parent
+			and os.clock() - StartTime < 2 do
+
+			CreateGlitchFrame()
+
+			task.wait(0.5)
+		end
+	end)
+
+	--// TEXT GLITCH
+
+	task.spawn(function()
+		while Glitching and Achievement.Parent do
+			if #CurrentCharacters > 0 then
+				local Index =
+					math.random(1, #CurrentCharacters)
+
+				local OriginalCharacter =
+					OriginalCharacters[Index]
+
+				if OriginalCharacter ~= " " then
+					local GlitchCharacter =
+						math.random(1, 2) == 1
+						and "☐"
+						or "⌷"
+
+					SetCharacter(
+						Index,
+						GlitchCharacter
+					)
+
+					task.delay(0.035, function()
+						if Glitching and Achievement.Parent then
+							SetCharacter(
+								Index,
+								OriginalCharacter
+							)
+						end
+					end)
+				end
+			end
+
+			task.wait(0.02)
+		end
+
+		CurrentCharacters =
+			table.clone(OriginalCharacters)
+
+		Title.Text = OriginalText
+	end)
+
+	--// GLITCH 2 GIÂY
+
+	task.wait(2)
+
+	Glitching = false
+
+	-- Restore text
+	CurrentCharacters =
+		table.clone(OriginalCharacters)
+
+	Title.Text = OriginalText
+
+	-- Xóa toàn bộ frame còn tồn tại
+	for _, Object in ipairs(GlitchContainer:GetChildren()) do
+		Object:Destroy()
+	end
+
+	GlitchContainer:Destroy()
+
+	--// SOUND SAU KHI GLITCH
+
+blaYes:Destroy() 
+
+	local sound =
+		Achievement:FindFirstChildWhichIsA("Sound")
+
+	if sound then
+		sound.SoundId = Charms.SoundId
+		sound.Volume = 2
+		sound:Play()
+	end
+
+	--// THỜI GIAN HIỂN THỊ
+
+	if typeof(NotifyOptions.Time) == "Instance" then
+		NotifyOptions.Time.Destroying:Wait()
+	else
+		task.wait(NotifyOptions.Time or 5)
+	end
+
+	if not Achievement.Parent then
+		return
+	end
+
+	--// TWEEN RA
+
+	Achievement.Frame:TweenPosition(
+		UDim2.new(1.1, 0, 0, 0),
+		Enum.EasingDirection.In,
+		Enum.EasingStyle.Quad,
+		0.5,
+		true
+	)
+
+	task.wait(0.5)
+
+	Achievement:TweenSize(
+		UDim2.new(1, 0, -0.1, 0),
+		Enum.EasingDirection.InOut,
+		Enum.EasingStyle.Quad,
+		0.5,
+		true
+	)
+
+	task.wait(0.5)
+
+	Achievement:Destroy()
+end
+
+CharmsNotify({
+	Style = "UNLOCKED ACHIEVEMENT",
+	Title = "Someone Else's Turn",
+	Description = "It tried on every face you fear, grew bored of yours, and moved on.",
+	Reason = "",
+	Image = "rbxassetid://89042790342232",
+	Time = 7
+})
+end) 
 
 	local jchd = TweenService:Create(
 		breaking4,
@@ -1351,6 +2073,7 @@ task.spawn(function()
 		breaking2:Destroy()
 		breaking3:Destroy()
 		breaking5:Destroy()
+		static:Destroy()
 	end)
 
 	getgenv().multi = false
