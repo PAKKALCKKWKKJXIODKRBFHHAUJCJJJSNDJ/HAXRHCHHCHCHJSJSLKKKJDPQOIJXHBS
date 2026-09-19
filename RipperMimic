@@ -725,10 +725,7 @@ spawnShake:ShakeOnce(
 			CFrameValue:Destroy()
 
 			local Names = {
-				A60ButRipper = true,
-				A60ButSilence = true,
-				CeaseMimic = true,
-				A60ButDeer = true
+				A60ButRipper = true
 			}
 
 			local TargetModel
