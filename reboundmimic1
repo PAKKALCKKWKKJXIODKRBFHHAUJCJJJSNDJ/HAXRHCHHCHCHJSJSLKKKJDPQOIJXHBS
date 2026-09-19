@@ -42,7 +42,7 @@ local entity = Spawner:Create({
 	Movement = {
 		Speed = 180, 
 		Delay = 5,
-		Reversed = math.random(1, 2) == 1
+		Reversed = true
 	},
 	Rebounding = {
 		Enabled = false,
