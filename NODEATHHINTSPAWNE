@@ -430,56 +430,74 @@ end
 local function GetNodesFromRoom(room: Model, reversed: boolean): { BasePart }
 	local nodes = {}
 	local roomEntrance = room:FindFirstChild("RoomEntrance")
+
 	if roomEntrance then
 		local n = roomEntrance:Clone()
 		n.Name = "0"
 		n.CFrame -= Vector3.new(0, 3, 0)
-		nodes[1] = n
+		table.insert(nodes, n)
 	end
+
 	local nodesFolder = room:FindFirstChild("PathfindNodes")
 	if nodesFolder then
 		for _, n in next, nodesFolder:GetChildren() do
-			nodes[#nodes + 1] = n
+			if n:IsA("BasePart") then
+				table.insert(nodes, n)
+			end
 		end
 	end
+
 	local roomExit = room:FindFirstChild("RoomExit")
 	if roomExit then
-		local index = #nodes + 1
 		local n = roomExit:Clone()
-		n.Name = index
+		n.Name = "999999"
 		n.CFrame -= Vector3.new(0, 3, 0)
-		nodes[index] = n
+		table.insert(nodes, n)
 	end
-	table.sort(nodes, function(a: BasePart, b: BasePart)
+
+	table.sort(nodes, function(a, b)
+		local aName = tonumber(a.Name) or 0
+		local bName = tonumber(b.Name) or 0
+
 		if reversed then
-			return tonumber(a.Name) > tonumber(b.Name)
+			return aName > bName
 		else
-			return tonumber(a.Name) < tonumber(b.Name)
+			return aName < bName
 		end
 	end)
+
 	return nodes
+end
+
+local function GetOrderedRooms(reversed: boolean): { Model }
+	local rooms = CurrentRooms:GetChildren()
+
+	table.sort(rooms, function(a, b)
+		local aIndex = tonumber(a.Name) or 0
+		local bIndex = tonumber(b.Name) or 0
+
+		if reversed then
+			return aIndex > bIndex
+		else
+			return aIndex < bIndex
+		end
+	end)
+
+	return rooms
 end
 
 local function GetPathfindNodesAmbush(config: any): { BasePart }
 	local pathfindNodes = {}
-	local rooms = CurrentRooms:GetChildren()
-	if config.Movement.Reversed == false then
-		for i = 1, #rooms, 1 do
-			local room = rooms[i]
-			local roomNodes = GetNodesFromRoom(room, false)
-			for _, node in next, roomNodes do
-				pathfindNodes[#pathfindNodes + 1] = node
-			end
-		end
-	else
-		for i = #rooms, 1, -1 do
-			local room = rooms[i]
-			local roomNodes = GetNodesFromRoom(room, true)
-			for _, node in next, roomNodes do
-				pathfindNodes[#pathfindNodes + 1] = node
-			end
+	local rooms = GetOrderedRooms(config.Movement.Reversed)
+
+	for _, room in next, rooms do
+		local roomNodes = GetNodesFromRoom(room, config.Movement.Reversed)
+
+		for _, node in next, roomNodes do
+			pathfindNodes[#pathfindNodes + 1] = node
 		end
 	end
+
 	return pathfindNodes
 end
 
@@ -702,12 +720,13 @@ Module.Run = function(self, entity: any, copyEntity: boolean)
 	-- Spawning
 	local spawnPoint: BasePart? = nil
 	do
-		local rooms = CurrentRooms:GetChildren()
-		if config.Movement.Reversed then
-			spawnPoint = rooms[#rooms]:FindFirstChild("RoomExit")
-		else
-			spawnPoint = rooms[1]:FindFirstChild("RoomEntrance")
-		end
+	local rooms = GetOrderedRooms(config.Movement.Reversed)
+
+if config.Movement.Reversed then
+	spawnPoint = rooms[1]:FindFirstChild("RoomExit")
+else
+	spawnPoint = rooms[1]:FindFirstChild("RoomEntrance")
+end
 	end
 	if not spawnPoint then
 		error(string.format(debug.traceback("Failed to find spawn point for entity: '%s'"), config.Entity.Name))
