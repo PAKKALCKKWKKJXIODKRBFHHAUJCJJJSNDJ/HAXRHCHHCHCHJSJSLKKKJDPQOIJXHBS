@@ -20,7 +20,16 @@ Reboundcolor.Name = "Bla"
 Reboundcolor.TintColor = Color3.fromRGB(65, 138, 255) Reboundcolor.Saturation = -0.7 Reboundcolor.Contrast = 0.2
 game.TweenService:Create(Reboundcolor,TweenInfo.new(15),{TintColor = Color3.fromRGB(255, 255, 255),Saturation = 0, Contrast = 0}):Play()
 local TweenService = game:GetService("TweenService")
-local TW = TweenService:Create(game.Lighting.MainColorCorrection, TweenInfo.new(5),{TintColor = Color3.fromRGB(255, 255, 255)})
+local MainColorCorrection = Instance.new("ColorCorrectionEffect")
+MainColorCorrection.Name = "MainColorCorrection"
+MainColorCorrection.TintColor = Color3.fromRGB(255, 255, 255)
+MainColorCorrection.Parent = game.Lighting
+
+local TW = TweenService:Create(
+	MainColorCorrection,
+	TweenInfo.new(5),
+	{TintColor = Color3.fromRGB(255, 255, 255)}
+)
 TW:Play()
 local function GetGitSound(GithubSnd, SoundName)
 					local url = GithubSnd
