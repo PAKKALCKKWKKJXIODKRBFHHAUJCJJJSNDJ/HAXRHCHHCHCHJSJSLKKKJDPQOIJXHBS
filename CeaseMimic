@@ -601,7 +601,7 @@ if Model then
 		if RoomEntrance and RoomEntrance:IsA("BasePart") then
 			local TargetCFrame =
 				RoomEntrance.CFrame
-				+ RoomEntrance.CFrame.LookVector * 10
+				+ RoomEntrance.CFrame.LookVector * math.random(5,20)
 
 			local CFrameValue = Instance.new("CFrameValue")
 			CFrameValue.Value = Model:GetPivot()
