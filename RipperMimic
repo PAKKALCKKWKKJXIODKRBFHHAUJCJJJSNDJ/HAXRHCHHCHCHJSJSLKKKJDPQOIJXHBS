@@ -267,10 +267,12 @@ else
 breaking.Volume = 0
 end
 
+local spawn
+
 if not backward then
 local Github23 = GetGitSound("https://github.com/PAKKALCKKWKKJXIODKRBFHHAUJCJJJSNDJ/HAXRHCHHCHCHJSJSLKKKJDPQOIJXHBS/raw/refs/heads/main/HnVideoEditor_2026_08_26_185847148.mp3?raw=true", "klvjikpapjdb")
 
-local spawn = Instance.new("Sound")
+spawn = Instance.new("Sound")
 spawn.SoundId = Github23.SoundId
 spawn.PlaybackSpeed = 1
 spawn.Parent = workspace
@@ -321,7 +323,10 @@ end)
 
 	task.spawn(function()
 
+if not backward then
+
 		spawn:Play() 
+end
 	end)
 end)
 
