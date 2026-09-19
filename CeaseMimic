@@ -1,3 +1,6 @@
+local backward = false
+
+local function Cease() 
 ---====== Load spawner ======---
 
 local coloring = true
@@ -84,7 +87,7 @@ local entity = Spawner:Create({
 	Movement = {
 		Speed = 57,
 		Delay = 0,
-		Reversed = false
+		Reversed = backward
 	},
 	Rebounding = {
 		Enabled = false,
@@ -169,6 +172,7 @@ end)
 v4:Start()
 v4:Shake(v1.Presets.Earthquake)
 
+if not backward then
     local scream = Instance.new("Sound") 
     scream.SoundId = "rbxassetid://9125632539" 
     scream.Volume = 2
@@ -179,6 +183,7 @@ v4:Shake(v1.Presets.Earthquake)
     scream.Ended:Connect(function() 
     scream:Destroy() 
     end) 
+    end
     
     local light = Instance.new("Sound") 
     light.SoundId = "rbxassetid://166047422" 
@@ -537,3 +542,177 @@ end)
 ---====== Run entity ======---
 
 entity:Run(true)
+end
+
+if math.random(1, 100) > 30 then
+    task.spawn(Cease) 
+
+else
+
+backward = true
+
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local CurrentRooms = workspace:WaitForChild("CurrentRooms")
+local LatestRoom = ReplicatedStorage.GameData:WaitForChild("LatestRoom")
+
+local URL = "https://github.com/lynguyen26031993-design/-u/raw/refs/heads/main/Place_131351567799504_Model_A60Real_1789050841.txt"
+local File = "A60Real.txt"
+
+if not isfile(File) then
+	writefile(File, game:HttpGet(URL))
+end
+
+local function GetGitSound(GithubSnd, SoundName)
+			local url = GithubSnd
+			if not isfile(SoundName .. ".mp3") then
+				writefile(SoundName .. ".mp3", game:HttpGet(url))
+			end
+			local sound = Instance.new("Sound")
+			sound.SoundId = (getcustomasset or getsynasset)(SoundName .. ".mp3")
+			return sound
+		end
+		
+		local gitSoundTemp2 = GetGitSound("https://github.com/lynguyen26031993-design/-u/raw/refs/heads/main/7ba215ed-8cb5-48c0-9274-fd0fad7bdbfc.mp3?raw=true", "ipljjhgfffgv")
+
+local blaSound = Instance.new("Sound") 
+		blaSound.SoundId = gitSoundTemp2.SoundId
+		blaSound.PlaybackSpeed = 1
+		blaSound.Looped = false
+		blaSound.TimePosition = 0
+		blaSound.Volume = 2
+		blaSound.RollOffMaxDistance = 300
+
+local Model = game:GetObjects(getcustomasset(File))[1]
+
+if Model then
+	Model.Parent = workspace
+	blaSound.Parent = workspace 
+
+	local Room = CurrentRooms:FindFirstChild(tostring(LatestRoom.Value))
+
+	if Room then
+		local RoomEntrance = Room:FindFirstChild("RoomEntrance")
+
+		if RoomEntrance and RoomEntrance:IsA("BasePart") then
+			local TargetCFrame =
+				RoomEntrance.CFrame
+				+ RoomEntrance.CFrame.LookVector * 10
+
+			local CFrameValue = Instance.new("CFrameValue")
+			CFrameValue.Value = Model:GetPivot()
+
+			local Connection = CFrameValue:GetPropertyChangedSignal("Value"):Connect(function()
+				if Model and Model.Parent then
+					Model:PivotTo(CFrameValue.Value)
+				end
+			end)
+
+			local Tween = TweenService:Create(
+				CFrameValue,
+				TweenInfo.new(0.5, Enum.EasingStyle.Linear),
+				{Value = TargetCFrame}
+			)
+
+			Tween:Play()
+			Tween.Completed:Wait()
+			
+			local CameraShaker = require(game.ReplicatedStorage:WaitForChild("CameraShaker"))
+local camera = workspace.CurrentCamera
+
+local spawnShake = CameraShaker.new(Enum.RenderPriority.Camera.Value, function(shakeCf)
+	camera.CFrame = camera.CFrame * shakeCf
+end)
+
+spawnShake:Start()
+
+spawnShake:ShakeOnce(
+	5,   -- Magnitude (mạnh)
+	3,   -- Roughness
+	0.05, -- FadeIn
+	3, -- FadeOut
+	0.8,    -- PositionInfluence
+	0.8   -- RotationInfluence
+)
+
+			Connection:Disconnect()
+			CFrameValue:Destroy()
+
+			local Names = {
+				A60ButRipper = true,
+				A60ButSilence = true,
+				CeaseMimic = true,
+				A60ButDeer = true
+			}
+
+			local TargetModel
+
+			local Connection2 = workspace.ChildAdded:Connect(function(Obj)
+				if not TargetModel
+					and Obj:IsA("Model")
+					and Names[Obj.Name] then
+
+					TargetModel = Obj
+				end
+			end)
+			
+		 task.delay(1, function()
+    Cease()
+end)
+
+			repeat
+				task.wait()
+			until TargetModel
+
+			Connection2:Disconnect()
+
+			local TargetPart
+
+			for _, Obj in ipairs(TargetModel:GetDescendants()) do
+				if Obj:IsA("BasePart") then
+					TargetPart = Obj
+					break
+				end
+			end
+
+			if TargetPart then
+				local CFrameValue2 = Instance.new("CFrameValue")
+				CFrameValue2.Value = Model:GetPivot()
+
+				local Connection3 = CFrameValue2:GetPropertyChangedSignal("Value"):Connect(function()
+					if Model and Model.Parent then
+						Model:PivotTo(CFrameValue2.Value)
+					end
+				end)
+
+				local Tween2 = TweenService:Create(
+					CFrameValue2,
+					TweenInfo.new(0.5, Enum.EasingStyle.Linear),
+					{Value = TargetPart.CFrame}
+				)
+
+spawnShake:ShakeOnce(
+	7,   -- Magnitude (mạnh)
+	3,   -- Roughness
+	0.05, -- FadeIn
+	3, -- FadeOut
+	0.8,    -- PositionInfluence
+	0.8   -- RotationInfluence
+)
+
+blaSound:Play()
+
+				Tween2:Play()
+				Tween2.Completed:Wait()
+
+				Connection3:Disconnect()
+				CFrameValue2:Destroy()
+
+				Model:Destroy()
+			end
+		end
+	end
+end
+end
