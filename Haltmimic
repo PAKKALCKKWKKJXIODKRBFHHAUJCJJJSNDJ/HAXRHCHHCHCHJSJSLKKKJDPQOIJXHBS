@@ -371,6 +371,8 @@ local partneeded = model:FindFirstChild("Multi")
 
 	if censor and partneeded then
 		censor.Parent = partneeded
+censor:FindFirstChildWhichIsA("Frame").BorderColor3 = Color3.fromRGB(0, 0, 0)
+
 		censor.StudsOffset = censor.StudsOffset - Vector3.new(0, 3, 0)
 	end
 	
