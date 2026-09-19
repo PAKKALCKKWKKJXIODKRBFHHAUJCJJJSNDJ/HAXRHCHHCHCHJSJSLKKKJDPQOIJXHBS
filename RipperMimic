@@ -261,7 +261,11 @@ breaking.PlaybackSpeed = 1
 breaking.Parent = workspace
 breaking.Looped = false
 breaking.RollOffMaxDistance = 1000000000
+if not backward then
 breaking.Volume = 4
+else
+breaking.Volume = 0
+end
 
 if not backward then
 local Github23 = GetGitSound("https://github.com/PAKKALCKKWKKJXIODKRBFHHAUJCJJJSNDJ/HAXRHCHHCHCHJSJSLKKKJDPQOIJXHBS/raw/refs/heads/main/HnVideoEditor_2026_08_26_185847148.mp3?raw=true", "klvjikpapjdb")
