@@ -123,6 +123,8 @@ require(game.Players.LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game).caption("
 task.wait(2)
 require(game.Players.LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game).caption("Origin by pyxlfunkin and credits to pyxlfunkin's team. ",true)
 task.wait(2)
+require(game.Players.LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game).caption("PLEASE, IF MODIFIERS BUTTON DOESN'T WORK, TYPE '/modifier' ON THE CHAT AND SEND IT",true)
+task.wait(2)
 require(game.Players.LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game).caption("Enjoy!",true)
 end)
 
@@ -1395,19 +1397,32 @@ local MultimonsterEntity = {
 	Url = "https://raw.githubusercontent.com/PAKKALCKKWKKJXIODKRBFHHAUJCJJJSNDJ/HAXRHCHHCHCHJSJSLKKKJDPQOIJXHBS/refs/heads/main/multimonstet"
 }
 
+local Frostbite = {
+	Name = "Frostbite",
+	Interval = 10,
+	Chance = 2,
+	Url = "https://raw.githubusercontent.com/iccdjkkkkskskhdgdgegvbfbgncjjdudejdjvi/REBLAHARDCOREDI/refs/heads/main/Frostbite"
+}
+
 task.spawn(function()
-	local startTime = tick()
-	local cycle = 0
+	local MultiStartTime = tick()
+	local FrostStartTime = tick()
+
+	local MultiCycle = 0
+	local FrostCycle = 0
 
 	while true do
 		local pausedTime = WaitCooldown()
-		startTime += pausedTime
 
-		local elapsed = tick() - startTime
+		MultiStartTime += pausedTime
+		FrostStartTime += pausedTime
 
-		if elapsed >= MultimonsterEntity.Interval then
-			startTime = tick()
-			cycle += 1
+		local now = tick()
+
+		-- Multimonster
+		if now - MultiStartTime >= MultimonsterEntity.Interval then
+			MultiStartTime = now
+			MultiCycle += 1
 
 			local Chance = MultimonsterEntity.Chance
 
@@ -1415,14 +1430,14 @@ task.spawn(function()
 				Chance = 50
 			end
 
-			local roll = GetMultiMonsterRoll(cycle)
+			local roll = GetMultiMonsterRoll(MultiCycle)
 
 			print(
 				"[Multimonster] Roll:", roll,
 				"| Chance:", Chance,
 				"| MultiMonster:", getgenv().MultiMonster,
 				"| multi:", getgenv().multi,
-				"| Cycle:", cycle
+				"| Cycle:", MultiCycle
 			)
 
 			if roll <= Chance then
@@ -1433,30 +1448,10 @@ task.spawn(function()
 			end
 		end
 
-		task.wait(0.25)
-	end
-end)
-
-local Frostbite = {
-	Name = "Frostbite",
-	Interval = 10,
-	Chance = 2,
-	Url = "https://raw.githubusercontent.com/iccdjkkkkskskhdgdgegvbfbgncjjdudejdjvi/REBLAHARDCOREDI/refs/heads/main/Frostbite"
-}
-
-task.spawn(function()
-	local startTime = tick()
-	local cycle = 0
-
-	while true do
-		local pausedTime = WaitCooldown()
-		startTime += pausedTime
-
-		local elapsed = tick() - startTime
-
-		if elapsed >= Frostbite.Interval then
-			startTime = tick()
-			cycle += 1
+		-- Frostbite
+		if now - FrostStartTime >= Frostbite.Interval then
+			FrostStartTime = now
+			FrostCycle += 1
 
 			local Chance = Frostbite.Chance
 
@@ -1464,13 +1459,10 @@ task.spawn(function()
 				Chance = 25
 			end
 
-			local roll = GetMultiMonsterRoll(cycle)
-
+			local roll = GetMultiMonsterRoll(FrostCycle)
 
 			if roll <= Chance then
 				SafeLoadFileCached(Frostbite.Url)
-			else
-
 			end
 		end
 
