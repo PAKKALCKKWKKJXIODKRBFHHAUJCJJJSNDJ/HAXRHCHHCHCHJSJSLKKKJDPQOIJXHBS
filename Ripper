@@ -2,6 +2,14 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local blaSound
 
+local speed
+
+if getgenv().FasterTrouble then
+speed = 225
+else
+speed = 180
+end
+
 local function GetGitSound(GithubSnd, SoundName)
 			local url = GithubSnd
 			if not isfile(SoundName .. ".mp3") then
@@ -193,7 +201,7 @@ local entity = Spawner:Create({
 		Values = {10, 27, 0.1, 0.4} -- Magnitude, Roughness, FadeIn, FadeOut
 	},
 	Movement = {
-		Speed = 180,
+		Speed = speed,
 		Delay = 3,
 		Reversed = false
 	},
