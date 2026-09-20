@@ -4,6 +4,24 @@ getgenv().multi = true
 getgenv().spam = false
 local fringeFrame
 local Caption
+
+local TweenService = game:GetService("TweenService")
+
+local Sound = workspace:FindFirstChild("ThemebLla")
+
+if Sound and Sound:IsA("Sound") then
+	local TW = TweenService:Create(
+		Sound,
+		TweenInfo.new(2),
+		{Volume = 0}
+	)
+
+	TW:Play()
+
+	TW.Completed:Wait()
+	Sound:Stop()
+end
+
 local function Blank()
 	local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
