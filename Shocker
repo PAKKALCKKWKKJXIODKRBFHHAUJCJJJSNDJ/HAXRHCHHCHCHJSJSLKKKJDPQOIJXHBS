@@ -5,6 +5,14 @@ local SoundService = game:GetService("SoundService")
 local TweenService = game:GetService("TweenService")
 local Players = game:GetService("Players")
 
+local speed
+
+if getgenv().FasterTrouble then
+speed = 1.25
+else
+speed = 1
+end
+
 local function GetGitSound(GithubSnd, SoundName)
 			local url = GithubSnd
 			if not isfile(SoundName .. ".mp3") then
@@ -426,7 +434,7 @@ local function HookShocker(model, target)
 		speedModifier = 1
 	end
 
-	local attackTime = 1 / (speedModifier * 1.25)
+	local attackTime = 1 / (speedModifier * speed)
 
 	attackSound.PlaybackSpeed = 1
 	attackSound.TimePosition = 0
