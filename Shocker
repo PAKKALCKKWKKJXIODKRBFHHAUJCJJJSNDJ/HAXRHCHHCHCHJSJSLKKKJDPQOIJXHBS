@@ -426,7 +426,7 @@ local function HookShocker(model, target)
 		speedModifier = 1
 	end
 
-	local attackTime = 1 / speedModifier
+	local attackTime = 1 / (speedModifier * 1.25)
 
 	attackSound.PlaybackSpeed = 1
 	attackSound.TimePosition = 0
