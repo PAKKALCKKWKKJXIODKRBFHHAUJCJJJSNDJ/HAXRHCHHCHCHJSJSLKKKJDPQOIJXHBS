@@ -138,7 +138,7 @@ local Spawner = loadstring(game:HttpGet("https://raw.githubusercontent.com/cakma
 local entity = Spawner:Create({
 	Entity = {
 		Name = "Rebound",
-		Asset = "https://github.com/eoyoustme/Hardcore/blob/main/Rebound1.rbxm?raw=true",
+		Asset = "https://github.com/lynguyen26031993-design/-u/raw/refs/heads/main/Place_131351567799504_Model_Rebounjkd_1789914413.txt",
 		HeightOffset = 3
 	},
 	Lights = {
