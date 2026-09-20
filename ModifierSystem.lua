@@ -239,33 +239,8 @@ if not ButtonModifiers then
 	return
 end
 
-----------------------------------------------------------------
--- SOUND
--- Sound FAIL không được làm GUI chết
-----------------------------------------------------------------
 
-local Themebro = GetGitSound(
-	"https://github.com/lynguyen26031993-design/-u/raw/refs/heads/main/marketplace%20making%202.mp3",
-	"jcklppsokjcjjsnbsjfjd"
-)
 
-local breaking3 = Instance.new("Sound")
-
-if Themebro then
-	pcall(function()
-		breaking3.SoundId = Themebro.SoundId
-	end)
-end
-
-breaking3.PlaybackSpeed = 1
-breaking3.Parent = workspace
-breaking3.Looped = true
-breaking3.Name = "ThemeModifier"
-breaking3.RollOffMaxDistance = 1000000000
-breaking3.Volume = 2.5
-
-local BreakingStarted = false
-local BreakingOriginalVolume = breaking3.Volume
 
 local RoomSound
 local RoomSoundOriginalVolume
@@ -1404,22 +1379,6 @@ local function CloseModifierUI()
 
 		ButtonModifiers.Interactable = true
 	end
-
-	if BreakingStarted then
-
-		if breaking3
-			and breaking3.Parent then
-
-			breaking3.Volume = 0
-		end
-
-		if RoomSound
-			and RoomSound.Parent then
-
-			RoomSound.Volume =
-				RoomSoundOriginalVolume or 0
-		end
-	end
 end
 
 local function OpenModifierUI()
@@ -1428,74 +1387,6 @@ local function OpenModifierUI()
 		or not ModifierUI.Parent then
 
 		return
-	end
-
-	------------------------------------------------------------
-	-- SOUND IS OPTIONAL
-	------------------------------------------------------------
-
-	if BreakingStarted then
-
-		if Themebro
-			and breaking3
-			and breaking3.Parent then
-
-			pcall(function()
-
-				breaking3.Volume =
-					BreakingOriginalVolume
-
-				if not breaking3.IsPlaying then
-					breaking3:Play()
-				end
-
-			end)
-		end
-
-		if RoomSound
-			and RoomSound.Parent then
-
-			RoomSound.Volume = 0
-		end
-
-	else
-
-		BreakingStarted = true
-
-		if Themebro
-			and breaking3
-			and breaking3.Parent then
-
-			pcall(function()
-
-				breaking3.Volume =
-					BreakingOriginalVolume
-
-				breaking3:Play()
-
-			end)
-		end
-
-		local RoomBoundingCenter =
-			workspace:FindFirstChild(
-				"RoomBoundingCenter"
-			)
-
-		if RoomBoundingCenter then
-
-			RoomSound =
-				RoomBoundingCenter:FindFirstChildWhichIsA(
-					"Sound"
-				)
-
-			if RoomSound then
-
-				RoomSoundOriginalVolume =
-					RoomSound.Volume
-
-				RoomSound.Volume = 0
-			end
-		end
 	end
 
 	------------------------------------------------------------
@@ -1572,23 +1463,6 @@ ModifierUI:GetPropertyChangedSignal(
 		UserInputService.MouseBehavior =
 			Enum.MouseBehavior.Default
 
-		if BreakingStarted then
-
-			if Themebro
-				and breaking3
-				and breaking3.Parent then
-
-				breaking3.Volume =
-					BreakingOriginalVolume
-			end
-
-			if RoomSound
-				and RoomSound.Parent then
-
-				RoomSound.Volume = 0
-			end
-		end
-
 		if ButtonModifiers
 			and ButtonModifiers.Parent then
 
@@ -1599,22 +1473,6 @@ ModifierUI:GetPropertyChangedSignal(
 
 		UserInputService.MouseBehavior =
 			OldMouseBehavior
-
-		if BreakingStarted then
-
-			if breaking3
-				and breaking3.Parent then
-
-				breaking3.Volume = 0
-			end
-
-			if RoomSound
-				and RoomSound.Parent then
-
-				RoomSound.Volume =
-					RoomSoundOriginalVolume or 0
-			end
-		end
 
 		if ButtonModifiers
 			and ButtonModifiers.Parent then
@@ -1935,16 +1793,4 @@ end
 pcall(function()
 	UserInputService.MouseBehavior =
 		Enum.MouseBehavior.LockCenter
-end)
-
-pcall(function()
-	if breaking3 then
-		breaking3:Destroy()
-	end
-end)
-
-pcall(function()
-	if Themebro then
-		Themebro:Destroy()
-	end
 end)
