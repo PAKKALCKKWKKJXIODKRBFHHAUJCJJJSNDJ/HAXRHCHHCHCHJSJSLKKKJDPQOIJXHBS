@@ -27,45 +27,36 @@ local function SafeCall(Func, Default)
 end
 
 local function LoadAsset(Url, FileName)
-	local function TryLoad(File)
-		if not isfile(File) then
-			return nil
-		end
+	while true do
+		------------------------------------------------------------
+		-- FILE ĐÃ TỒN TẠI -> THỬ LOAD
+		------------------------------------------------------------
+		if isfile(FileName) then
+			local Ok, Result = pcall(function()
+				return game:GetObjects(getasset(FileName))
+			end)
 
-		local Ok, Result = pcall(function()
-			return game:GetObjects(getasset(File))
-		end)
-
-		if Ok and Result and #Result > 0 then
-			return Result
-		end
-
-		return nil
-	end
-
-	-- Original cache
-	local Objects = TryLoad(FileName)
-
-	if Objects then
-		return Objects
-	end
-
-	-- Backup cache
-	local BackupFile = "__safe_" .. FileName
-
-	if not isfile(BackupFile) then
-		local Ok, Data = pcall(function()
-			return game:HttpGet(Url)
-		end)
-
-		if Ok and Data and #Data > 0 then
+			if Ok and Result and #Result > 0 then
+				return Result
+			end
+		else
+			--------------------------------------------------------
+			-- FILE CHƯA TỒN TẠI -> DOWNLOAD
+			--------------------------------------------------------
 			pcall(function()
-				writefile(BackupFile, Data)
+				local Data = game:HttpGet(Url)
+
+				if Data and #Data > 0 then
+					writefile(FileName, Data)
+				end
 			end)
 		end
-	end
 
-	return TryLoad(BackupFile)
+		------------------------------------------------------------
+		-- CHƯA LOAD ĐƯỢC -> THỬ LẠI
+		------------------------------------------------------------
+		task.wait(0.5)
+	end
 end
 
 local function GetGitSound(GithubSnd, SoundName)
@@ -197,10 +188,6 @@ local ButtonFile =
 
 local ButtonObjects = LoadAsset(ButtonUrl, ButtonFile)
 
-if not ButtonObjects then
-	return
-end
-
 local ButtonModifiers
 
 for _, Object in ipairs(ButtonObjects) do
@@ -239,8 +226,33 @@ if not ButtonModifiers then
 	return
 end
 
+----------------------------------------------------------------
+-- SOUND
+-- Sound FAIL không được làm GUI chết
+----------------------------------------------------------------
 
+local Themebro = GetGitSound(
+	"https://github.com/lynguyen26031993-design/-u/raw/refs/heads/main/marketplace%20making%202.mp3",
+	"jcklppsokjcjjsnbsjfjd"
+)
 
+local breaking3 = Instance.new("Sound")
+
+if Themebro then
+	pcall(function()
+		breaking3.SoundId = Themebro.SoundId
+	end)
+end
+
+breaking3.PlaybackSpeed = 1
+breaking3.Parent = workspace
+breaking3.Looped = true
+breaking3.Name = "ThemeModifier"
+breaking3.RollOffMaxDistance = 1000000000
+breaking3.Volume = 2.5
+
+local BreakingStarted = false
+local BreakingOriginalVolume = breaking3.Volume
 
 local RoomSound
 local RoomSoundOriginalVolume
@@ -418,10 +430,6 @@ local Objects = LoadAsset(
 	ModifierFile
 )
 
-if not Objects then
-	return
-end
-
 local ModifierUI
 
 for _, Object in ipairs(Objects) do
@@ -475,22 +483,20 @@ local ModifierObjects = LoadAsset(
 	ModifiersKsFile
 )
 
-if ModifierObjects then
-	for _, Object in ipairs(ModifierObjects) do
-		pcall(function()
-			Object.Parent = MainUI
-		end)
+for _, Object in ipairs(ModifierObjects) do
+	pcall(function()
+		Object.Parent = MainUI
+	end)
 
-		if not ModifiersKs and Object:IsA("Frame") then
-			ModifiersKs = Object
-		end
+	if not ModifiersKs and Object:IsA("Frame") then
+		ModifiersKs = Object
+	end
 
-		if not ModifiersKs then
-			local Found = FindGuiCandidate(Object)
+	if not ModifiersKs then
+		local Found = FindGuiCandidate(Object)
 
-			if Found and Found:IsA("Frame") then
-				ModifiersKs = Found
-			end
+		if Found and Found:IsA("Frame") then
+			ModifiersKs = Found
 		end
 	end
 end
@@ -827,6 +833,7 @@ local function SetupEntry(
 						EffectRow.Visible = true
 
 						if RowConfig then
+
 							EffectRow.Name =
 								RowConfig.Name
 								or "EffectRow"
@@ -854,6 +861,7 @@ local function SetupEntry(
 						NewEffectRow.Visible = true
 
 						if RowConfig then
+
 							NewEffectRow.Text =
 								RowConfig.Text
 								or ""
@@ -1111,12 +1119,14 @@ local function SetupEntry(
 											or ""
 
 										if CurrentConfig.TextColor then
+
 											NewTemplate.TextColor3 =
 												CurrentConfig.TextColor
 										end
 									end
 
 									if CurrentConfig.TemplateColor then
+
 										NewTemplate.BackgroundColor3 =
 											CurrentConfig.TemplateColor
 									end
@@ -1379,6 +1389,22 @@ local function CloseModifierUI()
 
 		ButtonModifiers.Interactable = true
 	end
+
+	if BreakingStarted then
+
+		if breaking3
+			and breaking3.Parent then
+
+			breaking3.Volume = 0
+		end
+
+		if RoomSound
+			and RoomSound.Parent then
+
+			RoomSound.Volume =
+				RoomSoundOriginalVolume or 0
+		end
+	end
 end
 
 local function OpenModifierUI()
@@ -1387,6 +1413,74 @@ local function OpenModifierUI()
 		or not ModifierUI.Parent then
 
 		return
+	end
+
+	------------------------------------------------------------
+	-- SOUND IS OPTIONAL
+	------------------------------------------------------------
+
+	if BreakingStarted then
+
+		if Themebro
+			and breaking3
+			and breaking3.Parent then
+
+			pcall(function()
+
+				breaking3.Volume =
+					BreakingOriginalVolume
+
+				if not breaking3.IsPlaying then
+					breaking3:Play()
+				end
+
+			end)
+		end
+
+		if RoomSound
+			and RoomSound.Parent then
+
+			RoomSound.Volume = 0
+		end
+
+	else
+
+		BreakingStarted = true
+
+		if Themebro
+			and breaking3
+			and breaking3.Parent then
+
+			pcall(function()
+
+				breaking3.Volume =
+					BreakingOriginalVolume
+
+				breaking3:Play()
+
+			end)
+		end
+
+		local RoomBoundingCenter =
+			workspace:FindFirstChild(
+				"RoomBoundingCenter"
+			)
+
+		if RoomBoundingCenter then
+
+			RoomSound =
+				RoomBoundingCenter:FindFirstChildWhichIsA(
+					"Sound"
+				)
+
+			if RoomSound then
+
+				RoomSoundOriginalVolume =
+					RoomSound.Volume
+
+				RoomSound.Volume = 0
+			end
+		end
 	end
 
 	------------------------------------------------------------
@@ -1463,6 +1557,23 @@ ModifierUI:GetPropertyChangedSignal(
 		UserInputService.MouseBehavior =
 			Enum.MouseBehavior.Default
 
+		if BreakingStarted then
+
+			if Themebro
+				and breaking3
+				and breaking3.Parent then
+
+				breaking3.Volume =
+					BreakingOriginalVolume
+			end
+
+			if RoomSound
+				and RoomSound.Parent then
+
+				RoomSound.Volume = 0
+			end
+		end
+
 		if ButtonModifiers
 			and ButtonModifiers.Parent then
 
@@ -1474,6 +1585,22 @@ ModifierUI:GetPropertyChangedSignal(
 		UserInputService.MouseBehavior =
 			OldMouseBehavior
 
+		if BreakingStarted then
+
+			if breaking3
+				and breaking3.Parent then
+
+				breaking3.Volume = 0
+			end
+
+			if RoomSound
+				and RoomSound.Parent then
+
+				RoomSound.Volume =
+					RoomSoundOriginalVolume or 0
+			end
+		end
+
 		if ButtonModifiers
 			and ButtonModifiers.Parent then
 
@@ -1484,7 +1611,6 @@ end)
 
 ----------------------------------------------------------------
 -- CHAT COMMAND
--- Gõ /modifier để mở Modifierrsssss
 ----------------------------------------------------------------
 
 LP.Chatted:Connect(function(Message)
@@ -1508,7 +1634,6 @@ end)
 
 ----------------------------------------------------------------
 -- BUTTON OPEN
--- CONNECT NGAY SAU KHI MODIFIER UI TỒN TẠI
 ----------------------------------------------------------------
 
 ButtonModifiers.Interactable = true
@@ -1793,4 +1918,19 @@ end
 pcall(function()
 	UserInputService.MouseBehavior =
 		Enum.MouseBehavior.LockCenter
+end)
+
+pcall(function()
+
+	if breaking3 then
+		breaking3:Destroy()
+	end
+
+end)
+
+pcall(function()
+	if Themebro then
+		Themebro:Destroy()
+	end
+
 end)
