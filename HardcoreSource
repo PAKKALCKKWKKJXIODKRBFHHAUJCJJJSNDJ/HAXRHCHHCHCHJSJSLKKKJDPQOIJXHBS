@@ -101,7 +101,7 @@ local CooldownPaused = false
 local function WaitCooldown()
 	local pauseStart = nil
 
-	while CooldownPaused or getgenv().multi == true do
+	while CooldownPaused or getgenv().multi == true or getgenv().FrostbiteHere == true do
 		if not pauseStart then
 			pauseStart = tick()
 		end
@@ -1323,8 +1323,7 @@ local TimeEntities = {
 { Name = "Limbo",      Interval = 170, Chance = 55, Url = "https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/Limbo" },
 { Name = "Silence",    Interval = 220, Chance = 55, Url = "https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/Silence" },
 { Name = "Deer God",   Interval = 300, Chance = 50, Url = "https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/DeerGod" },
-{ Name = "Cease",       Interval = 110, Chance = 70, Url = "https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/Cease" },
-{ Name = "Frostbite",       Interval = 10, Chance = 2, Url = "https://raw.githubusercontent.com/iccdjkkkkskskhdgdgegvbfbgncjjdudejdjvi/REBLAHARDCOREDI/refs/heads/main/Frostbite" }
+{ Name = "Cease",       Interval = 110, Chance = 70, Url = "https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/Cease" }
 }
 
 local RoomEntities = {
@@ -1438,6 +1437,47 @@ task.spawn(function()
 	end
 end)
 
+local Frostbite = {
+	Name = "Frostbite",
+	Interval = 10,
+	Chance = 2,
+	Url = "https://raw.githubusercontent.com/iccdjkkkkskskhdgdgegvbfbgncjjdudejdjvi/REBLAHARDCOREDI/refs/heads/main/Frostbite"
+}
+
+task.spawn(function()
+	local startTime = tick()
+	local cycle = 0
+
+	while true do
+		local pausedTime = WaitCooldown()
+		startTime += pausedTime
+
+		local elapsed = tick() - startTime
+
+		if elapsed >= Frostbite.Interval then
+			startTime = tick()
+			cycle += 1
+
+			local Chance = Frostbite.Chance
+
+			if getgenv().FrostbiteOften == true then
+				Chance = 25
+			end
+
+			local roll = GetMultiMonsterRoll(cycle)
+
+
+			if roll <= Chance then
+				SafeLoadFileCached(Frostbite.Url)
+			else
+
+			end
+		end
+
+		task.wait(0.25)
+	end
+end)
+
 for _, entity in ipairs(TimeEntities) do
 task.spawn(function()
 local startTime = tick()
@@ -1455,21 +1495,7 @@ while true do
 
 			local roll = GetSyncedRoll(entity.Name .. "_" .. cycle)  
 			if roll <= entity.Chance then  
-				if entity.Name == "Frostbite" then  
-					CooldownPaused = true  
-					  
-					task.spawn(function()  
-						SafeLoadFileCached(entity.Url)  
-					end)  
-					  
-					repeat  
-						task.wait(0.2)  
-					until getgenv().Frostbite == false  
-					  
-					CooldownPaused = false  
-				else  
 					SafeLoadFileCached(entity.Url)  
-				end  
 			end  
 		end  
 
