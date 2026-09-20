@@ -342,6 +342,47 @@ local Desist = {
 	}
 }
 
+local Multimonster = {
+	CardDesc = "It returns every time.",
+	CardTitle = "Thousands Of Frauds",
+
+	TemplateColor = Color3.fromRGB(
+		150,
+		0,
+		0
+	),
+
+	TextColor = Color3.fromRGB(
+		200,
+		0,
+		0
+	),
+
+	CardAvatarVisible = false,
+
+	CardMeta = "Added by Guestly (The Owner)",
+
+	IconImage = "rbxassetid://118380097781687",
+
+	NoBanner = false,
+
+	BannerImg = "rbxassetid://118380097781687",
+
+	EffectRowCount = 2,
+
+	EffectRows = {
+		[1] = {
+			Name = "EffectRow",
+			Text = "New threat"
+		},
+
+		[2] = {
+			Name = "MoreChaoticEffect",
+			Text = "More chaotic"
+		}
+	}
+}
+
 local Configs = {
 	{
 		Name = "PrimeConfig",
@@ -351,6 +392,11 @@ local Configs = {
 	{
 		Name = "Desist",
 		Config = Desist
+	}, 
+	
+	{
+		Name = "MultiMonster",
+		Config = Multimonster
 	}
 }
 
