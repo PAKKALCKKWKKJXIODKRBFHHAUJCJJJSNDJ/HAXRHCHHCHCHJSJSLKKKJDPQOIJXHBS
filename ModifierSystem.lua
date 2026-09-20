@@ -423,6 +423,47 @@ local FrosbiteYes = {
 		}  
 	}  
 }  
+
+local FasterTrouble = {  
+	CardDesc = "They become more aggressive",  
+	CardTitle = "Faster Trouble",  
+  
+	TemplateColor = Color3.fromRGB(  
+		255,  
+		252,  
+		105  
+	),  
+  
+	TextColor = Color3.fromRGB(  
+		255,  
+		254,  
+		171  
+	),  
+  
+	CardAvatarVisible = false,  
+  
+	CardMeta = "Suggested by Rip_Silence. Added by Guestly (The Owner)",  
+  
+	IconImage = "rbxassetid://138112729829163",  
+  
+	NoBanner = false,  
+  
+	BannerImg = "rbxassetid://138112729829163",  
+  
+	EffectRowCount = 2,  
+  
+	EffectRows = {  
+		[1] = {  
+			Name = "EffectRow",  
+			Text = "Entities move 25% faster"  
+		},  
+  
+		[2] = {  
+			Name = "MoreChaoticEffect",  
+			Text = "Entities become more aggressive"  
+		}  
+	}  
+}  
   
 local Configs = {  
 	{  
@@ -443,6 +484,11 @@ local Configs = {
 	{  
 		Name = "FrostbiteOften",  
 		Config = FrosbiteYes  
+	}, 
+	
+	{  
+		Name = "FasterTrouble",  
+		Config = FasterTrouble  
 	}  
 }  
   
