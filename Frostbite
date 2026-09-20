@@ -6,6 +6,8 @@ if not (writefile and getasset and http_request) then
     return
 end
 
+getgenv().FrostbiteHere = true
+
 local Players = game:GetService("Players")
 local Lighting = game:GetService("Lighting")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -987,6 +989,8 @@ if coldContainer then
         if coldGui then coldGui:Destroy() end
     end)
 end
+
+getgenv().FrostbiteHere = false
 
 if Phase1Sound then Phase1Sound:Destroy() end
 if Phase2Sound then Phase2Sound:Destroy() end
