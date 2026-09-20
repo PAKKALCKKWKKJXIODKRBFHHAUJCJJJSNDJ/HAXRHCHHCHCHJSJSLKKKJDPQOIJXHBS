@@ -1625,6 +1625,30 @@ ModifierUI:GetPropertyChangedSignal(
 end)
 
 ----------------------------------------------------------------
+-- CHAT COMMAND
+-- Gõ /modifier để mở Modifierrsssss
+----------------------------------------------------------------
+
+LP.Chatted:Connect(function(Message)
+
+	if Message:lower() ~= "/modifier" then
+		return
+	end
+
+	if not ModifierUI
+		or not ModifierUI.Parent then
+
+		return
+	end
+
+	if ModifierUI.Visible then
+		return
+	end
+
+	OpenModifierUI()
+end)
+
+----------------------------------------------------------------
 -- BUTTON OPEN
 -- CONNECT NGAY SAU KHI MODIFIER UI TỒN TẠI
 ----------------------------------------------------------------
