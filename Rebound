@@ -15,6 +15,14 @@ function light(tim,color0,color1)
 	end
 end
 
+local speed
+
+if getgenv().FasterTrouble then
+speed = 225
+else
+speed = 180
+end
+
 local blueSound 
 
 local Players = game:GetService("Players")
@@ -158,7 +166,7 @@ local entity = Spawner:Create({
 		Values = {7.5, 15, 0.1, 2} -- Magnitude, Roughness, FadeIn, FadeOut
 	},
 	Movement = {
-		Speed = 180,
+		Speed = speed,
 		Delay = 3,
 		Reversed = true
 	},
