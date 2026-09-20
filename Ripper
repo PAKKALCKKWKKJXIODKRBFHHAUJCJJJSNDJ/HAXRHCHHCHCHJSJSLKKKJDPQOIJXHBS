@@ -325,7 +325,7 @@ entity:SetCallback("OnStartMoving", function()
 	
 	task.spawn(function()
 
-		local blueSound = game.Workspace.RipperBla.Ripe.FarStatic
+		local blueSound = entity.Model.Ripe.FarStatic
 
 		local gitSoundTemp = GetGitSound("https://github.com/eoyoustme/Hardcore/blob/main/ripper%20static%20final.mp3?raw=true", "Ripper")
 
@@ -337,9 +337,9 @@ entity:SetCallback("OnStartMoving", function()
 
 		gitSoundTemp:Destroy()
 
-		blaSound.Parent = workspace.RipperBla
+		blaSound.Parent = entity.Model.Ripe
 
-		local ReallyNear = game.Workspace.RipperBla.Ripe.ReallyCloseStatic
+		local ReallyNear = entity.Model.Ripe.ReallyCloseStatic
 
 		local Github = GetGitSound("https://github.com/eoyoustme/Hardcore/blob/main/ripper%20static%20final.mp3?raw=true", "Ripper")
 
@@ -351,7 +351,7 @@ entity:SetCallback("OnStartMoving", function()
 
 		Github:Destroy()
 
-		local Close = game.Workspace.RipperBla.Ripe.CloseStatic
+		local Close = entity.Model.Ripe.CloseStatic
 
 		local cui = GetGitSound("https://github.com/eoyoustme/Hardcore/blob/main/ripper%20sound%20effecrs%20%20new.mp3?raw=true", "lolang")
 
