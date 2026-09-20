@@ -12,9 +12,21 @@ if not getasset then
 	return
 end
 
-local function LoadAsset(Url, FileName)
-	local AssetFile = FileName
+----------------------------------------------------------------
+-- SAFE HELPERS
+----------------------------------------------------------------
 
+local function SafeCall(Func, Default)
+	local Ok, Result = pcall(Func)
+
+	if Ok then
+		return Result
+	end
+
+	return Default
+end
+
+local function LoadAsset(Url, FileName)
 	local function TryLoad(File)
 		if not isfile(File) then
 			return nil
@@ -31,14 +43,14 @@ local function LoadAsset(Url, FileName)
 		return nil
 	end
 
-	local Objects = TryLoad(AssetFile)
+	-- Original cache
+	local Objects = TryLoad(FileName)
 
 	if Objects then
 		return Objects
 	end
 
-	-- Không đè cache cũ.
-	-- Nếu cache lỗi, tạo file dự phòng riêng.
+	-- Backup cache
 	local BackupFile = "__safe_" .. FileName
 
 	if not isfile(BackupFile) then
@@ -53,9 +65,7 @@ local function LoadAsset(Url, FileName)
 		end
 	end
 
-	Objects = TryLoad(BackupFile)
-
-	return Objects
+	return TryLoad(BackupFile)
 end
 
 local function GetGitSound(GithubSnd, SoundName)
@@ -66,7 +76,7 @@ local function GetGitSound(GithubSnd, SoundName)
 			return game:HttpGet(GithubSnd)
 		end)
 
-		if Ok and Data then
+		if Ok and Data and #Data > 0 then
 			pcall(function()
 				writefile(File, Data)
 			end)
@@ -204,6 +214,7 @@ for _, Object in ipairs(ButtonObjects) do
 		ButtonModifiers = Button
 
 		Button.Name = "ButtonModifiers"
+
 		Button.Position = UDim2.new(
 			0.0700000003,
 			0,
@@ -218,7 +229,8 @@ for _, Object in ipairs(ButtonObjects) do
 
 		if Image then
 			Image.Image = "rbxassetid://125464028645163"
-			Image.ImageColor3 = Color3.fromRGB(255, 222, 189)
+			Image.ImageColor3 =
+				Color3.fromRGB(255, 222, 189)
 		end
 	end
 end
@@ -229,6 +241,7 @@ end
 
 ----------------------------------------------------------------
 -- SOUND
+-- Sound FAIL không được làm GUI chết
 ----------------------------------------------------------------
 
 local Themebro = GetGitSound(
@@ -236,13 +249,14 @@ local Themebro = GetGitSound(
 	"jcklppsokjcjjsnbsjfjd"
 )
 
-if not Themebro then
-	return
-end
-
 local breaking3 = Instance.new("Sound")
 
-breaking3.SoundId = Themebro.SoundId
+if Themebro then
+	pcall(function()
+		breaking3.SoundId = Themebro.SoundId
+	end)
+end
+
 breaking3.PlaybackSpeed = 1
 breaking3.Parent = workspace
 breaking3.Looped = true
@@ -264,17 +278,8 @@ local PrimeConfig = {
 	CardDesc = "Still Ripper but drank 100 cans of Blue Monster",
 	CardTitle = "Prime Ripper",
 
-	TemplateColor = Color3.fromRGB(
-		100,
-		100,
-		255
-	),
-
-	TextColor = Color3.fromRGB(
-		77,
-		154,
-		255
-	),
+	TemplateColor = Color3.fromRGB(100, 100, 255),
+	TextColor = Color3.fromRGB(77, 154, 255),
 
 	CardAvatarVisible = false,
 
@@ -305,17 +310,8 @@ local Desist = {
 	CardDesc = "Cease's Brother fr",
 	CardTitle = "Desist",
 
-	TemplateColor = Color3.fromRGB(
-		255,
-		115,
-		0
-	),
-
-	TextColor = Color3.fromRGB(
-		255,
-		196,
-		120
-	),
+	TemplateColor = Color3.fromRGB(255, 115, 0),
+	TextColor = Color3.fromRGB(255, 196, 120),
 
 	CardAvatarVisible = false,
 
@@ -346,17 +342,8 @@ local Multimonster = {
 	CardDesc = "It returns every time.",
 	CardTitle = "Thousands Of Frauds",
 
-	TemplateColor = Color3.fromRGB(
-		150,
-		0,
-		0
-	),
-
-	TextColor = Color3.fromRGB(
-		200,
-		0,
-		0
-	),
+	TemplateColor = Color3.fromRGB(150, 0, 0),
+	TextColor = Color3.fromRGB(200, 0, 0),
 
 	CardAvatarVisible = false,
 
@@ -387,17 +374,8 @@ local FrosbiteYes = {
 	CardDesc = "Frostbite has some decisions. ",
 	CardTitle = "It's so cold",
 
-	TemplateColor = Color3.fromRGB(
-		74,
-		198,
-		255
-	),
-
-	TextColor = Color3.fromRGB(
-		166,
-		227,
-		255
-	),
+	TemplateColor = Color3.fromRGB(74, 198, 255),
+	TextColor = Color3.fromRGB(166, 227, 255),
 
 	CardAvatarVisible = false,
 
@@ -433,13 +411,13 @@ local Configs = {
 	{
 		Name = "Desist",
 		Config = Desist
-	}, 
-	
+	},
+
 	{
 		Name = "MultiMonster",
 		Config = Multimonster
-	}, 
-	
+	},
+
 	{
 		Name = "FrostbiteOften",
 		Config = FrosbiteYes
@@ -466,7 +444,6 @@ local Objects = LoadAsset(
 )
 
 if not Objects then
-	breaking3:Destroy()
 	return
 end
 
@@ -483,7 +460,6 @@ for _, Object in ipairs(Objects) do
 end
 
 if not ModifierUI then
-	breaking3:Destroy()
 	return
 end
 
@@ -491,22 +467,38 @@ ModifierUI.Name = "Modifierrsssss"
 ModifierUI.Visible = false
 
 ----------------------------------------------------------------
--- MODIFIERS KS
+-- STATES
 ----------------------------------------------------------------
 
-local ModifierFile =
-	"Place_6839171747_Frame_ModifiersKs_1788583482.txt"
+local AddedModifiers = {}
+local ModifierTemplates = {}
 
-local ModifierUrl =
-	"https://github.com/PAKKALCKKWKKJXIODKRBFHHAUJCJJJSNDJ/HAXRHCHHCHCHJSJSLKKKJDPQOIJXHBS/raw/refs/heads/main/Place_6839171747_Frame_ModifiersKs_1788583482.txt"
+local OriginalTemplateUsed = false
 
-local ModifierObjects = LoadAsset(
-	ModifierUrl,
-	ModifierFile
-)
+local DetailOpened = false
+local DetailTweening = false
+
+local CurrentConfigData
+local CurrentState
+
+----------------------------------------------------------------
+-- MODIFIERS KS
+-- Hoàn toàn OPTIONAL
+----------------------------------------------------------------
 
 local ModifiersKs
 local ModifierTemplate
+
+local ModifiersKsFile =
+	"Place_6839171747_Frame_ModifiersKs_1788583482.txt"
+
+local ModifiersKsUrl =
+	"https://github.com/PAKKALCKKWKKJXIODKRBFHHAUJCJJJSNDJ/HAXRHCHHCHCHJSJSLKKKJDPQOIJXHBS/raw/refs/heads/main/Place_6839171747_Frame_ModifiersKs_1788583482.txt"
+
+local ModifierObjects = LoadAsset(
+	ModifiersKsUrl,
+	ModifiersKsFile
+)
 
 if ModifierObjects then
 	for _, Object in ipairs(ModifierObjects) do
@@ -545,26 +537,13 @@ if ModifiersKs then
 end
 
 ----------------------------------------------------------------
--- STATES
-----------------------------------------------------------------
-
-local AddedModifiers = {}
-local ModifierTemplates = {}
-
-local OriginalTemplateUsed = false
-
-local DetailOpened = false
-local DetailTweening = false
-
-local CurrentConfigData
-local CurrentState
-
-----------------------------------------------------------------
 -- MODIFIERS KS UPDATE
 ----------------------------------------------------------------
 
 local function UpdateModifiersKs()
-	if not ModifiersKs then
+	if not ModifiersKs
+		or not ModifiersKs.Parent then
+
 		return
 	end
 
@@ -576,7 +555,9 @@ local function UpdateModifiersKs()
 		end
 	end
 
-	ModifiersKs.Visible = Count > 0
+	pcall(function()
+		ModifiersKs.Visible = Count > 0
+	end)
 
 	local Desc = ModifiersKs:FindFirstChild(
 		"Desc",
@@ -584,9 +565,11 @@ local function UpdateModifiersKs()
 	)
 
 	if Desc and Desc:IsA("TextLabel") then
-		Desc.Text =
-			tostring(Count)
-			.. " MODIFIERS ACTIVATED"
+		pcall(function()
+			Desc.Text =
+				tostring(Count)
+				.. " MODIFIERS ACTIVATED"
+		end)
 	end
 end
 
@@ -599,6 +582,13 @@ local function SetupEntry(
 	Entry,
 	ConfigData
 )
+
+	if not Entry
+		or not ConfigData
+		or not ConfigData.Config then
+
+		return
+	end
 
 	local Config = ConfigData.Config
 
@@ -723,6 +713,10 @@ local function SetupEntry(
 			Fill.Visible = false
 		end
 	end
+
+	------------------------------------------------------------
+	-- ENTRY CLICK
+	------------------------------------------------------------
 
 	Entry.MouseButton1Click:Connect(function()
 
@@ -858,7 +852,6 @@ local function SetupEntry(
 						EffectRow.Visible = true
 
 						if RowConfig then
-
 							EffectRow.Name =
 								RowConfig.Name
 								or "EffectRow"
@@ -1062,15 +1055,16 @@ local function SetupEntry(
 
 							if CurrentState2.Added then
 
-								CurrentState2.Added =
-									false
+								CurrentState2.Added = false
 
 								AddToAccount.Text =
 									"ADD TO GAMEPLAY"
 
-								getgenv()[
-									CurrentConfigData.Name
-								] = nil
+								pcall(function()
+									getgenv()[
+										CurrentConfigData.Name
+									] = nil
+								end)
 
 								local OldTemplate =
 									CurrentState2.Template
@@ -1083,11 +1077,9 @@ local function SetupEntry(
 										OldTemplate.Visible =
 											false
 
-									else
+									elseif OldTemplate.Parent then
 
-										if OldTemplate.Parent then
-											OldTemplate:Destroy()
-										end
+										OldTemplate:Destroy()
 									end
 								end
 
@@ -1100,17 +1092,19 @@ local function SetupEntry(
 
 							else
 
-								CurrentState2.Added =
-									true
+								CurrentState2.Added = true
 
-								getgenv()[
-									CurrentConfigData.Name
-								] = true
+								pcall(function()
+									getgenv()[
+										CurrentConfigData.Name
+									] = true
+								end)
 
 								AddToAccount.Text =
 									"UNADD"
 
-								if ModifierTemplate then
+								if ModifierTemplate
+									and ModifierTemplate.Parent then
 
 									local NewTemplate
 
@@ -1131,8 +1125,7 @@ local function SetupEntry(
 											ModifierTemplate.Parent
 									end
 
-									NewTemplate.Visible =
-										true
+									NewTemplate.Visible = true
 
 									if NewTemplate:IsA(
 										"TextButton"
@@ -1169,6 +1162,10 @@ local function SetupEntry(
 				end
 			end
 
+			----------------------------------------------------
+			-- CLOSE DETAIL
+			----------------------------------------------------
+
 			local CloseDetail =
 				DActions:FindFirstChild(
 					"CloseDetail",
@@ -1192,14 +1189,9 @@ local function SetupEntry(
 				CloseDetail.MouseButton1Click:Connect(
 					function()
 
-						Detail.Visible =
-							false
-
-						DetailOpened =
-							false
-
-						DetailTweening =
-							false
+						Detail.Visible = false
+						DetailOpened = false
+						DetailTweening = false
 					end
 				)
 			end
@@ -1313,11 +1305,8 @@ for _, RootObject in ipairs(Objects) do
 			local Entry
 
 			if i == 1 then
-
 				Entry = Template
-
 			else
-
 				Entry = Template:Clone()
 				Entry.Parent = Parent
 			end
@@ -1394,76 +1383,136 @@ if SearchBox then
 end
 
 ----------------------------------------------------------------
--- CLOSE + BUTTON OPEN
+-- CLOSE + OPEN
 ----------------------------------------------------------------
 
-local OldMouseBehavior = UserInputService.MouseBehavior
+local OldMouseBehavior =
+	UserInputService.MouseBehavior
 
 local function CloseModifierUI()
-	if not ModifierUI or not ModifierUI.Parent then
+
+	if not ModifierUI
+		or not ModifierUI.Parent then
+
 		return
 	end
 
 	ModifierUI.Visible = false
 
-	if ButtonModifiers and ButtonModifiers.Parent then
+	if ButtonModifiers
+		and ButtonModifiers.Parent then
+
 		ButtonModifiers.Interactable = true
 	end
 
 	if BreakingStarted then
-		breaking3.Volume = 0
 
-		if RoomSound and RoomSound.Parent then
-			RoomSound.Volume = RoomSoundOriginalVolume or 0
+		if breaking3
+			and breaking3.Parent then
+
+			breaking3.Volume = 0
+		end
+
+		if RoomSound
+			and RoomSound.Parent then
+
+			RoomSound.Volume =
+				RoomSoundOriginalVolume or 0
 		end
 	end
 end
 
 local function OpenModifierUI()
-	if not ModifierUI or not ModifierUI.Parent then
+
+	if not ModifierUI
+		or not ModifierUI.Parent then
+
 		return
 	end
 
+	------------------------------------------------------------
+	-- SOUND IS OPTIONAL
+	------------------------------------------------------------
+
 	if BreakingStarted then
-		if breaking3 and breaking3.Parent then
-			breaking3.Volume = BreakingOriginalVolume
-			if not breaking3.IsPlaying then
-				breaking3:Play()
-			end
+
+		if Themebro
+			and breaking3
+			and breaking3.Parent then
+
+			pcall(function()
+
+				breaking3.Volume =
+					BreakingOriginalVolume
+
+				if not breaking3.IsPlaying then
+					breaking3:Play()
+				end
+
+			end)
 		end
 
-		if RoomSound and RoomSound.Parent then
+		if RoomSound
+			and RoomSound.Parent then
+
 			RoomSound.Volume = 0
 		end
+
 	else
+
 		BreakingStarted = true
 
-		if breaking3 and breaking3.Parent then
-			breaking3.Volume = BreakingOriginalVolume
-			breaking3:Play()
+		if Themebro
+			and breaking3
+			and breaking3.Parent then
+
+			pcall(function()
+
+				breaking3.Volume =
+					BreakingOriginalVolume
+
+				breaking3:Play()
+
+			end)
 		end
 
 		local RoomBoundingCenter =
-			workspace:FindFirstChild("RoomBoundingCenter")
+			workspace:FindFirstChild(
+				"RoomBoundingCenter"
+			)
 
 		if RoomBoundingCenter then
+
 			RoomSound =
-				RoomBoundingCenter:FindFirstChildWhichIsA("Sound")
+				RoomBoundingCenter:FindFirstChildWhichIsA(
+					"Sound"
+				)
 
 			if RoomSound then
-				RoomSoundOriginalVolume = RoomSound.Volume
+
+				RoomSoundOriginalVolume =
+					RoomSound.Volume
+
 				RoomSound.Volume = 0
 			end
 		end
 	end
 
-	OldMouseBehavior = UserInputService.MouseBehavior
+	------------------------------------------------------------
+	-- OPEN GUI ALWAYS
+	------------------------------------------------------------
+
+	OldMouseBehavior =
+		UserInputService.MouseBehavior
+
 	UserInputService.MouseBehavior =
 		Enum.MouseBehavior.Default
 
 	ModifierUI.Visible = true
 
-	if ButtonModifiers and ButtonModifiers.Parent then
+	if ButtonModifiers
+		and ButtonModifiers.Parent then
+
 		ButtonModifiers.Interactable = false
 	end
 end
@@ -1473,19 +1522,30 @@ end
 ----------------------------------------------------------------
 
 for _, RootObject in ipairs(Objects) do
-	for _, Descendant in ipairs(RootObject:GetDescendants()) do
+
+	for _, Descendant in ipairs(
+		RootObject:GetDescendants()
+	) do
+
 		if Descendant.Name == "CloseButton"
 			and (
 				Descendant:IsA("TextButton")
 				or Descendant:IsA("ImageButton")
 			)
-			and not Descendant:GetAttribute("Connected") then
+			and not Descendant:GetAttribute(
+				"Connected"
+			) then
 
-			Descendant:SetAttribute("Connected", true)
+			Descendant:SetAttribute(
+				"Connected",
+				true
+			)
 
-			Descendant.MouseButton1Click:Connect(function()
-				CloseModifierUI()
-			end)
+			Descendant.MouseButton1Click:Connect(
+				function()
+					CloseModifierUI()
+				end
+			)
 		end
 	end
 end
@@ -1494,40 +1554,71 @@ end
 -- VISIBLE STATE
 ----------------------------------------------------------------
 
-ModifierUI:GetPropertyChangedSignal("Visible"):Connect(function()
-	if not ModifierUI or not ModifierUI.Parent then
+ModifierUI:GetPropertyChangedSignal(
+	"Visible"
+):Connect(function()
+
+	if not ModifierUI
+		or not ModifierUI.Parent then
+
 		return
 	end
 
 	if ModifierUI.Visible then
-		OldMouseBehavior = UserInputService.MouseBehavior
+
+		OldMouseBehavior =
+			UserInputService.MouseBehavior
+
 		UserInputService.MouseBehavior =
 			Enum.MouseBehavior.Default
 
 		if BreakingStarted then
-			breaking3.Volume = BreakingOriginalVolume
 
-			if RoomSound and RoomSound.Parent then
+			if Themebro
+				and breaking3
+				and breaking3.Parent then
+
+				breaking3.Volume =
+					BreakingOriginalVolume
+			end
+
+			if RoomSound
+				and RoomSound.Parent then
+
 				RoomSound.Volume = 0
 			end
 		end
 
-		if ButtonModifiers and ButtonModifiers.Parent then
+		if ButtonModifiers
+			and ButtonModifiers.Parent then
+
 			ButtonModifiers.Interactable = false
 		end
+
 	else
-		UserInputService.MouseBehavior = OldMouseBehavior
+
+		UserInputService.MouseBehavior =
+			OldMouseBehavior
 
 		if BreakingStarted then
-			breaking3.Volume = 0
 
-			if RoomSound and RoomSound.Parent then
+			if breaking3
+				and breaking3.Parent then
+
+				breaking3.Volume = 0
+			end
+
+			if RoomSound
+				and RoomSound.Parent then
+
 				RoomSound.Volume =
 					RoomSoundOriginalVolume or 0
 			end
 		end
 
-		if ButtonModifiers and ButtonModifiers.Parent then
+		if ButtonModifiers
+			and ButtonModifiers.Parent then
+
 			ButtonModifiers.Interactable = true
 		end
 	end
@@ -1535,22 +1626,27 @@ end)
 
 ----------------------------------------------------------------
 -- BUTTON OPEN
+-- CONNECT NGAY SAU KHI MODIFIER UI TỒN TẠI
 ----------------------------------------------------------------
 
 ButtonModifiers.Interactable = true
 
-ButtonModifiers.MouseButton1Click:Connect(function()
-	if not ModifierUI
-		or not ModifierUI.Parent then
-		return
-	end
+ButtonModifiers.MouseButton1Click:Connect(
+	function()
 
-	if ModifierUI.Visible then
-		return
-	end
+		if not ModifierUI
+			or not ModifierUI.Parent then
 
-	OpenModifierUI()
-end)
+			return
+		end
+
+		if ModifierUI.Visible then
+			return
+		end
+
+		OpenModifierUI()
+	end
+)
 
 ----------------------------------------------------------------
 -- FADE
@@ -1735,22 +1831,10 @@ local function FadeAndDestroy(Object)
 		return
 	end
 
-	if Object.Name == "Modifierrsssss"
-		and ModifiersKs
-		and ModifiersKs:IsDescendantOf(Object) then
-
-		FadeGui(
-			ModifiersKs,
-			3
-		)
-
-	else
-
-		FadeGui(
-			Object,
-			3
-		)
-	end
+	FadeGui(
+		Object,
+		3
+	)
 
 	if Object.Parent then
 		Object:Destroy()
@@ -1773,35 +1857,56 @@ pcall(function()
 end)
 
 if LatestRoom then
+
 	LatestRoom.Changed:Wait()
 
 	task.wait(0.1)
-
-	-- Chờ trước khi bắt đầu hiệu ứng kết thúc
 	task.wait(1.5)
 
-	-- Destroy ModifierUI + ButtonCharms NGAY khi ModifiersKs chuẩn bị fade
-	if ModifierUI and ModifierUI.Parent then
+	------------------------------------------------------------
+	-- DESTROY MODIFIER UI
+	------------------------------------------------------------
+
+	if ModifierUI
+		and ModifierUI.Parent then
+
 		pcall(function()
 			ModifierUI:Destroy()
 		end)
 	end
+
 	ModifierUI = nil
 
-	if ButtonModifiers and ButtonModifiers.Parent then
+	------------------------------------------------------------
+	-- DESTROY BUTTON
+	------------------------------------------------------------
+
+	if ButtonModifiers
+		and ButtonModifiers.Parent then
+
 		pcall(function()
 			ButtonModifiers:Destroy()
 		end)
 	end
+
 	ButtonModifiers = nil
 
-	-- Chỉ ModifiersKs được fade
-	if ModifiersKs and ModifiersKs.Parent then
+	------------------------------------------------------------
+	-- FADE MODIFIERS KS
+	------------------------------------------------------------
+
+	if ModifiersKs
+		and ModifiersKs.Parent then
+
 		FadeAndDestroy(ModifiersKs)
 	end
 
 	ModifiersKs = nil
 end
+
+----------------------------------------------------------------
+-- FINAL CLEANUP
+----------------------------------------------------------------
 
 pcall(function()
 	UserInputService.MouseBehavior =
@@ -1809,9 +1914,13 @@ pcall(function()
 end)
 
 pcall(function()
-	breaking3:Destroy()
+	if breaking3 then
+		breaking3:Destroy()
+	end
 end)
 
 pcall(function()
-	Themebro:Destroy()
+	if Themebro then
+		Themebro:Destroy()
+	end
 end)
