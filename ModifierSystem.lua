@@ -383,6 +383,47 @@ local Multimonster = {
 	}
 }
 
+local FrosbiteYes = {
+	CardDesc = "Frostbite has some decisions. ",
+	CardTitle = "It's so cold",
+
+	TemplateColor = Color3.fromRGB(
+		74,
+		198,
+		255
+	),
+
+	TextColor = Color3.fromRGB(
+		166,
+		227,
+		255
+	),
+
+	CardAvatarVisible = false,
+
+	CardMeta = "Added by Guestly (The Owner)",
+
+	IconImage = "rbxassetid://79836848051564",
+
+	NoBanner = false,
+
+	BannerImg = "rbxassetid://79836848051564",
+
+	EffectRowCount = 2,
+
+	EffectRows = {
+		[1] = {
+			Name = "EffectRow",
+			Text = "Frostbite appears oftenly"
+		},
+
+		[2] = {
+			Name = "MoreChaoticEffect",
+			Text = "More chaotic"
+		}
+	}
+}
+
 local Configs = {
 	{
 		Name = "PrimeConfig",
@@ -397,6 +438,11 @@ local Configs = {
 	{
 		Name = "MultiMonster",
 		Config = Multimonster
+	}, 
+	
+	{
+		Name = "FrostbiteOften",
+		Config = FrosbiteYes
 	}
 }
 
