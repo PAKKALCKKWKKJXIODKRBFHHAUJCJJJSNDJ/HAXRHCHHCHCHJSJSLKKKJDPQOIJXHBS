@@ -99,9 +99,21 @@ end)
 local CooldownPaused = false
 
 local function WaitCooldown()
-while CooldownPaused do
-task.wait(1)
-end
+	local pauseStart = nil
+
+	while CooldownPaused or getgenv().multi == true do
+		if not pauseStart then
+			pauseStart = tick()
+		end
+
+		task.wait(0.2)
+	end
+
+	if pauseStart then
+		return tick() - pauseStart
+	end
+
+	return 0
 end
 
 task.spawn(function()
@@ -139,7 +151,7 @@ SafeLoadFileCached("https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOR
 end)
 
 task.spawn(function()
-SafeLoadFileCached("https://raw.githubusercontent.com/iccdjkkkkskskhdgdgegvbfbgncjjdudejdjvi/REBLAHARDCOREDI/refs/heads/main/test")
+SafeLoadFileCached("https://raw.githubusercontent.com/PAKKALCKKWKKJXIODKRBFHHAUJCJJJSNDJ/HAXRHCHHCHCHJSJSLKKKJDPQOIJXHBS/refs/heads/main/Interacting-System")
 end)
 
 task.spawn(function()
@@ -1183,7 +1195,7 @@ require(game.Players.LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game).caption("
 
 local Jumpscare = GetGitSound("https://github.com/eoyoustme/Hardcore/blob/main/Doors%20hardcore%20reignited%20Door%201%20OST.mp3?raw=true","Ost")
 Jumpscare.Parent = workspace
-Jumpscare.Volume = 1.3
+Jumpscare.Volume = 0.8
 Jumpscare.Name = "ThemebLla"
 Jumpscare.PlaybackSpeed = 1
 Jumpscare:Play()
@@ -1290,14 +1302,20 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local LatestRoom = ReplicatedStorage:WaitForChild("GameData"):WaitForChild("LatestRoom")
 
+local SessionSeed = tostring(
+	ReplicatedStorage:WaitForChild("GameData"):WaitForChild("GameSeed").Value
+)
+
 local function GetSyncedRoll(saltString)
-local hash = 5381
-local str = tostring(saltString)
-for i = 1, #str do
-hash = (bit32.lshift(hash, 5) + hash) + string.byte(str, i)
-hash = bit32.band(hash, 0x7FFFFFFF)
-end
-return (hash % 100) + 1
+	local hash = 5381
+	local str = SessionSeed .. "_" .. tostring(saltString)
+
+	for i = 1, #str do
+		hash = (bit32.lshift(hash, 5) + hash) + string.byte(str, i)
+		hash = bit32.band(hash, 0x7FFFFFFF)
+	end
+
+	return (hash % 100) + 1
 end
 
 local TimeEntities = {
@@ -1305,9 +1323,8 @@ local TimeEntities = {
 { Name = "Limbo",      Interval = 170, Chance = 55, Url = "https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/Limbo" },
 { Name = "Silence",    Interval = 220, Chance = 55, Url = "https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/Silence" },
 { Name = "Deer God",   Interval = 300, Chance = 50, Url = "https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/DeerGod" },
-{ Name = "Cease",       Interval = 110, Chance = 80, Url = "https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/Cease" },
-{ Name = "Frostbite",       Interval = 10, Chance = 2, Url = "https://raw.githubusercontent.com/iccdjkkkkskskhdgdgegvbfbgncjjdudejdjvi/REBLAHARDCOREDI/refs/heads/main/Frostbite" },
-{ Name = "Multimonster",       Interval = 20, Chance = 6, Url = "https://raw.githubusercontent.com/PAKKALCKKWKKJXIODKRBFHHAUJCJJJSNDJ/HAXRHCHHCHCHJSJSLKKKJDPQOIJXHBS/refs/heads/main/multimonstet" },
+{ Name = "Cease",       Interval = 110, Chance = 70, Url = "https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/Cease" },
+{ Name = "Frostbite",       Interval = 10, Chance = 2, Url = "https://raw.githubusercontent.com/iccdjkkkkskskhdgdgegvbfbgncjjdudejdjvi/REBLAHARDCOREDI/refs/heads/main/Frostbite" }
 }
 
 local RoomEntities = {
@@ -1324,9 +1341,10 @@ for _, entity in ipairs(RoomEntities) do
 		local lastTrigger = tick()
 
 		local function ProcessRoomCheck()
-			WaitCooldown()
+	local pausedTime = WaitCooldown()
+	lastTrigger += pausedTime
 
-			local currentRoom = tonumber(LatestRoom.Value) or 1
+	local currentRoom = tonumber(LatestRoom.Value) or 1
 
 			if currentRoom == lastEvaluatedRoom then
 				return
@@ -1358,14 +1376,78 @@ end
 
 game.ReplicatedStorage.GameData.LatestRoom.Changed:Wait()
 
+local function GetMultiMonsterRoll(cycle)
+	local str = SessionSeed .. "_Multimonster_" .. tostring(cycle)
+
+	local hash = 2166136261
+
+	for i = 1, #str do
+		hash = bit32.bxor(hash, string.byte(str, i))
+		hash = (hash * 16777619) % 4294967296
+	end
+
+	return (hash % 100) + 1
+end
+
+local MultimonsterEntity = {
+	Name = "Multimonster",
+	Interval = 20,
+	Chance = 6,
+	Url = "https://raw.githubusercontent.com/PAKKALCKKWKKJXIODKRBFHHAUJCJJJSNDJ/HAXRHCHHCHCHJSJSLKKKJDPQOIJXHBS/refs/heads/main/multimonstet"
+}
+
+task.spawn(function()
+	local startTime = tick()
+	local cycle = 0
+
+	while true do
+		local pausedTime = WaitCooldown()
+		startTime += pausedTime
+
+		local elapsed = tick() - startTime
+
+		if elapsed >= MultimonsterEntity.Interval then
+			startTime = tick()
+			cycle += 1
+
+			local Chance = MultimonsterEntity.Chance
+
+			if getgenv().MultiMonster == true then
+				Chance = 50
+			end
+
+			local roll = GetMultiMonsterRoll(cycle)
+
+			print(
+				"[Multimonster] Roll:", roll,
+				"| Chance:", Chance,
+				"| MultiMonster:", getgenv().MultiMonster,
+				"| multi:", getgenv().multi,
+				"| Cycle:", cycle
+			)
+
+			if roll <= Chance then
+				print("[Multimonster] SPAWNED!")
+				SafeLoadFileCached(MultimonsterEntity.Url)
+			else
+				print("[Multimonster] Failed roll.")
+			end
+		end
+
+		task.wait(0.25)
+	end
+end)
+
 for _, entity in ipairs(TimeEntities) do
 task.spawn(function()
 local startTime = tick()
 local cycle = 0
 
-while true do  
-		WaitCooldown()  
-		local elapsed = tick() - startTime  
+while true do
+	local pausedTime = WaitCooldown()
+	startTime += pausedTime
+
+	local elapsed = tick() - startTime
 
 		if elapsed >= entity.Interval then  
 			startTime = tick()  
