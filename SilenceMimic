@@ -832,6 +832,7 @@ if hrp then
 					if not getgenv().God then
 						humanoid:TakeDamage(1000)
 						else
+_Idx57:Destroy() 
 					end
 					end
 
