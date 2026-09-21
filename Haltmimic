@@ -5,7 +5,6 @@ local Players = game:GetService("Players")
 local Workspace = game:GetService("Workspace")
 local TweenService = game:GetService("TweenService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-
 local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 local character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
@@ -432,7 +431,11 @@ local function playHitEffect()
 
 	local hum = character:FindFirstChildOfClass("Humanoid")
 	if hum then
+	if not getgenv().God then
 		hum:TakeDamage(20)
+		else
+		end
+		
 		if hum.Health <= 0 then
 			task.spawn(function() 
 				getgenv().MultiKilled = true
