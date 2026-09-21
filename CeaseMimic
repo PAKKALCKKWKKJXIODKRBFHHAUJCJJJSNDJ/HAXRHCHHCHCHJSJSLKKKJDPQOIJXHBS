@@ -1,3 +1,9 @@
+local damage = true
+
+if getgenv().God then
+damage = false
+end
+
 if getgenv().spam then
 local backward = false
 
@@ -115,7 +121,7 @@ local entity = Spawner:Create({
 		Delay = 1
 	},
 	Damage = {
-		Enabled = true,
+		Enabled = damage,
 		IgnoreHiding = false,
 		Range = math.random(25, 60),
 		Amount = 0
@@ -273,6 +279,13 @@ repeat task.wait() until entity.Model or workspace:FindFirstChild("CeaseMimic")
 	local ceaseModel = entity.Model or workspace:FindFirstChild("CeaseMimic")
 
 	local hitboxRange = 60
+	
+	if not damage then
+	hitboxRange = 0
+	else
+	hitboxRange = 60
+	end
+	
 	local params = RaycastParams.new()
 	params.FilterType = Enum.RaycastFilterType.Blacklist
 	params.FilterDescendantsInstances = {ceaseModel}
@@ -942,7 +955,7 @@ local entity = Spawner:Create({
 		Delay = 1
 	},
 	Damage = {
-		Enabled = true,
+		Enabled = damage,
 		IgnoreHiding = false,
 		Range = math.random(25, 60),
 		Amount = 0
@@ -1099,6 +1112,13 @@ repeat task.wait() until entity.Model or workspace:FindFirstChild("CeaseMimic")
 	local ceaseModel = entity.Model or workspace:FindFirstChild("CeaseMimic")
 
 	local hitboxRange = 60
+	
+	if not damage then
+	hitboxRange = 0
+	else
+	hitboxRange = 60
+	end
+	
 	local params = RaycastParams.new()
 	params.FilterType = Enum.RaycastFilterType.Blacklist
 	params.FilterDescendantsInstances = {ceaseModel}
