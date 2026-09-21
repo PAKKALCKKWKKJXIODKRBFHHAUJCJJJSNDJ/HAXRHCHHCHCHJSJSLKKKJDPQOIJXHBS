@@ -123,7 +123,7 @@ local Spawner = loadstring(game:HttpGet("https://raw.githubusercontent.com/iccdj
 local entity = Spawner:Create({
 	Entity = {
 		Name = "A60ButRipper",
-		Asset = "https://github.com/lynguyen26031993-design/-u/raw/refs/heads/main/MultimonsterFace%20(1).rbxm?raw=true",
+		Asset = "https://github.com/lynguyen26031993-design/-u/raw/refs/heads/main/Place_131351567799504_Model_A60Real_1789050841.txt",
 		HeightOffset = 4
 	},
 	Lights = {
@@ -352,115 +352,10 @@ entity:SetCallback("OnEnterRoom", function(room: Model, firstTime: boolean)
 
 				if chance == 1 then
 				else
-				if not backward then
-				blaSound:Play() 
 				
-					task.wait(2)
+
 					
-					local originalCFrame = entityRoot.CFrame				
-					local backCFrame = originalCFrame * CFrame.new(0, 0, 25) 
-					local tweenBackInfo = TweenInfo.new(2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-					local tweenBack = TweenService:Create(entityRoot, tweenBackInfo, {CFrame = backCFrame})
 
-					tweenBack:Play()
-					tweenBack.Completed:Wait()
-
-					local tweenForwardInfo = TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
-					local tweenForward = TweenService:Create(entityRoot, tweenForwardInfo, {CFrame = originalCFrame})
-					tweenForward:Play()
-					wait(0.45)
-
-					local camShake2 = CameraShaker.new(Enum.RenderPriority.Camera.Value, function(shakeCf)
-						camera.CFrame = camera.CFrame * shakeCf
-					end)
-					camShake2:Start()
-					camShake2:ShakeOnce(30, 11.5, 0.1, 2, 15, 0.5) 
-					
-					local CurrentRooms = workspace:WaitForChild("CurrentRooms")
-					local LatestRoom = game:GetService("ReplicatedStorage"):WaitForChild("GameData"):WaitForChild("LatestRoom")
-
-					local room = CurrentRooms:FindFirstChild(tostring(LatestRoom.Value))
-					if not room then
-						return
-					end
-
-					for _, v in ipairs(room:GetDescendants()) do
-						if v:IsA("BasePart") and v.Name == "KeyHitbox" then
-							return
-						end
-					end
-
-					local doorModel
-
-					local function HandleHidden(model)
-						local found = false
-
-						for _, v in ipairs(model:GetDescendants()) do
-							if v:IsA("BasePart") and v.Name == "Hidden" then
-								v.Transparency = 1
-								found = true
-							end
-						end
-
-						if not found then
-							model.DescendantAdded:Connect(function(v)
-								if v:IsA("BasePart") and v.Name == "Hidden" then
-									v.Transparency = 1
-								end
-							end)
-						end
-					end
-
-					for _, v in ipairs(room:GetDescendants()) do
-						if v:IsA("Model") and v.Name == "Door" then
-							doorModel = v
-							break
-						end
-					end
-					
-					doorModel:SetAttribute("Broken", true) 
-
-					if not doorModel then
-						return
-					end
-
-					HandleHidden(doorModel)
-
-					local cloneModel = doorModel:Clone()
-					cloneModel.Name = "DoorClone"
-					cloneModel.Parent = doorModel.Parent
-
-					local cloneDoor
-
-					for _, v in ipairs(cloneModel:GetDescendants()) do
-						if v:IsA("MeshPart") and v.Name == "Door" then
-							cloneDoor = v
-							break
-						end
-					end
-
-					if not cloneDoor then
-						cloneModel:Destroy()
-						return
-					end
-
-					cloneDoor.CFrame = cloneDoor.CFrame
-						* CFrame.Angles(math.rad(-90), 0, 0)
-						* CFrame.new(0, 7, -3.7)
-
-					for _, v in ipairs(doorModel:GetDescendants()) do
-						if v:IsA("BasePart") then
-							v.Transparency = 1
-						elseif v:IsA("SurfaceGui") and v.Name == "Sign" then
-							v:Destroy()
-						elseif v:IsA("Sound") then
-							v.Volume = 0
-						end
-					end
-
-					HandleHidden(cloneModel)
-				end
-				end
 
 				if entityModel and entityModel.Parent then
 					FadeDestroy(entityModel)
@@ -872,7 +767,7 @@ local Spawner = loadstring(game:HttpGet("https://raw.githubusercontent.com/iccdj
 local entity = Spawner:Create({
 	Entity = {
 		Name = "A60ButRipper",
-		Asset = "https://github.com/lynguyen26031993-design/-u/raw/refs/heads/main/MultimonsterFace%20(1).rbxm?raw=true",
+		Asset = "https://github.com/lynguyen26031993-design/-u/raw/refs/heads/main/Place_131351567799504_Model_A60Real_1789050841.txt",
 		HeightOffset = 4
 	},
 	Lights = {
