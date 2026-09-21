@@ -828,7 +828,11 @@ if hrp then
 					local humanoid = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
 
 					if humanoid then
+					
+					if not getgenv().God then
 						humanoid:TakeDamage(1000)
+						else
+					end
 					end
 
 					local Players = game:GetService("Players")
