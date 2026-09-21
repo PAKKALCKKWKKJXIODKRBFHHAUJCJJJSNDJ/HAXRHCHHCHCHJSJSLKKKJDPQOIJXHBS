@@ -840,8 +840,8 @@ Module.Run = function(self, entity: any, copyEntity: boolean)
     model:SetAttribute("Running", true)
     self.ActiveEntities[#self.ActiveEntities + 1] = entity
 
-        -- Spawning
-    local spawnPoint: BasePart? = nil
+-- Spawning
+local spawnPoint: BasePart? = nil
 local spawnRoomIndex: number? = nil
 
 do
@@ -861,7 +861,11 @@ do
 		end
 
 		if lowestRoomIndex ~= math.huge then
-			spawnRoomIndex = lowestRoomIndex + 3
+			if #rooms <= 4 then
+				spawnRoomIndex = lowestRoomIndex
+			else
+				spawnRoomIndex = lowestRoomIndex + 2
+			end
 
 			local spawnRoom = CurrentRooms:FindFirstChild(tostring(spawnRoomIndex))
 
@@ -872,12 +876,12 @@ do
 	end
 end
 
-    if not spawnPoint then
-        error(string.format(
-            debug.traceback("Failed to find spawn point for entity: '%s'"),
-            config.Entity.Name
-        ))
-    end
+if not spawnPoint then
+	error(string.format(
+		debug.traceback("Failed to find spawn point for entity: '%s'"),
+		config.Entity.Name
+	))
+end
 
     local originalSpawnCFrame = spawnPoint.CFrame + Vector3.new(
         0,
