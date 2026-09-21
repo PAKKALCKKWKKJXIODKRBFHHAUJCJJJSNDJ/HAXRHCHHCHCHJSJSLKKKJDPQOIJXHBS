@@ -1,6 +1,11 @@
 if getgenv().spam then
+
 local backward = false
 local count = 3
+
+if getgenv().CeaseToRipper then
+backward = true
+end
 
 local function Ripper() 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
