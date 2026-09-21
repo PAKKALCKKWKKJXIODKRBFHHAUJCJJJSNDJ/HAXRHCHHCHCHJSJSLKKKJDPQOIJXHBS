@@ -590,7 +590,7 @@ local entity = Spawner:Create({
 ---====== Debug entity ======---
 
 entity:SetCallback("OnSpawned", function()
-getgenv().CeaseToDeer = false
+
 	local Model = entity.Model
 	local partneeded = Model:FindFirstChild("Multi")
 
@@ -678,6 +678,7 @@ censor:FindFirstChildWhichIsA("Frame").BorderColor3 = Color3.fromRGB(0, 0, 0)
 end)
 
 entity:SetCallback("OnStartMoving", function()
+getgenv().CeaseToDeer = false
 end)
 
 entity:SetCallback("OnEnterRoom", function(room: Model, firstTime: boolean)
