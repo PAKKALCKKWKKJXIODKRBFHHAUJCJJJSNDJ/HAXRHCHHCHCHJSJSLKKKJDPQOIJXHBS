@@ -182,22 +182,7 @@ getgenv().CeaseToRipper = false
 end
 	
 	blaSound.Parent = entity.Model.RushNew
-	
-	if not backward then
-	local _Sound = Instance.new('Sound')
 
-local bla = GetGitSound("https://github.com/iccdjkkkkskskhdgdgegvbfbgncjjdudejdjvi/REBLAHARDCOREDI/raw/refs/heads/main/Lhouijie%20Almendras%20-%20Ripper_a60%20-%201786206833758%202026-08-08%2020_33.mp3?raw=true", "kckvjjjjfjj")
-
-_Sound.SoundId = bla.SoundId
-_Sound.PlaybackSpeed = 1
-_Sound.Looped = false
-_Sound.Parent = workspace
-_Sound.Volume = 7
-
-bla:Destroy()
-
-_Sound:Play()
-end
 
 if not getgenv().RipperMimi and not backward then
 	light(4, Color3.fromRGB(85, 0, 0), Color3.fromRGB(255, 0, 0))
@@ -235,10 +220,12 @@ spawn.Parent = workspace
 spawn.Looped = false
 spawn.RollOffMaxDistance = 1000000000
 if not getgenv().RipperMimi then
-spawn.Volume = 3
+spawn.Volume = 4
 else
-spawn.Volume = 1.5
+spawn.Volume = 3
 end
+
+spawn:Play() 
 end
 
 local player = Players.LocalPlayer
@@ -281,7 +268,7 @@ end)
 
 if not backward then
 
-		spawn:Play() 
+		
 end
 	end)
 end)
@@ -831,20 +818,6 @@ entity:SetCallback("OnSpawned", function()
 	print("Entity has spawned")
 	
 	blaSound.Parent = entity.Model.RushNew
-	
-	local _Sound = Instance.new('Sound')
-
-local bla = GetGitSound("https://github.com/iccdjkkkkskskhdgdgegvbfbgncjjdudejdjvi/REBLAHARDCOREDI/raw/refs/heads/main/Lhouijie%20Almendras%20-%20Ripper_a60%20-%201786206833758%202026-08-08%2020_33.mp3?raw=true", "kckvjjjjfjj")
-
-_Sound.SoundId = bla.SoundId
-_Sound.PlaybackSpeed = 1
-_Sound.Looped = false
-_Sound.Parent = workspace
-_Sound.Volume = 7
-
-bla:Destroy()
-
-_Sound:Play()
 
 if not getgenv().RipperMimi then
 	light(4, Color3.fromRGB(85, 0, 0), Color3.fromRGB(255, 0, 0))
@@ -875,10 +848,12 @@ spawn.Parent = workspace
 spawn.Looped = false
 spawn.RollOffMaxDistance = 1000000000
 if not getgenv().RipperMimi then
-spawn.Volume = 3
+spawn.Volume = 4
 else
-spawn.Volume = 1.5
+spawn.Volume = 3
 end
+
+spawn:Play() 
 
 local player = Players.LocalPlayer
 
@@ -918,7 +893,7 @@ end)
 
 	task.spawn(function()
 
-		spawn:Play() 
+		
 	end)
 end)
 
