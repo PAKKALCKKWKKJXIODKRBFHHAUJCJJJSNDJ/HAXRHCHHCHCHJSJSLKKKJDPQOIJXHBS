@@ -585,106 +585,116 @@ LocalPlayer.CharacterAdded:Connect(OnCharacterAdded)
 
 -- \\ Main // --
 Module.Create = function(self, config: any): any?
-	local newConfig = ApplyConfigDefaults(config, CONST.DEFAULT.CONFIG)
-	newConfig.Movement.Speed = CONST.BASE_ENTITY_SPEED / 100 * config.Movement.Speed
-	
-	-- Fetch entity model
-	local asset = newConfig.Entity.Asset
-	local success, entityModel = false, nil
-	if typeof(asset) == "Instance" then
-		success, entityModel = true, asset
-	elseif typeof(asset) == "string" then
-		success, entityModel = pcall(function()
-			local instance: Instance? = LoadCustomInstance(asset)
-			if typeof(instance) == "Instance" then
-				if instance.ClassName ~= "Model" then
-					error(string.format(
-						debug.traceback("Entity model Instance invalid, expected Model but got '%s'"),
-						instance.ClassName
-					))
-					return
-				end
+    local newConfig = ApplyConfigDefaults(config, CONST.DEFAULT.CONFIG)
+    newConfig.Movement.Speed = CONST.BASE_ENTITY_SPEED / 100 * config.Movement.Speed
+
+    -- Fetch entity model
+    local asset = newConfig.Entity.Asset
+    local success, entityModel = false, nil
+
+    if typeof(asset) == "Instance" then
+        success, entityModel = true, asset
+    elseif typeof(asset) == "string" then
+        success, entityModel = pcall(function()
+            if asset:match("%.txt$") then
+                local temp = "temp_entity.rbxmx"
+                writefile(temp, game:HttpGet(asset))
+                asset = temp
+            end
+
+            local instance: Instance? = LoadCustomInstance(asset)
+            if typeof(instance) == "Instance" then
+                if instance.ClassName ~= "Model" then
+                    error(string.format(
+                        debug.traceback("Entity model Instance invalid, expected Model but got '%s'"),
+                        instance.ClassName
+                    ))
+                    return
+                end
 			else
 				error(debug.traceback("Failed to fetch entity model."))
 				return
 			end
 			return instance
 		end)
-	end
-	if not (success and entityModel) then return end
-	
-	-- Entity model preparations
-	local rootPart = entityModel.PrimaryPart or entityModel:FindFirstChildWhichIsA("BasePart", true)
-	if not rootPart then return end
-	rootPart.Anchored = true
-	entityModel.PrimaryPart = rootPart
-	
-	local name = config.Entity.Name
-	if typeof(name) == "string" and name ~= "" then
-		entityModel.Name = name
-	end
-	for attr, val in next, CONST.ATTR.ENTITY do
-		entityModel:SetAttribute(attr, val)
-	end
-	
-	local c = Instance.new("Configuration")
-	c.Name = "RoomsEntered"
-	c.Parent = entityModel
-	
-	return {
-		Model = entityModel,
-		Config = newConfig,
-		Debug = CloneTable(CONST.DEFAULT.DEBUG),
-		SetCallback = function(self, key: string, callback: any)
-			assert(typeof(key) == "string" and self.Debug[key], debug.traceback("Callback key is invalid."))
-			assert(typeof(callback) == "function", debug.traceback("Callback must be a function."))
-			if self.Debug[key] then
-				self.Debug[key] = callback
-			end
-		end,
-		RunCallback = function(self, key: string, ...: any?)
-			local callback = self.Debug[key]
-			if typeof(callback) == "function" then
-				local success, result = pcall(callback, ...)
-				if not success then
-					error(debug.traceback(
-						string.format(
-							"Error in callback: '%s' for entity: '%s':\n%s",
-							key,
-							self.Config.Entity.Name,
-							result
-						)
-					))
-				end
-			end
-		end,
-		IsAlive = function(self): boolean
-			return self.Model and self.Model.Parent
-		end,
-		Pause = function(self)
-			if self:IsAlive() then
-				self.Model:SetAttribute("Paused", true)
-			end
-		end,
-		Resume = function(self)
-			if self:IsAlive() then
-				self.Model:SetAttribute("Paused", false)
-			end
-		end,
-		Run = function(self, copyEntity: boolean)
-			Module:Run(self, copyEntity)
-		end,
-		Despawn = function(self)
-			if self:IsAlive() then
-				self.Model:Destroy()
-				local i = table.find(Module.ActiveEntities, self)
-				if i then
-					table.remove(Module.ActiveEntities, i)
-				end
-				task.spawn(self.RunCallback, self, "OnDespawned")
-			end
-		end
-	}
+    end
+    if not (success and entityModel) then return end
+
+    -- Entity model preparations
+    local rootPart = entityModel.PrimaryPart or entityModel:FindFirstChildWhichIsA("BasePart", true)
+    if not rootPart then return end
+
+    rootPart.Anchored = true
+    entityModel.PrimaryPart = rootPart
+
+    local name = config.Entity.Name
+    if typeof(name) == "string" and name ~= "" then
+        entityModel.Name = name
+    end
+
+    for attr, val in next, CONST.ATTR.ENTITY do
+        entityModel:SetAttribute(attr, val)
+    end
+
+    local c = Instance.new("Configuration")
+    c.Name = "RoomsEntered"
+    c.Parent = entityModel
+
+    return {
+        Model = entityModel,
+        Config = newConfig,
+        Debug = CloneTable(CONST.DEFAULT.DEBUG),
+        SetCallback = function(self, key: string, callback: any)
+            assert(typeof(key) == "string" and self.Debug[key], debug.traceback("Callback key is invalid."))
+            assert(typeof(callback) == "function", debug.traceback("Callback must be a function."))
+            if self.Debug[key] then
+                self.Debug[key] = callback
+            end
+        end,
+        RunCallback = function(self, key: string, ...: any?)
+            local callback = self.Debug[key]
+            if typeof(callback) == "function" then
+                local success, result = pcall(callback, ...)
+                if not success then
+                    error(debug.traceback(
+                        string.format(
+                            "Error in callback: '%s' for entity: '%s':\n%s",
+                            key,
+                            self.Config.Entity.Name,
+                            result
+                        )
+                    ))
+                end
+            end
+        end,
+        IsAlive = function(self): boolean
+            return self.Model and self.Model.Parent
+        end,
+        Pause = function(self)
+            if self:IsAlive() then
+                self.Model:SetAttribute("Paused", true)
+            end
+        end,
+        Resume = function(self)
+            if self:IsAlive() then
+                self.ResumeFromRoomStart = true
+                self.Model:SetAttribute("Paused", false)
+            end
+        end,
+        Run = function(self, copyEntity: boolean)
+            Module:Run(self, copyEntity)
+        end,
+        Despawn = function(self)
+            if self:IsAlive() then
+                self.Model:Destroy()
+                local i = table.find(Module.ActiveEntities, self)
+                if i then
+                    table.remove(Module.ActiveEntities, i)
+                end
+                task.spawn(self.RunCallback, self, "OnDespawned")
+            end
+        end
+    }
 end
 
 Module.Run = function(self, entity: any, copyEntity: boolean)
