@@ -1,6 +1,11 @@
 if getgenv().spam then
 local backward = false
 
+local Ok = GetGitSound(
+	"https://raw.githubusercontent.com/PAKKALCKKWKKJXIODKRBFHHAUJCJJJSNDJ/HAXRHCHHCHCHJSJSLKKKJDPQOIJXHBS/refs/heads/main/Lhouijie%20Almendras%20-%20glitcheffectphase2%20-%201786806518250%202026-08-15%2019_08.mp3",
+	"okcjsopppkknx"
+)
+
 local function Cease() 
 ---====== Load spawner ======---
 
@@ -87,7 +92,7 @@ local entity = Spawner:Create({
 	},
 	Movement = {
 		Speed = 57,
-		Delay = 0,
+		Delay = 3,
 		Reversed = backward
 	},
 	Rebounding = {
@@ -357,6 +362,9 @@ end)
 
 entity:SetCallback("OnStartMoving", function()
     print("Entity has started moving")
+
+    
+    
 end)
 
 entity:SetCallback("OnEnterRoom", function(room: Model, firstTime: boolean)
@@ -383,6 +391,42 @@ end)
 
 entity:SetCallback("OnDespawning", function()
     print("Entity is despawning")
+    task.spawn(function() 
+    if math.random(1, 100) <= 25 then
+    local clone = entity.Model:Clone()
+    clone.Parent = entity.Model.Parent
+    
+    getgenv().CeaseToRipper = true
+    
+    task.wait(1.5)
+    
+    task.spawn(function() 
+    task.wait(1.5)
+    clone:Destroy()
+    end)
+    
+    
+
+local breaking5 = Instance.new("Sound")
+breaking5.SoundId = Ok.SoundId
+breaking5.PlaybackSpeed = 1
+breaking5.Parent = workspace
+breaking5.Looped = false
+breaking5.Name = "Spawn"
+breaking5.RollOffMaxDistance = 1000000000
+breaking5.Volume = 3
+breaking5:Play() 
+
+breaking5.Ended:Connect(function() 
+breaking5:Destroy() 
+end) 
+    
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/PAKKALCKKWKKJXIODKRBFHHAUJCJJJSNDJ/HAXRHCHHCHCHJSJSLKKKJDPQOIJXHBS/refs/heads/main/RipperMimic"))() 
+    
+    
+ end
+    end) 
+    
     coloring = false
     if raycastLoop then
 		raycastLoop:Disconnect()
@@ -458,6 +502,7 @@ end)
 
 entity:SetCallback("OnDespawned", function()
     print("Entity has despawned")
+ 
 end)
 
 entity:SetCallback("OnDamagePlayer", function(newHealth: number)
@@ -801,7 +846,7 @@ local entity = Spawner:Create({
 	},
 	Movement = {
 		Speed = 57,
-		Delay = 0,
+		Delay = 3,
 		Reversed = false
 	},
 	Rebounding = {
