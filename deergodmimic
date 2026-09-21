@@ -1,4 +1,4 @@
-if getgenv().spam then
+if getgenv().spam and not getgenv().CeaseToDeer then
 local backward = false
 
 local function Deer() 
@@ -484,6 +484,7 @@ local blaSound = Instance.new("Sound")
 		blaSound.Volume = 1
 		blaSound.RollOffMaxDistance = 50
 
+if not getgenv().CeaseToDeer then
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local CurrentRooms = workspace:WaitForChild("CurrentRooms")
 local Module_Events = require(ReplicatedStorage.ModulesClient.Module_Events)
@@ -525,6 +526,7 @@ print("Đã bật hệ thống chớp đèn tự động cho tất cả phòng (
 
 -- \\ Phần code ngừng chớp (Chạy dòng này khi muốn dừng toàn bộ) // --
 -- getgenv().IsAllRoomsFlickering = false
+end
 
 ---====== Create entity ======---
 
