@@ -123,6 +123,8 @@ require(game.Players.LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game).caption("
 task.wait(2)
 require(game.Players.LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game).caption("Origin by pyxlfunkin and credits to pyxlfunkin's team. ",true)
 task.wait(2)
+require(game.Players.LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game).caption("PLEASE, IF MODIFIERS BUTTON DOESN'T WORK, TYPE '/modifier' ON THE CHAT AND SEND IT",true)
+task.wait(2)
 require(game.Players.LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game).caption("Enjoy!",true)
 end)
 
@@ -1391,14 +1393,14 @@ end
 local MultimonsterEntity = {
 	Name = "Multimonster",
 	Interval = 20,
-	Chance = 6,
+	Chance = 2,
 	Url = "https://raw.githubusercontent.com/PAKKALCKKWKKJXIODKRBFHHAUJCJJJSNDJ/HAXRHCHHCHCHJSJSLKKKJDPQOIJXHBS/refs/heads/main/multimonstet"
 }
 
 local Frostbite = {
 	Name = "Frostbite",
 	Interval = 10,
-	Chance = 2,
+	Chance = 1,
 	Url = "https://raw.githubusercontent.com/iccdjkkkkskskhdgdgegvbfbgncjjdudejdjvi/REBLAHARDCOREDI/refs/heads/main/Frostbite"
 }
 
