@@ -3,7 +3,13 @@ local DestroyGlitchLines
 getgenv().multi = true
 getgenv().spam = false
 local fringeFrame
+getgenv().God = false
 local Caption
+
+local damage = true
+if getgenv().God then
+damage = false
+end
 
 local TweenService = game:GetService("TweenService")
 
@@ -838,7 +844,7 @@ local entity = Spawner:Create({
 		Delay = 1
 	},
 	Damage = {
-		Enabled = true,
+		Enabled = damage,
 		IgnoreHiding = true,
 		Range = 40,
 		Amount = 0.0001
@@ -1450,7 +1456,7 @@ local entity = Spawner:Create({
 		Delay = 1
 	},
 	Damage = {
-		Enabled = true,
+		Enabled = damage,
 		IgnoreHiding = true,
 		Range = 40,
 		Amount = 0.0001
