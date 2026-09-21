@@ -300,72 +300,12 @@ entity:SetCallback("OnEnterRoom", function(room: Model, firstTime: boolean)
 	local assetContainer = room:WaitForChild("Assets")
 
 	local latestRoomNum = tostring(game.ReplicatedStorage.GameData.LatestRoom.Value)
-	if room.Name ~= latestRoomNum then 
-		return 
+	if room.Name ~= latestRoomNum then
+		return
 	end
 
-	if hasTriggered then 
-		return 
-	end
-
-	local RunService = game:GetService("RunService")
-	local TweenService = game:GetService("TweenService")
-
-	local entityModel = workspace:FindFirstChild("A60ButRipper")
-	local entityRoot = entityModel and (entityModel:FindFirstChild("HumanoidRootPart") or entityModel:FindFirstChildWhichIsA("BasePart")) 
-
-	local doorModel = room:FindFirstChild("Door")
-	local doorPanel = doorModel and doorModel:FindFirstChild("Door")
-
-	if entityModel and entityRoot and doorPanel and doorPanel:IsA("BasePart") then
-		hasTriggered = true
-
-		while entityModel and entityModel.Parent and entityRoot and (entityRoot.Position - doorPanel.Position).Magnitude > 8 do
-			task.wait()
-		end
-
-		if entityModel and entityModel.Parent and entityRoot then
-			local doorFreezePos = entityRoot.CFrame
-			local freezeConnection
-
-			freezeConnection = RunService.Heartbeat:Connect(function()
-				if entityModel and entityModel.Parent and entityRoot then
-					entityRoot.Anchored = true
-					entityRoot.CFrame = doorFreezePos
-					entityRoot.AssemblyLinearVelocity = Vector3.zero
-					entityRoot.AssemblyAngularVelocity = Vector3.zero
-				end
-			end)
-
-			local chance = 2
-
-			for _, v in ipairs(room:GetDescendants()) do
-				if v:IsA("BasePart") and v.Name == "KeyHitbox" then
-					chance = 1
-					break
-				end
-			end
-
-			task.spawn(function()
-				local CameraShaker = require(game.ReplicatedStorage.CameraShaker)
-				local camera = game.Workspace.CurrentCamera
-
-				if chance == 1 then
-				else
-				
-
-					
-
-
-				if entityModel and entityModel.Parent then
-					FadeDestroy(entityModel)
-				end
-
-				task.wait(3)
-
-				hasTriggered = false 
-			end)
-		end
+	if hasTriggered then
+		return
 	end
 end)
 
