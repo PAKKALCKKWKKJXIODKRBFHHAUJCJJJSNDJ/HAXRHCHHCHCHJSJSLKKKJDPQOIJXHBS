@@ -168,65 +168,6 @@ entity:SetCallback("OnSpawned", function()
 	
 	blaSound.Parent = entity.Model.Multi
 	
-	for _, Obj in ipairs(entity.Model:GetDescendants()) do
-		if Obj:IsA("Sound") then
-			Obj.Volume = 0
-		end
-	end
-
-	-- Load SoundBox
-	local SoundURL = "https://github.com/lynguyen26031993-design/-u/raw/refs/heads/main/Place_6839171747_Part_RipperSoundBox_1789755040.txt"
-	local SoundFile = "RipperSoundBox.txt"
-
-	if not isfile(SoundFile) then
-		writefile(SoundFile, game:HttpGet(SoundURL))
-	end
-
-	local SoundBox = game:GetObjects(getcustomasset(SoundFile))[1]
-
-	if not SoundBox then
-		return
-	end
-
-	-- Tìm BasePart trong entity
-	local Target = entity.Model:FindFirstChildWhichIsA("BasePart", true)
-
-	if not Target then
-		SoundBox:Destroy()
-		return
-	end
-
-	-- Đưa SoundBox vào entity
-	SoundBox.Parent = Target
-
-	-- TP SoundBox tới BasePart tìm được
-	if SoundBox:IsA("Model") then
-		SoundBox:PivotTo(Target.CFrame)
-	elseif SoundBox:IsA("BasePart") then
-		SoundBox.CFrame = Target.CFrame
-	end
-
-	-- Weld SoundBox vào Target
-	if SoundBox:IsA("Model") then
-		for _, Obj in ipairs(SoundBox:GetDescendants()) do
-			if Obj:IsA("BasePart") then
-				Obj.Anchored = false
-
-				local Weld = Instance.new("WeldConstraint")
-				Weld.Part0 = Target
-				Weld.Part1 = Obj
-				Weld.Parent = Obj
-			end
-		end
-	elseif SoundBox:IsA("BasePart") then
-		SoundBox.Anchored = false
-
-		local Weld = Instance.new("WeldConstraint")
-		Weld.Part0 = Target
-		Weld.Part1 = SoundBox
-		Weld.Parent = SoundBox
-	end
-	
 	if not backward then
 	local _Sound = Instance.new('Sound')
 
@@ -971,65 +912,6 @@ entity:SetCallback("OnSpawned", function()
 	print("Entity has spawned")
 	
 	blaSound.Parent = entity.Model.Multi
-	
-	for _, Obj in ipairs(entity.Model:GetDescendants()) do
-		if Obj:IsA("Sound") then
-			Obj.Volume = 0
-		end
-	end
-
-	-- Load SoundBox
-	local SoundURL = "https://github.com/lynguyen26031993-design/-u/raw/refs/heads/main/Place_6839171747_Part_RipperSoundBox_1789755040.txt"
-	local SoundFile = "RipperSoundBox.txt"
-
-	if not isfile(SoundFile) then
-		writefile(SoundFile, game:HttpGet(SoundURL))
-	end
-
-	local SoundBox = game:GetObjects(getcustomasset(SoundFile))[1]
-
-	if not SoundBox then
-		return
-	end
-
-	-- Tìm BasePart trong entity
-	local Target = entity.Model:FindFirstChildWhichIsA("BasePart", true)
-
-	if not Target then
-		SoundBox:Destroy()
-		return
-	end
-
-	-- Đưa SoundBox vào entity
-	SoundBox.Parent = Target
-
-	-- TP SoundBox tới BasePart tìm được
-	if SoundBox:IsA("Model") then
-		SoundBox:PivotTo(Target.CFrame)
-	elseif SoundBox:IsA("BasePart") then
-		SoundBox.CFrame = Target.CFrame
-	end
-
-	-- Weld SoundBox vào Target
-	if SoundBox:IsA("Model") then
-		for _, Obj in ipairs(SoundBox:GetDescendants()) do
-			if Obj:IsA("BasePart") then
-				Obj.Anchored = false
-
-				local Weld = Instance.new("WeldConstraint")
-				Weld.Part0 = Target
-				Weld.Part1 = Obj
-				Weld.Parent = Obj
-			end
-		end
-	elseif SoundBox:IsA("BasePart") then
-		SoundBox.Anchored = false
-
-		local Weld = Instance.new("WeldConstraint")
-		Weld.Part0 = Target
-		Weld.Part1 = SoundBox
-		Weld.Parent = SoundBox
-	end
 	
 	local _Sound = Instance.new('Sound')
 
