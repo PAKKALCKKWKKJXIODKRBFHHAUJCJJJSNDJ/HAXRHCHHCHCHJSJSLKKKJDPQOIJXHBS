@@ -1,3 +1,8 @@
+local damage = true
+if getgenv().God then
+damage = false
+end
+
 if getgenv().spam and not getgenv().CeaseToDeer then
 local backward = false
 
@@ -67,7 +72,7 @@ local entity = Spawner:Create({
 		Delay = 0
 	},
 	Damage = {
-		Enabled = true,
+		Enabled = damage,
 		Range = 15,
 		Amount = 125
 	},
@@ -565,7 +570,7 @@ local entity = Spawner:Create({
 		Delay = 0
 	},
 	Damage = {
-		Enabled = true,
+		Enabled = damage,
 		Range = 15,
 		Amount = 125
 	},
