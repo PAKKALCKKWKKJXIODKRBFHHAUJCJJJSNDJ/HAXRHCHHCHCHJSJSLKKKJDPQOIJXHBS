@@ -1,6 +1,11 @@
 local spawnCount = 0
 local blueSound
 
+local damage = true
+if getgenv().God then
+damage = false
+end
+
 function GetGitSound(GithubSnd,SoundName)
 	local url=GithubSnd
 	if not isfile(SoundName..".mp3") then
@@ -52,7 +57,7 @@ local entity = Spawner:Create({
 		Delay = 0
 	},
 	Damage = {
-		Enabled = true,
+		Enabled = damage,
 		Range = 60,
 		Amount = 40
 	},
