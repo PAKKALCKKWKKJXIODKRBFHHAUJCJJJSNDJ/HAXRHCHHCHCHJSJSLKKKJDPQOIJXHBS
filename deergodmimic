@@ -590,6 +590,7 @@ local entity = Spawner:Create({
 ---====== Debug entity ======---
 
 entity:SetCallback("OnSpawned", function()
+getgenv().CeaseToDeer = false
 	local Model = entity.Model
 	local partneeded = Model:FindFirstChild("Multi")
 
