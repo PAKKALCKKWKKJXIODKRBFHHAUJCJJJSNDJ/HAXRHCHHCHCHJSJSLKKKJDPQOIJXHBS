@@ -1,9 +1,11 @@
 local spawnCount = 0
 local blueSound
 
+local hitbox = 60
 local damage = true
 if getgenv().God then
 damage = false
+hitbox = 0
 end
 
 function GetGitSound(GithubSnd,SoundName)
@@ -58,7 +60,7 @@ local entity = Spawner:Create({
 	},
 	Damage = {
 		Enabled = damage,
-		Range = 60,
+		Range = hitbox,
 		Amount = 40
 	},
 	Crucifixion = {
