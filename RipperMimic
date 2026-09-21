@@ -170,6 +170,10 @@ local entity = Spawner:Create({
 
 entity:SetCallback("OnSpawned", function()
 	print("Entity has spawned")
+
+if getgenv().CeaseToRipper then
+getgenv().CeaseToRipper = false
+end
 	
 	blaSound.Parent = entity.Model.Multi
 	
