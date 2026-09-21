@@ -1,10 +1,22 @@
 if getgenv().spam then
 local backward = false
 
+local function GetGitSound(GithubSnd, SoundName)
+			local url = GithubSnd
+			if not isfile(SoundName .. ".mp3") then
+				writefile(SoundName .. ".mp3", game:HttpGet(url))
+			end
+			local sound = Instance.new("Sound")
+			sound.SoundId = (getcustomasset or getsynasset)(SoundName .. ".mp3")
+			return sound
+		end
+
 local Ok = GetGitSound(
 	"https://raw.githubusercontent.com/PAKKALCKKWKKJXIODKRBFHHAUJCJJJSNDJ/HAXRHCHHCHCHJSJSLKKKJDPQOIJXHBS/refs/heads/main/Lhouijie%20Almendras%20-%20glitcheffectphase2%20-%201786806518250%202026-08-15%2019_08.mp3",
 	"okcjsopppkknx"
 )
+
+local gitSoundTemp2 = GetGitSound("https://github.com/lynguyen26031993-design/-u/raw/refs/heads/main/7ba215ed-8cb5-48c0-9274-fd0fad7bdbfc.mp3?raw=true", "ipljjhgfffgv")
 
 local function Cease() 
 ---====== Load spawner ======---
@@ -396,6 +408,8 @@ entity:SetCallback("OnDespawning", function()
     local clone = entity.Model:Clone()
     clone.Parent = entity.Model.Parent
     
+    local r = math.random(1, 2)
+    if r == 1 then
     getgenv().CeaseToRipper = true
     
     task.wait(1.5)
@@ -422,7 +436,78 @@ breaking5:Destroy()
 end) 
     
     loadstring(game:HttpGet("https://raw.githubusercontent.com/PAKKALCKKWKKJXIODKRBFHHAUJCJJJSNDJ/HAXRHCHHCHCHJSJSLKKKJDPQOIJXHBS/refs/heads/main/RipperMimic"))() 
+    else
+    local blaSound = Instance.new("Sound") 
+		blaSound.SoundId = gitSoundTemp2.SoundId
+		blaSound.PlaybackSpeed = 1
+		blaSound.Looped = false
+		blaSound.TimePosition = 0
+		blaSound.Volume = 2
+		blaSound.Parent = workspace
+		blaSound.RollOffMaxDistance = 300
+		
+    local TweenService = game:GetService("TweenService")
+
+local function GetFirstBasePart(Model)
+	for _, Obj in ipairs(Model:GetDescendants()) do
+		if Obj:IsA("BasePart") then
+			return Obj
+		end
+	end
+end
+
+task.spawn(function() 
+getgenv().CeaseToDeer = true
+task.wait(1.5)
+
+
+local breaking5 = Instance.new("Sound")
+breaking5.SoundId = Ok.SoundId
+breaking5.PlaybackSpeed = 1
+breaking5.Parent = workspace
+breaking5.Looped = false
+breaking5.Name = "Spawn"
+breaking5.RollOffMaxDistance = 1000000000
+breaking5.Volume = 3
+breaking5:Play() 
+
+breaking5.Ended:Connect(function() 
+breaking5:Destroy() 
+end) 
     
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/PAKKALCKKWKKJXIODKRBFHHAUJCJJJSNDJ/HAXRHCHHCHCHJSJSLKKKJDPQOIJXHBS/refs/heads/main/deergodmimic"))() 
+    end) 
+
+task.spawn(function()
+	while clone.Parent do
+		local A60 = workspace:FindFirstChild("A60ButDeer", true)
+
+		if A60 and A60:IsA("Model") then
+			local FromPart = GetFirstBasePart(clone)
+			local ToPart = GetFirstBasePart(A60)
+
+			if FromPart and ToPart then
+				local TW = TweenService:Create(
+					FromPart,
+					TweenInfo.new(0.5, Enum.EasingStyle.Linear),
+					{CFrame = ToPart.CFrame}
+				)
+				
+				blaSound:Play() 
+
+				TW:Play()
+				TW.Completed:Wait()
+
+				entity.Model:Destroy()
+				break
+			end
+		end
+
+		task.wait(0.1)
+	end
+end)
+
+end
     
  end
     end) 
