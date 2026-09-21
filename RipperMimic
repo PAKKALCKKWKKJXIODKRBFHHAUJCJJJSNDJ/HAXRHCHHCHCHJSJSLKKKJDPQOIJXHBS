@@ -5,6 +5,7 @@ local count = 3
 
 if getgenv().CeaseToRipper then
 backward = true
+count = 2
 end
 
 local function Ripper() 
