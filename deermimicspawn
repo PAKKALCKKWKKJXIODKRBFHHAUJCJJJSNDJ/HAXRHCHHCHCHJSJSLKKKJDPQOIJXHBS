@@ -9,8 +9,6 @@
 	                                                          |___/          
 ]]--
 
--- DEER
-
 if getgenv().DeerMimicLmao then
 	return getgenv().DeerMimicLmao
 end
@@ -480,7 +478,7 @@ local function GetPathfindNodesAmbush(config: any, startRoomIndex: number?): { B
 			return pathfindNodes
 		end
 
-		local minimumRoomIndex = startRoomIndex or (lowestRoomIndex + 3)
+		local minimumRoomIndex = startRoomIndex or (lowestRoomIndex + 2)
 
 		table.sort(rooms, function(a, b)
 			return (tonumber(a.Name) or math.huge) < (tonumber(b.Name) or math.huge)
@@ -729,35 +727,14 @@ Module.Run = function(self, entity: any, copyEntity: boolean)
 	
 	-- Spawning
 	local spawnPoint: BasePart? = nil
-local spawnRoomIndex: number? = nil
-
-do
-	local rooms = CurrentRooms:GetChildren()
-
-	if config.Movement.Reversed then
-		spawnPoint = rooms[#rooms]:FindFirstChild("RoomExit")
-	else
-		local lowestRoomIndex = math.huge
-
-		for _, room in next, rooms do
-			local index = tonumber(room.Name)
-
-			if index and index < lowestRoomIndex then
-				lowestRoomIndex = index
-			end
-		end
-
-		if lowestRoomIndex ~= math.huge then
-			spawnRoomIndex = lowestRoomIndex + 3
-
-			local spawnRoom = CurrentRooms:FindFirstChild(tostring(spawnRoomIndex))
-
-			if spawnRoom then
-				spawnPoint = spawnRoom:FindFirstChild("RoomEntrance")
-			end
+	do
+		local rooms = CurrentRooms:GetChildren()
+		if config.Movement.Reversed then
+			spawnPoint = rooms[#rooms]:FindFirstChild("RoomExit")
+		else
+			spawnPoint = rooms[1]:FindFirstChild("RoomEntrance")
 		end
 	end
-end
 	if not spawnPoint then
 		error(string.format(debug.traceback("Failed to find spawn point for entity: '%s'"), config.Entity.Name))
 	end
@@ -884,7 +861,7 @@ task.spawn(function()
 	local reboundType = config.Rebounding.Type:upper()
 
 	if reboundType == "AMBUSH" then
-		local pathfindNodes = GetPathfindNodesAmbush(config, spawnRoomIndex)
+		local pathfindNodes = GetPathfindNodesAmbush(config)
 
 		-- Initial forward run
 		for _, v in next, pathfindNodes do
@@ -922,7 +899,7 @@ task.spawn(function()
 				-- Chuẩn bị cho lượt tiếp theo
 				task.wait(config.Rebounding.Delay)
 
-				pathfindNodes = GetPathfindNodesAmbush(config, spawnRoomIndex)
+				pathfindNodes = GetPathfindNodesAmbush(config)
 
 				model:SetAttribute("Damage", true)
 				task.spawn(entity.RunCallback, entity, "OnRebounding", true)
