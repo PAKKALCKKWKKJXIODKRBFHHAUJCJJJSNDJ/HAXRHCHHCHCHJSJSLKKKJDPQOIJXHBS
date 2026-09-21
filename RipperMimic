@@ -181,7 +181,7 @@ if getgenv().CeaseToRipper then
 getgenv().CeaseToRipper = false
 end
 	
-	blaSound.Parent = entity.Model.Multi
+	blaSound.Parent = entity.Model.RushNew
 	
 	if not backward then
 	local _Sound = Instance.new('Sound')
@@ -204,7 +204,7 @@ if not getgenv().RipperMimi and not backward then
 end
 	
 	local entityModel = workspace:FindFirstChild("A60ButRipper")
-		local Multi = entityModel and entityModel:FindFirstChild("Multi")
+		local Multi = entityModel and entityModel:FindFirstChild("RushNew")
 	
 	local Github = GetGitSound("https://github.com/cakmay227-svg/random/raw/refs/heads/main/XRecorder_Edited_20260801_01.mp3?raw=true", "jjjciie")
 
@@ -830,7 +830,7 @@ local entity = Spawner:Create({
 entity:SetCallback("OnSpawned", function()
 	print("Entity has spawned")
 	
-	blaSound.Parent = entity.Model.Multi
+	blaSound.Parent = entity.Model.RushNew
 	
 	local _Sound = Instance.new('Sound')
 
@@ -851,7 +851,7 @@ if not getgenv().RipperMimi then
 end
 	
 	local entityModel = workspace:FindFirstChild("A60ButRipper")
-		local Multi = entityModel and entityModel:FindFirstChild("Multi")
+		local Multi = entityModel and entityModel:FindFirstChild("RushNew")
 	
 	local Github = GetGitSound("https://github.com/cakmay227-svg/random/raw/refs/heads/main/XRecorder_Edited_20260801_01.mp3?raw=true", "jjjciie")
 
