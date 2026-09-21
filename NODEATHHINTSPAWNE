@@ -849,119 +849,152 @@ end
 	end)
 	
 	-- Pathfinding
-	task.spawn(function()
-		local reboundType = config.Rebounding.Type:upper()
-		if reboundType == "AMBUSH" then
-			local pathfindNodes = GetPathfindNodesAmbush(config)
-			for _, v in next, pathfindNodes do
-				local cframe = v.CFrame + Vector3.new(0, 3 + config.Entity.HeightOffset, 0)
-				EntityMoveTo(model, cframe, config.Movement.Speed)
-				task.spawn(entity.RunCallback, entity, "OnReachNode", v)
-			end
-			
-			-- Rebounding handling
-			if config.Rebounding.Enabled then
-				local reboundsCount = math.random(config.Rebounding.Min, config.Rebounding.Max)
-				for i = 1, reboundsCount do
-					task.wait(config.Rebounding.Delay)
-					model:SetAttribute("Damage", true)
-					task.spawn(entity.RunCallback, entity, "OnRebounding", true)
-					
-					-- Run backwards through nodes
-					for i = #pathfindNodes, 1, -1 do
-						local v = pathfindNodes[i]
-						local cframe = v.CFrame + Vector3.new(0, 3 + config.Entity.HeightOffset, 0)
-						EntityMoveTo(model, cframe, config.Movement.Speed)
-						task.spawn(entity.RunCallback, entity, "OnReachNode", v)
-					end
-					
-					task.spawn(entity.RunCallback, entity, "OnRebounding", false)
-					task.wait(config.Rebounding.Delay)
-					model:SetAttribute("Damage", true)
-					task.spawn(entity.RunCallback, entity, "OnRebounding", true)
-					pathfindNodes = GetPathfindNodesAmbush(config)
-					
-					-- Run forwards through nodes
-					for _, v in next, pathfindNodes do
-						local cframe = v.CFrame + Vector3.new(0, 3 + config.Entity.HeightOffset, 0)
-						EntityMoveTo(model, cframe, config.Movement.Speed)
-						task.spawn(entity.RunCallback, entity, "OnReachNode", v)
-					end
-					
-					task.spawn(entity.RunCallback, entity, "OnRebounding", false)
-					
-					-- Delay unless last rebound
-					if i < reboundsCount then
-						task.wait(config.Rebounding.Delay)
-					end
+task.spawn(function()
+	local reboundType = config.Rebounding.Type:upper()
+
+	if reboundType == "AMBUSH" then
+		local pathfindNodes = GetPathfindNodesAmbush(config)
+
+		-- Initial forward run
+		for _, v in next, pathfindNodes do
+			local cframe = v.CFrame + Vector3.new(0, 3 + config.Entity.HeightOffset, 0)
+			EntityMoveTo(model, cframe, config.Movement.Speed)
+			task.spawn(entity.RunCallback, entity, "OnReachNode", v)
+		end
+
+		-- Rebounding handling
+		if config.Rebounding.Enabled then
+			local reboundsCount = math.random(config.Rebounding.Min, config.Rebounding.Max)
+
+			for rebound = 1, reboundsCount do
+				task.wait(config.Rebounding.Delay)
+
+				model:SetAttribute("Damage", true)
+				task.spawn(entity.RunCallback, entity, "OnRebounding", true)
+
+				-- Run backwards through nodes
+				for i = #pathfindNodes, 1, -1 do
+					local v = pathfindNodes[i]
+					local cframe = v.CFrame + Vector3.new(0, 3 + config.Entity.HeightOffset, 0)
+
+					EntityMoveTo(model, cframe, config.Movement.Speed)
+					task.spawn(entity.RunCallback, entity, "OnReachNode", v)
 				end
-			end
-		elseif reboundType == "BLITZ" then
-			local nodesToCurrent, _ = GetPathfindNodesBlitz(config)
-			for _, n in next, nodesToCurrent do
-				local cframe = n.CFrame + Vector3.new(0, 3 + config.Entity.HeightOffset, 0)
-				EntityMoveTo(model, cframe, config.Movement.Speed)
-				task.spawn(entity.RunCallback, entity, "OnReachNode", n)
-			end
-			
-			-- Rebound handling
-			if config.Rebounding.Enabled then
-				local currentRoom = GetCurrentRoom(false)
-				if not currentRoom then
-					warn(debug.traceback("Failed to obtain current room."))
-					return
+
+				task.spawn(entity.RunCallback, entity, "OnRebounding", false)
+
+				-- Nếu đây là rebound cuối thì dừng ở điểm xuất phát
+				if rebound >= reboundsCount then
+					break
 				end
-				local roomNodes = GetNodesFromRoom(currentRoom, config.Movement.Reversed)
-				if #roomNodes == 1 then
-					warn(debug.traceback("Failed to obtain current room."))
-					return
+
+				-- Chuẩn bị cho lượt tiếp theo
+				task.wait(config.Rebounding.Delay)
+
+				pathfindNodes = GetPathfindNodesAmbush(config)
+
+				model:SetAttribute("Damage", true)
+				task.spawn(entity.RunCallback, entity, "OnRebounding", true)
+
+				-- Run forwards through nodes cho rebound tiếp theo
+				for _, v in next, pathfindNodes do
+					local cframe = v.CFrame + Vector3.new(0, 3 + config.Entity.HeightOffset, 0)
+
+					EntityMoveTo(model, cframe, config.Movement.Speed)
+					task.spawn(entity.RunCallback, entity, "OnReachNode", v)
 				end
-				local randomNode: BasePart? = nil;
-				if config.Movement.Reversed == false then
-					randomNode = roomNodes[math.random(1, #roomNodes - 1)]
-				else
-					randomNode = roomNodes[math.random(2, #roomNodes)]
-				end
-				if not randomNode then
-					warn(debug.traceback("Failed to obtain current room Blitz node."))
-					return
-				end
-				for _ = 1, math.random(config.Rebounding.Min, config.Rebounding.Max) do
-					model:SetAttribute("Damage", true)
-					task.spawn(entity.RunCallback, entity, "OnRebounding", true)
-					local nodeIndex = tonumber(randomNode.Name)
-					for i = #roomNodes, nodeIndex, -1 do
-						local cframe = roomNodes[math.clamp(i, 1, #roomNodes)].CFrame + Vector3.new(0, 3 + config.Entity.HeightOffset, 0)
-						EntityMoveTo(model, cframe, config.Movement.Speed)
-						task.spawn(entity.RunCallback, entity, "OnReachNode", roomNodes[i])
-					end
-					task.wait(config.Rebounding.Delay)
-					model:SetAttribute("Damage", true)
-					task.spawn(entity.RunCallback, entity, "OnRebounding", false)
-					for i = nodeIndex, #roomNodes do
-						local cframe = roomNodes[math.clamp(i, 1, #roomNodes)].CFrame + Vector3.new(0, 3 + config.Entity.HeightOffset, 0)
-						EntityMoveTo(model, cframe, config.Movement.Speed)
-						task.spawn(entity.RunCallback, entity, "OnReachNode", roomNodes[i])
-					end
-				end
-			end
-			
-			local _, updatedToEnd = GetPathfindNodesBlitz(config)
-			for _, n in next, updatedToEnd do
-				local cframe = n.CFrame + Vector3.new(0, 3 + config.Entity.HeightOffset, 0)
-				EntityMoveTo(model, cframe, config.Movement.Speed)
-				task.spawn(entity.RunCallback, entity, "OnReachNode", n)
+
+				task.spawn(entity.RunCallback, entity, "OnRebounding", false)
 			end
 		end
-		
-		-- Despawning
-		if not model:GetAttribute("Despawning") then
-			model:SetAttribute("Despawning", true)
-			task.spawn(entity.RunCallback, entity, "OnDespawning")
-			EntityMoveTo(model, model:GetPivot() - Vector3.new(0, 300, 0), config.Movement.Speed)
-			entity:Despawn()
+
+	elseif reboundType == "BLITZ" then
+		local nodesToCurrent, _ = GetPathfindNodesBlitz(config)
+
+		for _, n in next, nodesToCurrent do
+			local cframe = n.CFrame + Vector3.new(0, 3 + config.Entity.HeightOffset, 0)
+			EntityMoveTo(model, cframe, config.Movement.Speed)
+			task.spawn(entity.RunCallback, entity, "OnReachNode", n)
 		end
-	end)
+
+		-- Rebound handling
+		if config.Rebounding.Enabled then
+			local currentRoom = GetCurrentRoom(false)
+
+			if not currentRoom then
+				warn(debug.traceback("Failed to obtain current room."))
+				return
+			end
+
+			local roomNodes = GetNodesFromRoom(currentRoom, config.Movement.Reversed)
+
+			if #roomNodes == 1 then
+				warn(debug.traceback("Failed to obtain current room."))
+				return
+			end
+
+			local randomNode: BasePart? = nil
+
+			if config.Movement.Reversed == false then
+				randomNode = roomNodes[math.random(1, #roomNodes - 1)]
+			else
+				randomNode = roomNodes[math.random(2, #roomNodes)]
+			end
+
+			if not randomNode then
+				warn(debug.traceback("Failed to obtain current room Blitz node."))
+				return
+			end
+
+			local reboundsCount = math.random(config.Rebounding.Min, config.Rebounding.Max)
+
+			for rebound = 1, reboundsCount do
+				model:SetAttribute("Damage", true)
+				task.spawn(entity.RunCallback, entity, "OnRebounding", true)
+
+				local nodeIndex = tonumber(randomNode.Name)
+
+				-- Run backwards
+				for i = #roomNodes, nodeIndex, -1 do
+					local cframe = roomNodes[math.clamp(i, 1, #roomNodes)].CFrame
+						+ Vector3.new(0, 3 + config.Entity.HeightOffset, 0)
+
+					EntityMoveTo(model, cframe, config.Movement.Speed)
+					task.spawn(entity.RunCallback, entity, "OnReachNode", roomNodes[i])
+				end
+
+				task.wait(config.Rebounding.Delay)
+
+				model:SetAttribute("Damage", true)
+				task.spawn(entity.RunCallback, entity, "OnRebounding", false)
+
+				-- Run forwards
+				for i = nodeIndex, #roomNodes do
+					local cframe = roomNodes[math.clamp(i, 1, #roomNodes)].CFrame
+						+ Vector3.new(0, 3 + config.Entity.HeightOffset, 0)
+
+					EntityMoveTo(model, cframe, config.Movement.Speed)
+					task.spawn(entity.RunCallback, entity, "OnReachNode", roomNodes[i])
+				end
+			end
+		end
+
+		local _, updatedToEnd = GetPathfindNodesBlitz(config)
+
+		for _, n in next, updatedToEnd do
+			local cframe = n.CFrame + Vector3.new(0, 3 + config.Entity.HeightOffset, 0)
+			EntityMoveTo(model, cframe, config.Movement.Speed)
+			task.spawn(entity.RunCallback, entity, "OnReachNode", n)
+		end
+	end
+
+	-- Despawning
+	if not model:GetAttribute("Despawning") then
+		model:SetAttribute("Despawning", true)
+		task.spawn(entity.RunCallback, entity, "OnDespawning")
+		entity:Despawn()
+	end
+end)
 end
 
 if not getgenv()._internal_vynixu_entity_spawner then
