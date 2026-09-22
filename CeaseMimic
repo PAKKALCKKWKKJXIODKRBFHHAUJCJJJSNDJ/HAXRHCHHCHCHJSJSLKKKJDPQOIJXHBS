@@ -164,6 +164,7 @@ local censor = game:GetObjects(getcustomasset(path))[1]
 
 if censor then
 censor.Parent = partneeded
+censor.AlwaysOnTop = true
 censor:FindFirstChildWhichIsA("Frame").BorderColor3 = Color3.fromRGB(0, 0, 0)
 censor.StudsOffset = censor.StudsOffset - Vector3.new(0, 3, 0)
 end
@@ -998,6 +999,7 @@ local censor = game:GetObjects(getcustomasset(path))[1]
 
 if censor then
 censor.Parent = partneeded
+censor.AlwaysOnTop = true
 censor:FindFirstChildWhichIsA("Frame").BorderColor3 = Color3.fromRGB(0, 0, 0)
 
 censor.StudsOffset = censor.StudsOffset - Vector3.new(0, 3, 0)
