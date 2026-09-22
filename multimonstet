@@ -2177,7 +2177,10 @@ end
 
 task.spawn(function()
 	while getgenv().spam do
+	
 		task.wait(math.random(7, 15))
+		
+		if getgenv().DeerMimicHere then continue end
 
 		if #RandomScripts > 0 then
 			breaking5:Play()
