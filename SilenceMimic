@@ -651,7 +651,7 @@ end
 
 		local originalBrightness = v.Brightness
 
-		v.Brightness = originalBrightness * 3
+		v.Brightness = originalBrightness * 5
 
 		task.spawn(function()
 			task.wait(0.5)
@@ -682,7 +682,7 @@ end
 
 local light = Instance.new("PointLight")
 light.Parent = _Idx57.Multi
-light.Color = Color3.fromRGB(255,255,255)
+light.Color = Color3.fromRGB(255,0,0)
 light.Range = 70
 light.Brightness = 5
 
@@ -1045,10 +1045,10 @@ local function Start()
 
 	local spawnFrom
 
-	if roomCount <= 3 then
-		spawnFrom = lowestRoom
-	else
+if not getgenv().spam then
 		spawnFrom = lowestRoom + 1
+	else
+		spawnFrom = lowestRoom + 3
 	end
 
 	while true do
