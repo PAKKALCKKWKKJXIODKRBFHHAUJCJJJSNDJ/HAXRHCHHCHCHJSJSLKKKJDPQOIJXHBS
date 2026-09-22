@@ -3,6 +3,8 @@ if getgenv().God then
 damage = false
 end
 
+getgenv().DeerMimicHere = true
+
 if getgenv().spam and not getgenv().CeaseToDeer then
 local backward = false
 
@@ -179,6 +181,8 @@ censor:FindFirstChildWhichIsA("Frame").BorderColor3 = Color3.fromRGB(0, 0, 0)
 end)
 
 entity:SetCallback("OnStartMoving", function()
+task.wait(9)
+getgenv().DeerMimicHere = false
 end)
 
 entity:SetCallback("OnEnterRoom", function(room: Model, firstTime: boolean)
@@ -679,6 +683,9 @@ end)
 
 entity:SetCallback("OnStartMoving", function()
 getgenv().CeaseToDeer = false
+
+task.wait(9)
+getgenv().DeerMimicHere = false
 end)
 
 entity:SetCallback("OnEnterRoom", function(room: Model, firstTime: boolean)
