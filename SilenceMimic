@@ -1046,9 +1046,9 @@ local function Start()
 	local spawnFrom
 
 if not getgenv().spam then
-		spawnFrom = lowestRoom + 1
+		spawnFrom = lowestRoom + 2
 	else
-		spawnFrom = lowestRoom + 3
+		spawnFrom = lowestRoom + 4
 	end
 
 	while true do
