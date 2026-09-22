@@ -7,10 +7,12 @@ if getgenv().spam then
 
 local backward = false
 local count = 3
+local rebound = false
 
 if getgenv().CeaseToRipper then
 backward = true
 count = 2
+rebound = true
 end
 
 local function Ripper() 
@@ -148,11 +150,11 @@ local entity = Spawner:Create({
 		Reversed = backward
 	},
 	Rebounding = {
-		Enabled = false,
+		Enabled = rebound,
 		Type = "Ambush", -- "Blitz"
 		Min = 1,
 		Max = 1,
-		Delay = 2
+		Delay = 0
 	},
 	Damage = {
 		Enabled = damage,
@@ -176,10 +178,6 @@ local entity = Spawner:Create({
 
 entity:SetCallback("OnSpawned", function()
 	print("Entity has spawned")
-
-if getgenv().CeaseToRipper then
-getgenv().CeaseToRipper = false
-end
 	
 	blaSound.Parent = entity.Model.RushNew
 
@@ -294,6 +292,10 @@ entity:SetCallback("OnEnterRoom", function(room: Model, firstTime: boolean)
 	if hasTriggered then
 		return
 	end
+	
+	if backward then
+	task.wait(5)
+	end
 
 	local RunService = game:GetService("RunService")
 	local TweenService = game:GetService("TweenService")
@@ -360,6 +362,10 @@ entity:SetCallback("OnEnterRoom", function(room: Model, firstTime: boolean)
 				task.wait(3)
 
 				hasTriggered = false
+				
+				if getgenv().CeaseToRipper then
+getgenv().CeaseToRipper = false
+end
 			end)
 		end
 	end
