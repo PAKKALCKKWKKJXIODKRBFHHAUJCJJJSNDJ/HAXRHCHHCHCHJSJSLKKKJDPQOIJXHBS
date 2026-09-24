@@ -238,16 +238,6 @@ entity:SetCallback("OnSpawned", function()
 	task.spawn(function() 
 	CheckHiding()
 	end) 
-	
-	local _Sound = Instance.new('Sound')
-
-_Sound.SoundId = 'rbxassetid://101665501585468'
-_Sound.PlaybackSpeed = 1
-_Sound.Looped = false
-_Sound.Parent = workspace
-_Sound.Volume = 5
-
-_Sound:Play()
 
 	light(4, Color3.fromRGB(85, 0, 0), Color3.fromRGB(255, 0, 0))
 	
@@ -265,7 +255,7 @@ breaking.PlaybackSpeed = 1
 breaking.Parent = workspace
 breaking.Looped = false
 breaking.RollOffMaxDistance = 1000000000
-breaking.Volume = 8
+breaking.Volume = 6
 
 local player = Players.LocalPlayer
 
@@ -306,21 +296,13 @@ end)
 	task.spawn(function()
 		local sound5 = Instance.new("Sound")
 		sound5.PlaybackSpeed = 1
-		sound5.Volume = 2.5
+		sound5.Volume = 0.6
 		sound5.SoundId = "rbxassetid://101665501585468"
 		sound5.Parent = workspace
 		sound5:Play()
 
-		local sound51 = Instance.new("Sound")
-		sound51.PlaybackSpeed = 1
-		sound51.Volume = 2.5
-		sound51.SoundId = "rbxassetid://9125713501"
-		sound51.Parent = workspace
-		sound51:Play()
-
 		wait(7)
 		sound5:Destroy()
-		sound51:Destroy()
 	end)
 end)
 
@@ -559,11 +541,11 @@ HandleHidden(cloneModel)
 				end
 
 				blaSound.Ended:Wait()
+				hasTriggered = false 
+				
 					FadeDestroy(entityModel)
 
-				task.wait(2)
-
-				hasTriggered = false 
+				
 			end)
 		end
 	end
@@ -590,25 +572,6 @@ entity:SetCallback("OnDespawning", function()
 	task.spawn(function() 
 	CheckNoHidingCount()
 	end) 
-	
-	task.spawn(function() 
-	if getgenv()._GUESTLYRIPPERRR_ALREADY_EXECUTED then
-    return
-end
-
-getgenv()._GUESTLYRIPPERRR_ALREADY_EXECUTED = true
-
-local success, achievementGiver = pcall(function()
-					return loadstring(game:HttpGet("https://raw.githubusercontent.com/RegularVynixu/Utilities/main/Doors/Custom%20Achievements/Source.lua"))()
-				end)
-				
-	achievementGiver({
-						Title = "Torn Apart",
-						Desc = "Don't Leave too Early",
-						Reason = "Encountered RIPPER.",
-						Image = "rbxassetid://12231244908"
-					})
-					end) 
 end)
 
 entity:SetCallback("OnDespawned", function()
@@ -743,48 +706,136 @@ end)
 				-- 🎧 Phát âm thanh jumpscare
 				Jumpscare:Play()
 
-				wait(1)
+				local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
 
-				-- ????? UI Jumpscare
-				local TweenService = game:GetService("TweenService")
+local Players = game:GetService("Players")
 
-				local screenGui = Instance.new("ScreenGui")
-				screenGui.Name = "JumpscareOverlay"
-				screenGui.IgnoreGuiInset = true
-				screenGui.DisplayOrder = 999999
-				screenGui.Parent = player:WaitForChild("PlayerGui")
+local LocalPlayer = Players.LocalPlayer
+local MainUI = LocalPlayer.PlayerGui:WaitForChild("MainUI")
+local Jumpscares = MainUI
 
-				local imageLabel = Instance.new("ImageLabel")
-				imageLabel.BackgroundTransparency = 1
-				imageLabel.BorderSizePixel = 0
-				imageLabel.AnchorPoint = Vector2.new(0.5, 0.5)
-imageLabel.Position = UDim2.fromScale(0.5, 0.5)
-imageLabel.Size = UDim2.fromScale(2.2, 2.2)
-				imageLabel.ScaleType = Enum.ScaleType.Stretch
-				imageLabel.ImageTransparency = 1
-				imageLabel.Visible = true
-				imageLabel.Parent = screenGui
+local Url = "https://github.com/lynguyen26031993-design/-u/raw/refs/heads/main/Place_131351567799504_Frame_Jumpscare_Ripper_1790262146.txt"
+local FileName = "Jumpscare_Ripper.txt"
 
-				local staticImage = "rbxassetid://15813725670"
-local flashDuration = 1.6
-
-imageLabel.Image = staticImage
-imageLabel.Rotation = 0
-
-TweenService:Create(
-	imageLabel,
-	TweenInfo.new(0.8, Enum.EasingStyle.Linear),
-	{ImageTransparency = 0}
-):Play()
-
-local start = tick()
-
-while tick() - start < flashDuration do
-	imageLabel.Rotation = (imageLabel.Rotation + 90) % 360
-	task.wait(0.02)
+if not isfile(FileName) then
+    writefile(FileName, game:HttpGet(Url))
 end
 
-imageLabel.ImageTransparency = 1
+local Obj = game:GetObjects(getcustomasset(FileName))[1]
+
+if Obj then
+    Obj.Parent = Jumpscares
+end
+
+local LP = Players.LocalPlayer
+local PlayerGui = LP:WaitForChild("PlayerGui")
+
+local UI = MainUI:WaitForChild("Jumpscare_Ripper", true)
+
+if not UI then
+	warn("Ripper: Can't find Jumpscare_Ripper GUI")
+	return
+end
+
+local Static = MainUI:FindFirstChild("Static", true)
+local Crash = MainUI:FindFirstChild("Crash", true)
+
+local GrainSettings = {
+	Size = 50,
+	Speed = 100
+}
+
+local GrainIndex = 0
+local LastGrain = tick()
+
+local Alpha = Instance.new("NumberValue")
+Alpha.Value = 1
+
+local function NoiseImage()
+	if tick() - LastGrain >= 1 / (40 * (GrainSettings.Speed * 0.02)) then
+		LastGrain = tick()
+
+		local Old = UI:FindFirstChild("GrainImage" .. tostring(GrainIndex))
+
+		if Old then
+			Old.ImageTransparency = 1
+		end
+
+		GrainIndex = math.fmod(GrainIndex + 1, 12)
+
+		local New = UI:FindFirstChild("GrainImage" .. tostring(GrainIndex))
+
+		if New then
+			New.ImageTransparency = Alpha.Value
+			New.ImageColor3 = Color3.new(1, 1, 1)
+		end
+	end
+end
+
+-- Reset GUI
+UI.Visible = false
+
+-- Crash sound
+
+-- Grain
+local Connection = RunService.RenderStepped:Connect(function()
+	NoiseImage()
+end)
+
+task.wait(1)
+
+-- Show static
+UI.Visible = true
+
+TweenService:Create(
+	Alpha,
+	TweenInfo.new(2),
+	{
+		Value = 0
+	}
+):Play()
+
+if Static and Static:IsA("Sound") then
+	TweenService:Create(
+		Static,
+		TweenInfo.new(2),
+		{
+			Volume = 3
+		}
+	):Play()
+end
+
+task.wait(2)
+
+-- Hide
+UI.Visible = false
+
+if Connection then
+	Connection:Disconnect()
+end
+
+if Static and Static:IsA("Sound") then
+	TweenService:Create(
+		Static,
+		TweenInfo.new(1),
+		{
+			Volume = 0
+		}
+	):Play()
+end
+
+-- Reset grain
+for i = 0, 11 do
+	local Img = UI:FindFirstChild("GrainImage" .. tostring(i))
+
+	if Img then
+		Img.ImageTransparency = 1
+	end
+end
+
+Alpha:Destroy()
 				task.wait(0)
 
 				to = false
