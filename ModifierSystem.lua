@@ -300,6 +300,42 @@ local PrimeConfig = {
 		}  
 	}  
 }  
+
+local SilenceOld = {  
+	CardDesc = "It's still here.",  
+	CardTitle = "Old Silence Comeback",  
+  
+	TemplateColor = Color3.fromRGB(  
+		100,  
+		100,  
+		100  
+	),  
+  
+	TextColor = Color3.fromRGB(  
+		255,  
+		255,  
+		255  
+	),  
+  
+	CardAvatarVisible = false,  
+  
+	CardMeta = "Added by Guestly (The Owner)",  
+  
+	IconImage = "rbxassetid://99194885161623",  
+  
+	NoBanner = false,  
+  
+	BannerImg = "rbxassetid://99194885161623",  
+  
+	EffectRowCount = 1,  
+  
+	EffectRows = {  
+		[1] = {  
+			Name = "EffectRow",  
+			Text = "Replace Rework Silence with the old Silence"  
+		}
+	}  
+}  
   
 local Desist = {  
 	CardDesc = "Cease's Brother fr",  
@@ -489,6 +525,11 @@ local Configs = {
 	{  
 		Name = "FasterTrouble",  
 		Config = FasterTrouble  
+	} , 
+	
+	{  
+		Name = "SilenceOld",  
+		Config = SilenceOld  
 	}  
 }  
   
