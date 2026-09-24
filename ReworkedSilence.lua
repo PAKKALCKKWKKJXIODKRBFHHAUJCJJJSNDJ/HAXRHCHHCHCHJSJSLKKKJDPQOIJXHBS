@@ -9,7 +9,8 @@ local HeardChaseConnection
 local HideHeartbeatGui
 local ShakeLoop = false
 local LatestRoom = game.ReplicatedStorage.GameData:WaitForChild("LatestRoom")
-
+local PathMovementInterrupted = false
+local PathCopyToken = 0
 local SilenceShutdown = false
 local LatestRoomCount = 0
 local LatestRoomConnection
@@ -97,6 +98,32 @@ local function CustomGitSound(
 	return sound
 end
 
+local Ambi = Instance.new("Sound")
+
+		local FileYes = "INHAVEBBDJJ.mp3"
+
+		if not isfile(FileYes) then
+			writefile(
+				FileYes,
+				game:HttpGet(
+					"https://github.com/lynguyen26031993-design/-u/raw/refs/heads/main/I%20HAVE%20ENTERED%20THE%20ROOM%202.mp3?raw=true"
+				)
+			)
+		end
+
+		Ambi.SoundId =
+			(getcustomasset or getsynasset)(FileYes)
+
+		Ambi.Parent = workspace
+		Ambi.Volume = 3
+		Ambi.RollOffMaxDistance = 25000
+		Ambi.RollOffMinDistance = 5
+
+
+		Ambi.PlaybackSpeed = 1
+		Ambi.Name = "NopeMoskx"
+		Ambi.Looped = true
+		
 SilenceModel.Parent = workspace
 
 
@@ -900,7 +927,7 @@ local function AddReverb(obj)
 	if obj:IsA("Sound") and not obj:GetAttribute("Reverbed") then
 		obj:SetAttribute("Reverbed", true)
 
-		if obj ~= blayes or obj ~= blano or obj.Name ~= "Boso" then
+		if obj ~= blayes or obj ~= blano or obj.Name ~= "Boso" or obj.Name ~= "NopeMoskx" then
 			obj.PlaybackSpeed = 0.9
 		end
 
@@ -1037,6 +1064,640 @@ local FollowConnection
 local LastInside = false
 
 --//==================================================
+--// Movement Type 4 - Copy Player Path
+--//==================================================
+
+local PathMovementActive = false
+local PathMovementRunning = false
+local PlayerPath = {}
+
+local PathRecordInterval = 0.03
+local PathMinDistance = 0.05
+
+local function RecordPlayerPath()
+	if not HRP
+		or not HRP.Parent
+		or not EntityRoom
+		or not EntityRoom.Parent then
+		return
+	end
+
+	if not IsInsideRoom(EntityRoom, HRP.Position) then
+		return
+	end
+
+	local Position = HRP.Position
+	local CFrameValue = HRP.CFrame
+
+	local LastPoint = PlayerPath[#PlayerPath]
+
+	if LastPoint then
+		if (Position - LastPoint.Position).Magnitude < PathMinDistance then
+			return
+		end
+	end
+
+	table.insert(PlayerPath, {
+		Position = Position,
+		CFrame = CFrameValue
+	})
+end
+
+task.spawn(function()
+	while not SilenceShutdown
+		and SilenceModel
+		and SilenceModel.Parent do
+
+		RecordPlayerPath()
+
+		task.wait(PathRecordInterval)
+	end
+end)
+
+local function IsPlayerInsideEntityRoom()
+	if not HRP
+		or not HRP.Parent
+		or not EntityRoom
+		or not EntityRoom.Parent then
+		return false
+	end
+
+	return IsInsideRoom(
+		EntityRoom,
+		HRP.Position
+	)
+end
+
+local function MoveRushToPathPoint(Point)
+	if not RushNew
+		or not RushNew.Parent
+		or not Point then
+		return false
+	end
+
+	local Distance =
+		(RushNew.Position - Point.Position).Magnitude
+
+	if Distance <= 0.01 then
+		RushNew.CFrame = Point.CFrame
+		return true
+	end
+
+	local Duration =
+		math.max(
+			Distance / 17,
+			0.05
+		)
+
+	if ActiveMoveTween then
+		ActiveMoveTween:Cancel()
+		ActiveMoveTween = nil
+	end
+
+	local Tween = TweenService:Create(
+		RushNew,
+		TweenInfo.new(
+			Duration,
+			Enum.EasingStyle.Linear,
+			Enum.EasingDirection.InOut
+		),
+		{
+			CFrame = Point.CFrame
+		}
+	)
+
+	ActiveMoveTween = Tween
+	Tween:Play()
+
+	local State = Tween.Completed:Wait()
+
+	if ActiveMoveTween == Tween then
+		ActiveMoveTween = nil
+	end
+
+	if State ~= Enum.PlaybackState.Completed then
+		return false
+	end
+
+	return true
+end
+
+local function ReplayPlayerPath()
+	if PathMovementRunning then
+		return
+	end
+
+	if #PlayerPath < 2 then
+		return
+	end
+
+	if not IsPlayerInsideEntityRoom() then
+		return
+	end
+
+	PathMovementRunning = true
+	PathMovementActive = true
+	PathMovementInterrupted = false
+	FollowMoving = false
+
+	local MyToken = PathCopyToken
+
+	--// Snapshot path hiện tại
+	local ReplayPath = {}
+
+	for Index, Point in ipairs(PlayerPath) do
+		ReplayPath[Index] = {
+			Position = Point.Position,
+			CFrame = Point.CFrame
+		}
+	end
+
+	--// Tới điểm đầu tiên
+	local FirstPoint = ReplayPath[1]
+
+	if not IsPlayerInsideEntityRoom()
+		or MyToken ~= PathCopyToken then
+
+		PathMovementActive = false
+		PathMovementRunning = false
+		FollowMoving = true
+		return
+	end
+
+	local ReachedFirstPoint =
+		MoveRushToPathPoint(FirstPoint)
+
+	if not ReachedFirstPoint then
+		PathMovementActive = false
+		PathMovementRunning = false
+		FollowMoving = true
+		return
+	end
+
+	--// Delay trước khi bắt đầu copy
+	local StartDelay = math.random(1, 3)
+	local DelayStart = os.clock()
+
+	while os.clock() - DelayStart < StartDelay do
+
+		if SilenceShutdown
+			or not SilenceModel
+			or not SilenceModel.Parent
+			or not RushNew
+			or not RushNew.Parent
+			or MyToken ~= PathCopyToken
+			or PathMovementInterrupted then
+
+			PathMovementActive = false
+			PathMovementRunning = false
+			FollowMoving = true
+			return
+		end
+
+		if not IsPlayerInsideEntityRoom() then
+			repeat
+				RunService.Heartbeat:Wait()
+
+				if SilenceShutdown
+					or not SilenceModel
+					or not SilenceModel.Parent
+					or not RushNew
+					or not RushNew.Parent
+					or MyToken ~= PathCopyToken
+					or PathMovementInterrupted then
+
+					PathMovementActive = false
+					PathMovementRunning = false
+					FollowMoving = true
+					return
+				end
+
+			until IsPlayerInsideEntityRoom()
+
+			DelayStart = os.clock()
+		end
+
+		RunService.Heartbeat:Wait()
+	end
+
+	--// Thời gian copy
+	local CopyDuration = math.random(1, 3)
+	local CopyStart = os.clock()
+
+	local PathIndex = 2
+
+	while PathIndex <= #ReplayPath do
+
+		if SilenceShutdown
+			or not SilenceModel
+			or not SilenceModel.Parent
+			or not RushNew
+			or not RushNew.Parent
+			or MyToken ~= PathCopyToken
+			or PathMovementInterrupted then
+
+			break
+		end
+
+		--//==================================================
+		--// Player ra khỏi Entity Room -> pause
+		--//==================================================
+
+		if not IsPlayerInsideEntityRoom() then
+			repeat
+				RunService.Heartbeat:Wait()
+
+				if SilenceShutdown
+					or not SilenceModel
+					or not SilenceModel.Parent
+					or not RushNew
+					or not RushNew.Parent
+					or MyToken ~= PathCopyToken
+					or PathMovementInterrupted then
+
+					break
+				end
+
+			until IsPlayerInsideEntityRoom()
+
+			if SilenceShutdown
+				or MyToken ~= PathCopyToken
+				or PathMovementInterrupted then
+				break
+			end
+
+			CopyStart = os.clock()
+		end
+
+		if os.clock() - CopyStart >= CopyDuration then
+			break
+		end
+
+		--//==================================================
+		--// Player quá gần RushNew -> pause
+		--//==================================================
+
+		if HRP
+			and HRP.Parent then
+
+			local DistanceToPlayer =
+				(RushNew.Position - HRP.Position).Magnitude
+
+			if DistanceToPlayer < 15 then
+				repeat
+					RunService.Heartbeat:Wait()
+
+					if SilenceShutdown
+						or not SilenceModel
+						or not SilenceModel.Parent
+						or not RushNew
+						or not RushNew.Parent
+						or not HRP
+						or not HRP.Parent
+						or MyToken ~= PathCopyToken
+						or PathMovementInterrupted then
+
+						break
+					end
+
+					DistanceToPlayer =
+						(RushNew.Position - HRP.Position).Magnitude
+
+				until DistanceToPlayer >= 15
+
+				if SilenceShutdown
+					or MyToken ~= PathCopyToken
+					or PathMovementInterrupted then
+					break
+				end
+
+				--// Không tính thời gian pause vào CopyDuration
+				CopyStart = os.clock()
+			end
+		end
+
+		if os.clock() - CopyStart >= CopyDuration then
+			break
+		end
+
+		local Point = ReplayPath[PathIndex]
+		local PreviousPoint = ReplayPath[PathIndex - 1]
+
+		local Distance =
+			(Point.Position - PreviousPoint.Position).Magnitude
+
+		if Distance > 0.01 then
+
+			local TravelTime = Distance / 15
+			local StartTime = os.clock()
+			local StartCFrame = RushNew.CFrame
+
+			while os.clock() - StartTime < TravelTime do
+
+				if SilenceShutdown
+					or not SilenceModel
+					or not SilenceModel.Parent
+					or not RushNew
+					or not RushNew.Parent
+					or MyToken ~= PathCopyToken
+					or PathMovementInterrupted then
+
+					break
+				end
+
+				--//==================================================
+				--// Player ra khỏi room -> pause ngay
+				--//==================================================
+
+				if not IsPlayerInsideEntityRoom() then
+					repeat
+						RunService.Heartbeat:Wait()
+
+						if SilenceShutdown
+							or not SilenceModel
+							or not SilenceModel.Parent
+							or not RushNew
+							or not RushNew.Parent
+							or MyToken ~= PathCopyToken
+							or PathMovementInterrupted then
+
+							break
+						end
+
+					until IsPlayerInsideEntityRoom()
+
+					if SilenceShutdown
+						or MyToken ~= PathCopyToken
+						or PathMovementInterrupted then
+						break
+					end
+
+					StartTime = os.clock()
+					StartCFrame = RushNew.CFrame
+					CopyStart = os.clock()
+				end
+
+				--//==================================================
+				--// Player < 15 studs -> pause ngay
+				--//==================================================
+
+				if HRP
+					and HRP.Parent then
+
+					local DistanceToPlayer =
+						(RushNew.Position - HRP.Position).Magnitude
+
+					if DistanceToPlayer < 15 then
+
+						repeat
+							RunService.Heartbeat:Wait()
+
+							if SilenceShutdown
+								or not SilenceModel
+								or not SilenceModel.Parent
+								or not RushNew
+								or not RushNew.Parent
+								or not HRP
+								or not HRP.Parent
+								or MyToken ~= PathCopyToken
+								or PathMovementInterrupted then
+
+								break
+							end
+
+							DistanceToPlayer =
+								(RushNew.Position - HRP.Position).Magnitude
+
+						until DistanceToPlayer >= 15
+
+						if SilenceShutdown
+							or MyToken ~= PathCopyToken
+							or PathMovementInterrupted then
+							break
+						end
+
+						--// Bắt đầu lại movement từ vị trí hiện tại
+						StartTime = os.clock()
+						StartCFrame = RushNew.CFrame
+						CopyStart = os.clock()
+					end
+				end
+
+				if os.clock() - CopyStart >= CopyDuration then
+					break
+				end
+
+				local Alpha =
+					math.clamp(
+						(os.clock() - StartTime) / TravelTime,
+						0,
+						1
+					)
+
+				RushNew.CFrame =
+					StartCFrame:Lerp(
+						Point.CFrame,
+						Alpha
+					)
+
+				RunService.Heartbeat:Wait()
+			end
+
+		else
+			RushNew.CFrame = Point.CFrame
+		end
+
+		if MyToken ~= PathCopyToken
+			or PathMovementInterrupted then
+			break
+		end
+
+		if os.clock() - CopyStart >= CopyDuration then
+			break
+		end
+
+		--// Point này đã được entity copy xong
+		PathIndex += 1
+	end
+
+	--//==================================================
+	--// Xóa phần path đã được copy
+	--//==================================================
+
+	if MyToken == PathCopyToken
+		and not SilenceShutdown
+		and not PathMovementInterrupted then
+
+		local PlayedCount = math.max(
+			PathIndex - 1,
+			1
+		)
+
+		for _ = 1, math.min(
+			PlayedCount,
+			#PlayerPath
+		) do
+			table.remove(PlayerPath, 1)
+		end
+	end
+
+	--//==================================================
+	--// Kết thúc
+	--//==================================================
+
+	if PathMovementInterrupted then
+		PathMovementRunning = false
+		PathMovementActive = false
+		return
+	end
+
+	PathMovementActive = false
+	PathMovementRunning = false
+	FollowMoving = true
+end
+
+local function CancelPathMovement()
+	if not PathMovementRunning then
+		return
+	end
+
+	PathMovementInterrupted = true
+	PathMovementActive = false
+
+	if ActiveMoveTween then
+		ActiveMoveTween:Cancel()
+		ActiveMoveTween = nil
+	end
+
+	FollowMoving = false
+end
+
+task.spawn(function()
+	while not SilenceShutdown
+		and SilenceModel
+		and SilenceModel.Parent do
+
+		if not PathMovementRunning
+			and not YouWereHeardTriggered
+			and not MovingRoom
+			and #PlayerPath >= 2
+			and IsPlayerInsideEntityRoom() then
+
+			task.wait(math.random(4, 7))
+
+			if SilenceShutdown
+				or not SilenceModel
+				or not SilenceModel.Parent then
+				break
+			end
+
+			if YouWereHeardTriggered
+				or MovingRoom
+				or not IsPlayerInsideEntityRoom()
+				or #PlayerPath < 2 then
+
+				continue
+			end
+
+			task.spawn(ReplayPlayerPath)
+		else
+			task.wait(0.1)
+		end
+	end
+end)
+
+--//==================================================
+--// NopeMoskx Room Sound
+--//==================================================
+
+local NopeMoskxFadeTween
+local NopeMoskxInside = false
+
+local function UpdateNopeMoskx()
+	if not Ambi
+		or not Ambi.Parent
+		or not EntityRoom
+		or not EntityRoom.Parent
+		or not HRP
+		or not HRP.Parent then
+		return
+	end
+
+	local Inside = IsInsideRoom(
+		EntityRoom,
+		HRP.Position
+	)
+
+	--// Vào boundingbox
+	if Inside and not NopeMoskxInside then
+		NopeMoskxInside = true
+
+		if NopeMoskxFadeTween then
+			NopeMoskxFadeTween:Cancel()
+			NopeMoskxFadeTween = nil
+		end
+
+		--// Vào lại thì set cứng Volume 1.5
+		Ambi.Volume = 3
+
+		if not Ambi.IsPlaying then
+			Ambi:Play()
+		end
+
+	--// Ra khỏi boundingbox
+	elseif not Inside and NopeMoskxInside then
+		NopeMoskxInside = false
+
+		if NopeMoskxFadeTween then
+			NopeMoskxFadeTween:Cancel()
+		end
+
+		NopeMoskxFadeTween = TweenService:Create(
+			Ambi,
+			TweenInfo.new(
+				1,
+				Enum.EasingStyle.Sine,
+				Enum.EasingDirection.Out
+			),
+			{
+				Volume = 0
+			}
+		)
+
+		local Tween = NopeMoskxFadeTween
+		Tween:Play()
+
+		Tween.Completed:Connect(function(State)
+			if NopeMoskxFadeTween ~= Tween then
+				return
+			end
+
+			NopeMoskxFadeTween = nil
+
+			if State == Enum.PlaybackState.Completed
+				and Ambi
+				and Ambi.Parent
+				and not NopeMoskxInside then
+
+				Ambi:Stop()
+				Ambi.Volume = 0
+			end
+		end)
+	end
+end
+
+task.spawn(function()
+	while not SilenceShutdown
+		and SilenceModel
+		and SilenceModel.Parent do
+
+		UpdateNopeMoskx()
+
+		RunService.Heartbeat:Wait()
+	end
+end)
+
+--//==================================================
 --// Follow Player When Moving
 --//==================================================
 
@@ -1045,6 +1706,7 @@ local FollowSpeed = 8
 
 FollowConnection = RunService.Heartbeat:Connect(function(Delta)
 	if not FollowMoving
+		or PathMovementActive
 		or YouWereHeardTriggered then
 		return
 	end
@@ -1164,11 +1826,6 @@ ProximityPromptService.PromptTriggered:Connect(function(Prompt, Player)
 	end
 
 	--// 60% chance
-	local Distance =
-	(
-		HumanoidRootPart.Position
-		- RushNew.Position
-	).Magnitude
 
 local Distance =
 	(
@@ -1189,11 +1846,16 @@ if math.random() > Chance then
 	return
 end
 
-	--// Hủy movement tween cũ nếu đang có
-	if ActiveMoveTween then
-		ActiveMoveTween:Cancel()
-		ActiveMoveTween = nil
-	end
+	--// Prompt có priority hơn Path Replay
+if PathMovementRunning then
+	CancelPathMovement()
+end
+
+--// Hủy movement tween cũ nếu đang có
+if ActiveMoveTween then
+	ActiveMoveTween:Cancel()
+	ActiveMoveTween = nil
+end
 
 	local MoveTween = TweenService:Create(
 		RushNew,
@@ -3468,12 +4130,12 @@ task.spawn(function()
 			local Distance =
 				(HRP.Position - RushNew.Position).Magnitude
 
-			if Distance < 5 then
+			if Distance < 12 then
 				if not CloseDistanceStart then
 					CloseDistanceStart = os.clock()
 				end
 
-				if os.clock() - CloseDistanceStart >= 5 then
+				if os.clock() - CloseDistanceStart >= math.random(2, 4) then
 					PlayYouWereHeard()
 					break
 				end
@@ -3500,6 +4162,20 @@ local function MoveToNewRoom()
 	MovingRoom = true
 
 	local OldRoom = EntityRoom
+	
+	--// Room cũ sắp bị bỏ -> hủy toàn bộ path cũ
+PathCopyToken += 1
+table.clear(PlayerPath)
+
+--// Dừng path movement hiện tại
+PathMovementActive = false
+PathMovementRunning = false
+FollowMoving = false
+
+if ActiveMoveTween then
+	ActiveMoveTween:Cancel()
+	ActiveMoveTween = nil
+end
 
 	if not OldRoom or not OldRoom.Parent then
 		OldRoom = GetPlayerRoom()
@@ -3552,6 +4228,16 @@ local function MoveToNewRoom()
 	--// Update entity room
 EntityRoom = NewRoom
 LastReverbRoom = NewRoom
+
+--// Room mới -> bắt đầu thu path mới
+PathCopyToken += 1
+table.clear(PlayerPath)
+
+PathMovementActive = false
+PathMovementRunning = false
+FollowMoving = true
+
+
 
 local Character = LocalPlayer.Character
 local HumanoidRootPart =
@@ -3626,16 +4312,19 @@ task.spawn(function()
 		and SilenceModel.Parent
 		and RushNew
 		and RushNew.Parent do
+		
 
 		RunService.Heartbeat:Wait()
+		
 
 		if MovingRoom
-			or YouWereHeardTriggered then
+	or YouWereHeardTriggered
+	or PathMovementActive then
 
-			LookStartTime = nil
-			LookTriggered = false
-			continue
-		end
+	LookStartTime = nil
+	LookTriggered = false
+	continue
+end
 
 		local Character = LocalPlayer.Character
 		local HumanoidRootPart =
@@ -3722,6 +4411,10 @@ task.spawn(function()
 					ActiveMoveTween:Cancel()
 					ActiveMoveTween = nil
 				end
+				
+				if PathMovementRunning then
+	CancelPathMovement()
+end
 
 				local MoveTween =
 					TweenService:Create(
@@ -3770,6 +4463,7 @@ local function ShutdownSilence()
 	HeardChasing = false
 	HeardTouched = false
 	FollowMoving = false
+	Ambi:Destroy() 
 
 	MovingRoom = true
 	ShakeLoop = false
@@ -3908,6 +4602,7 @@ LatestRoomConnection =
 
 		if LatestRoomCount >= 5 then
 			task.spawn(ShutdownSilence)
+			DisableSilenceReverb()
 		end
 	end)
 	
