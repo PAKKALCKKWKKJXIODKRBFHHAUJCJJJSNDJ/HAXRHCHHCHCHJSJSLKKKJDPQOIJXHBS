@@ -1,0 +1,5 @@
+if getgenv().SilenceOld then
+loadstring(game:HttpGet("https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/Silence"))()
+else
+loadstring(game:HttpGet("https://raw.githubusercontent.com/PAKKALCKKWKKJXIODKRBFHHAUJCJJJSNDJ/HAXRHCHHCHCHJSJSLKKKJDPQOIJXHBS/refs/heads/main/ReworkedSilence.lua"))()
+end
