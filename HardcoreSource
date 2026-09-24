@@ -1323,7 +1323,7 @@ end
 local TimeEntities = {
 { Name = "Shocker",    Interval = 35,  Chance = 100, Url = "https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/Shocker" },
 { Name = "Limbo",      Interval = 170, Chance = 55, Url = "https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/Limbo" },
-{ Name = "Silence",    Interval = 220, Chance = 55, Url = "https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/Silence" },
+{ Name = "Silence",    Interval = 220, Chance = 55, Url = "https://raw.githubusercontent.com/PAKKALCKKWKKJXIODKRBFHHAUJCJJJSNDJ/HAXRHCHHCHCHJSJSLKKKJDPQOIJXHBS/refs/heads/main/SilencePick" },
 { Name = "Deer God",   Interval = 300, Chance = 50, Url = "https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/DeerGod" },
 { Name = "Cease",       Interval = 110, Chance = 70, Url = "https://raw.githubusercontent.com/cakmay227-svg/REBLAHARDCOREDI/refs/heads/main/Cease" }
 }
