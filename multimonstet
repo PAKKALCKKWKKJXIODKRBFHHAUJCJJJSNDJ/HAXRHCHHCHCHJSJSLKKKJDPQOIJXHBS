@@ -3,7 +3,7 @@ local DestroyGlitchLines
 getgenv().multi = true
 getgenv().spam = false
 local fringeFrame
-getgenv().God = true
+getgenv().God = false
 local Caption
 
 local damage = true
@@ -2218,7 +2218,7 @@ end
 task.spawn(function()
 	while getgenv().spam do
 	
-		task.wait(SyncRandomInt(7, 15))
+		task.wait(SyncRandomInt(11, 15))
 		
 		if getgenv().DeerMimicHere then continue end
 
