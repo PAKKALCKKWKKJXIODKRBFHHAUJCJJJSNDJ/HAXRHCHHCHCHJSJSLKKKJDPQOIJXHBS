@@ -44,6 +44,7 @@ local function SyncWait(Min, Max)
 	task.wait(SyncRandomNumber(Min, Max))
 end
 
+
 getgenv().DeerMimicHere = true
 
 if getgenv().spam and not getgenv().CeaseToDeer then
@@ -103,9 +104,9 @@ local entity = Spawner:Create({
 		Values = {3, 10, 1, 0.1} -- Magnitude, Roughness, FadeIn, FadeOut
 	},
 	Movement = {
-		Speed = 30,
+		Speed = 33,
 		Delay = 0,
-		Reversed = backward
+		Reversed = false
 	},
 	Rebounding = {
 		Enabled = true,
@@ -222,6 +223,74 @@ censor.AlwaysOnTop = true
 end)
 
 entity:SetCallback("OnStartMoving", function()
+local TweenService = game:GetService("TweenService")
+
+--// Tự gắn BasePart ở đây
+local BasePart = entity.Model:FindFirstChildWhichIsA("BasePart") 
+
+local ParentModel = BasePart.Parent
+
+local ChildAddedConnection
+
+local function OnChildAdded(Child)
+	if Child.Name ~= "CeaseMimic" then
+		return
+	end
+
+	local TargetPart = Child:FindFirstChildWhichIsA("BasePart", true)
+
+	if not TargetPart then
+		return
+	end
+	
+	local function GetGitSound(GithubSnd, SoundName)
+			local url = GithubSnd
+			if not isfile(SoundName .. ".mp3") then
+				writefile(SoundName .. ".mp3", game:HttpGet(url))
+			end
+			local sound = Instance.new("Sound")
+			sound.SoundId = (getcustomasset or getsynasset)(SoundName .. ".mp3")
+			return sound
+		end
+		
+		local gitSoundTemp2 = GetGitSound("https://github.com/lynguyen26031993-design/-u/raw/refs/heads/main/7ba215ed-8cb5-48c0-9274-fd0fad7bdbfc.mp3?raw=true", "ipljjhgfffgv")
+
+local blaSound = Instance.new("Sound") 
+		blaSound.SoundId = gitSoundTemp2.SoundId
+		blaSound.PlaybackSpeed = 1
+		blaSound.Looped = false
+		blaSound.TimePosition = 0
+		blaSound.Volume = 2
+		blaSound.RollOffMaxDistance = 300
+		blaSound.Parent = workspace
+
+	local Tween = TweenService:Create(
+		BasePart,
+		TweenInfo.new(0.8, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut),
+		{
+			CFrame = TargetPart.CFrame
+		}
+	)
+
+	Tween:Play()
+	blaSound:Play() 
+
+	Tween.Completed:Once(function()
+		if ChildAddedConnection then
+			ChildAddedConnection:Disconnect()
+			ChildAddedConnection = nil
+		end
+
+		if ParentModel then
+			ParentModel:Destroy()
+		else
+			BasePart:Destroy()
+		end
+	end)
+end
+
+ChildAddedConnection = workspace.ChildAdded:Connect(OnChildAdded)
+getgenv().CeaseToDeer = false
 task.wait(9)
 getgenv().DeerMimicHere = false
 end)
@@ -603,7 +672,7 @@ local entity = Spawner:Create({
 		Values = {3, 10, 1, 0.1} -- Magnitude, Roughness, FadeIn, FadeOut
 	},
 	Movement = {
-		Speed = 30,
+		Speed = 33,
 		Delay = 0,
 		Reversed = false
 	},
@@ -723,7 +792,9 @@ censor.AlwaysOnTop = true
 end)
 
 entity:SetCallback("OnStartMoving", function()
-getgenv().CeaseToDeer = false
+
+
+
 
 task.wait(9)
 getgenv().DeerMimicHere = false
