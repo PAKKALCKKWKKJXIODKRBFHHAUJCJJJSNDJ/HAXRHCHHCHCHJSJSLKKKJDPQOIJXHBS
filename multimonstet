@@ -2216,11 +2216,10 @@ local function WaitEntityDone(name)
 end
 
 task.spawn(function()
-	while getgenv().spam do
+	while getgenv().spam and not getgenv().DeerMimicHere do
 	
 		task.wait(SyncRandomInt(11, 15))
 		
-		if getgenv().DeerMimicHere then continue end
 
 		if #RandomScripts > 0 then
 			breaking5:Play()
