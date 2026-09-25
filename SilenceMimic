@@ -8,6 +8,47 @@ local function LoadModel(file, url)
 	return game:GetObjects(getcustomasset(file))[1]
 end
 
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local GameSeed = ReplicatedStorage
+	:WaitForChild("GameData")
+	:WaitForChild("GameSeed")
+
+local Seed = tonumber(GameSeed.Value) or 0
+
+--// SYNC RANDOM
+local SyncState = Seed % 2147483647
+
+if SyncState <= 0 then
+	SyncState += 2147483646
+end
+
+local function SyncRandom()
+	SyncState = (SyncState * 16807) % 2147483647
+	return (SyncState - 1) / 2147483646
+end
+
+local function SyncRandomInt(Min, Max)
+	Min = math.floor(Min)
+	Max = math.floor(Max)
+
+	if Min > Max then
+		Min, Max = Max, Min
+	end
+
+	return math.floor(
+		SyncRandom() * (Max - Min + 1)
+	) + Min
+end
+
+local function SyncRandomNumber(Min, Max)
+	return Min + SyncRandom() * (Max - Min)
+end
+
+local function SyncWait(Min, Max)
+	task.wait(SyncRandomNumber(Min, Max))
+end
+
 local _Idx57 = LoadModel(
 		"a60silence",
 		"https://github.com/lynguyen26031993-design/-u/raw/refs/heads/main/Multimonster%20(1).rbxm"
@@ -311,7 +352,7 @@ function BloodRoom.Enable(room)
 				local tex = textures[i]
 
 				if tex.Parent then
-					tex.Rotation = rots[math.random(#rots)]
+					tex.Rotation = rots[SyncRandomInt(#rots)]
 				else
 					table.remove(textures, i)
 				end
@@ -447,9 +488,9 @@ local function ImpactEffect()
 
 
 		local velocity = Vector3.new(
-			math.random(-100,100),
+			SyncRandomInt(-100,100),
 			220,
-			math.random(-100,100)
+			SyncRandomInt(-100,100)
 		)
 
 
