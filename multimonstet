@@ -3,7 +3,7 @@ local DestroyGlitchLines
 getgenv().multi = true
 getgenv().spam = false
 local fringeFrame
-getgenv().God = false
+getgenv().God = true
 local Caption
 
 local damage = true
@@ -12,6 +12,46 @@ damage = false
 end
 
 local TweenService = game:GetService("TweenService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local GameSeed = ReplicatedStorage
+	:WaitForChild("GameData")
+	:WaitForChild("GameSeed")
+
+local Seed = tonumber(GameSeed.Value) or 0
+
+--// SYNC RANDOM
+local SyncState = Seed % 2147483647
+
+if SyncState <= 0 then
+	SyncState += 2147483646
+end
+
+local function SyncRandom()
+	SyncState = (SyncState * 16807) % 2147483647
+	return (SyncState - 1) / 2147483646
+end
+
+local function SyncRandomInt(Min, Max)
+	Min = math.floor(Min)
+	Max = math.floor(Max)
+
+	if Min > Max then
+		Min, Max = Max, Min
+	end
+
+	return math.floor(
+		SyncRandom() * (Max - Min + 1)
+	) + Min
+end
+
+local function SyncRandomNumber(Min, Max)
+	return Min + SyncRandom() * (Max - Min)
+end
+
+local function SyncWait(Min, Max)
+	task.wait(SyncRandomNumber(Min, Max))
+end
 
 local Sound = workspace:FindFirstChild("ThemebLla")
 
@@ -71,11 +111,11 @@ local function Blank()
 		return
 	end
 
-	local amount = math.min(math.random(5, 10), #models)
+	local amount = math.min(SyncRandomInt(5, 10), #models)
 	local selected = {}
 
 	while #selected < amount do
-		local data = models[math.random(1, #models)]
+		local data = models[SyncRandomInt(1, #models)]
 
 		if not table.find(selected, data) then
 			table.insert(selected, data)
@@ -406,7 +446,7 @@ local function HaltMusic()
 			task.wait()
 		until not workspace:FindFirstChild("A60ButHalt", true)
 
-		task.wait(math.random(6, 7))
+		task.wait(SyncRandomInt(6, 7))
 
 		if breaking2.Volume == 0 then
 			breaking2.Volume = Breaking2OriginalVolume
@@ -427,7 +467,7 @@ local function TriggerBreaking2()
 			breaking3:Stop()
 		end
 
-		task.wait(math.random(8, 12))
+		task.wait(SyncRandomInt(8, 12))
 
 		if not HaltTriggered and breaking2.Parent then
 			breaking2.Volume = Breaking2OriginalVolume
@@ -798,7 +838,7 @@ Caption = function(text, duration)
 	end)
 end
 
-if math.random(1, 2) == 1 then
+if SyncRandomInt(1, 2) == 1 then
 task.spawn(function()
 	AddArtifacts(5)
 end)
@@ -1077,7 +1117,7 @@ for _, Obj in ipairs(CurrentRooms:GetDescendants()) do
 	end
 end
 		
-		if math.random(1, 2) == 1 then
+		if SyncRandomInt(1, 2) == 1 then
 		Caption("nice to see you again, old friend.", 3)
 		else
 		Caption("don't fail this time.", 3)
@@ -1108,12 +1148,12 @@ local RandomCaptions = {
 
 -- Random thứ tự 2 nhóm caption
 for i = #MimicCaptions, 2, -1 do
-	local j = math.random(1, i)
+	local j = SyncRandomInt(1, i)
 	MimicCaptions[i], MimicCaptions[j] = MimicCaptions[j], MimicCaptions[i]
 end
 
 for i = #RandomCaptions, 2, -1 do
-	local j = math.random(1, i)
+	local j = SyncRandomInt(1, i)
 	RandomCaptions[i], RandomCaptions[j] = RandomCaptions[j], RandomCaptions[i]
 end
 
@@ -1140,7 +1180,7 @@ end
 
 task.spawn(function()
 	while RandomCaptionIndex <= #RandomCaptions do
-		task.wait(math.random(15, 25))
+		task.wait(SyncRandomInt(15, 25))
 
 		if RandomCaptionIndex <= #RandomCaptions then
 			TriggerRandomCaption()
@@ -1155,7 +1195,7 @@ game.ReplicatedStorage.GameData.LatestRoom.Changed:Wait()
 -- RANDOM INITIAL MIMIC SEQUENCE
 --==================================================
 
-local InitialAmount = math.random(4, 5)
+local InitialAmount = SyncRandomInt(4, 5)
 
 local FirstTwoScripts = {
 	"CeaseMimic",
@@ -1173,7 +1213,7 @@ local SelectedInitialScripts = {}
 
 -- Spawn 1 và 2: chỉ Cease / Ripper, không lặp
 for i = 1, math.min(2, InitialAmount) do
-	local index = math.random(1, #FirstTwoScripts)
+	local index = SyncRandomInt(1, #FirstTwoScripts)
 	local selected = table.remove(FirstTwoScripts, index)
 
 	table.insert(SelectedInitialScripts, selected)
@@ -1182,7 +1222,7 @@ end
 -- Spawn 3 trở đi: chỉ Silence / Deer / Rebound / Halt
 for i = 3, InitialAmount do
 	if #LaterScripts > 0 then
-		local index = math.random(1, #LaterScripts)
+		local index = SyncRandomInt(1, #LaterScripts)
 		local selected = table.remove(LaterScripts, index)
 
 		table.insert(SelectedInitialScripts, selected)
@@ -1272,7 +1312,7 @@ local function RunInitialMimic(name)
 		ScriptCache["SilenceMimic"]()
 		
 		task.spawn(function()
-	if math.random(1, 2) == 1 then
+	if SyncRandomInt(1, 2) == 1 then
 		task.wait(7)
 		breaking2.Volume = Breaking2OriginalVolume
 		breaking2:Play()
@@ -2178,14 +2218,14 @@ end
 task.spawn(function()
 	while getgenv().spam do
 	
-		task.wait(math.random(7, 15))
+		task.wait(SyncRandomInt(7, 15))
 		
 		if getgenv().DeerMimicHere then continue end
 
 		if #RandomScripts > 0 then
 			breaking5:Play()
 
-			local index = math.random(1, #RandomScripts)
+			local index = SyncRandomInt(1, #RandomScripts)
 			local selected = table.remove(RandomScripts, index)
 
 			task.spawn(function()
