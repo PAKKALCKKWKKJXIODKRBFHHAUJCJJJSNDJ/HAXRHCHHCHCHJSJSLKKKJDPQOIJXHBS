@@ -1,5 +1,46 @@
 local damage = true
 
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local GameSeed = ReplicatedStorage
+	:WaitForChild("GameData")
+	:WaitForChild("GameSeed")
+
+local Seed = tonumber(GameSeed.Value) or 0
+
+--// SYNC RANDOM
+local SyncState = Seed % 2147483647
+
+if SyncState <= 0 then
+	SyncState += 2147483646
+end
+
+local function SyncRandom()
+	SyncState = (SyncState * 16807) % 2147483647
+	return (SyncState - 1) / 2147483646
+end
+
+local function SyncRandomInt(Min, Max)
+	Min = math.floor(Min)
+	Max = math.floor(Max)
+
+	if Min > Max then
+		Min, Max = Max, Min
+	end
+
+	return math.floor(
+		SyncRandom() * (Max - Min + 1)
+	) + Min
+end
+
+local function SyncRandomNumber(Min, Max)
+	return Min + SyncRandom() * (Max - Min)
+end
+
+local function SyncWait(Min, Max)
+	task.wait(SyncRandomNumber(Min, Max))
+end
+
 if getgenv().God then
 damage = false
 end
@@ -123,7 +164,7 @@ local entity = Spawner:Create({
 	Damage = {
 		Enabled = damage,
 		IgnoreHiding = false,
-		Range = math.random(25, 60),
+		Range = SyncRandomInt(25, 60),
 		Amount = 0
 	},
 	Crucifixion = {
@@ -418,11 +459,11 @@ end)
 entity:SetCallback("OnDespawning", function()
     print("Entity is despawning")
     task.spawn(function() 
-    if math.random(1, 100) <= 25 then
+    if SyncRandomInt(1, 100) <= 25 then
     local clone = entity.Model:Clone()
     clone.Parent = entity.Model.Parent
     
-    local r = math.random(1, 2)
+    local r = SyncRandomInt(1, 2)
     if r == 1 then
     getgenv().CeaseToRipper = true
     
@@ -690,7 +731,7 @@ end)
 entity:Run(true)
 end
 
-if math.random(1, 100) > 30 then
+if SyncRandomInt(1, 100) > 30 then
     task.spawn(Cease) 
 
 else
@@ -745,7 +786,7 @@ if Model then
 		if RoomEntrance and RoomEntrance:IsA("BasePart") then
 			local TargetCFrame =
 				RoomEntrance.CFrame
-				+ RoomEntrance.CFrame.LookVector * math.random(5,20)
+				+ RoomEntrance.CFrame.LookVector * SyncRandomInt(5,20)
 
 			local CFrameValue = Instance.new("CFrameValue")
 			CFrameValue.Value = Model:GetPivot()
@@ -958,7 +999,7 @@ local entity = Spawner:Create({
 	Damage = {
 		Enabled = damage,
 		IgnoreHiding = false,
-		Range = math.random(25, 60),
+		Range = SyncRandomInt(25, 60),
 		Amount = 0
 	},
 	Crucifixion = {
