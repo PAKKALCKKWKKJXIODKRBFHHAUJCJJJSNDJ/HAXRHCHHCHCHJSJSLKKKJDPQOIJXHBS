@@ -2216,7 +2216,7 @@ local function WaitEntityDone(name)
 end
 
 task.spawn(function()
-	while getgenv().spam and not getgenv().DeerMimicHere do
+	while getgenv().spam do
 	
 		task.wait(SyncRandomInt(11, 15))
 		
